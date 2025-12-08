@@ -33,6 +33,9 @@
             --shadow: 0 4px 16px rgba(0,0,0,0.2);
         }
 
+        html {
+            overscroll-behavior-x: contain;
+        }
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; outline: none; }
         body { 
             margin: 0; 
@@ -42,6 +45,7 @@
             padding-bottom: calc(80px + var(--safe-area-bottom)); 
             transition: background 0.3s; 
             touch-action: pan-y;
+            overscroll-behavior-x: contain;
         }
 
         .container {
