@@ -149,6 +149,24 @@
             filter: brightness(1.1);
         }
 
+        .btn-delete-hist {
+            background: var(--danger-light);
+            color: var(--danger);
+            border: none;
+            border-radius: 50%;
+            width: 28px;
+            height: 28px;
+            line-height: 28px;
+            text-align: center;
+            cursor: pointer;
+            font-weight: 600;
+            margin-left: 15px;
+            flex-shrink: 0;
+        }
+        .btn-delete-hist:hover {
+            filter: brightness(1.05);
+        }
+
         /* Quiz View Header */
         #view-quiz .nav-bar {
             background: rgba(242, 242, 247, 0.8);
@@ -808,17 +826,24 @@
             document.getElementById('no-history-btn').style.display = 'none';
             // 倒序显示最近10条
             list.slice().reverse().slice(0, 10).forEach((item, index) => {
+                const originalIndex = list.length - 1 - index;
                 const scoreClass = item.score >= 90 ? 'score-high' : (item.score < 60 ? 'score-low' : '');
                 const el = document.createElement('div');
                 el.className = 'history-item';
+                
+                // Also update the history item name for mock exams
+                let quizName = '随便刨一个';
+                if(item.type === 'sequence') quizName = '按序开啃';
+                if(item.type === 'mock_exam') quizName = '模拟开啃';
+
                 el.innerHTML = `
-                    <div>
-                        <div style="font-weight:bold; font-size:14px;">${item.type === 'sequence' ? '按序开啃' : '随便刨一个'}</div>
+                    <div style="flex-grow: 1; cursor: pointer;" onclick="loadReview(${originalIndex})">
+                        <div style="font-weight:bold; font-size:14px;">${quizName}</div>
                         <div style="font-size:12px; color:var(--text-sub);">${new Date(item.date).toLocaleString()}</div>
                     </div>
                     <div class="score-badge ${scoreClass}">${item.score}</div>
+                    <button class="btn-delete-hist" onclick="event.stopPropagation(); deleteHistoryRecord(${originalIndex})">×</button>
                 `;
-                el.onclick = () => loadReview(list.length - 1 - index);
                 container.appendChild(el);
             });
         }
@@ -832,6 +857,18 @@
         } else {
             wrongAnswersBtn.style.display = 'none';
         }
+    }
+
+    function deleteHistoryRecord(index) {
+        if (!confirm('确定要删除这条啃骨头记忆吗？')) return;
+
+        const historyKey = `bingo_hist_${currentDb.id}`;
+        let history = JSON.parse(localStorage.getItem(historyKey) || '[]');
+        
+        history.splice(index, 1); // Remove the element at the original index
+
+        localStorage.setItem(historyKey, JSON.stringify(history));
+        renderHistoryList(currentDb.id); // Refresh the list
     }
 
     function resumeQuiz() {
@@ -1219,6 +1256,8 @@
         }
 
         clearWipQuiz();
+        quizType = null;
+        currentQuiz = [];
 
         // 显示弹窗
         document.getElementById('result-score').innerText = score;
