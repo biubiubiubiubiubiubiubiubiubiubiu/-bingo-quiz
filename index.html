@@ -375,29 +375,19 @@
     function handleQuizScroll() {
         if (scrollTimeout) clearTimeout(scrollTimeout);
         scrollTimeout = setTimeout(() => {
-            const containerTop = document.getElementById('view-quiz').getBoundingClientRect().top;
+            const quizNav = document.querySelector('#view-quiz .nav-bar');
+            if (!quizNav) return;
+            const quizNavHeight = quizNav.offsetHeight;
             const questionElements = document.querySelectorAll('#quiz-container .ios-card');
-            let maxVisibleHeight = 0;
-            let firstVisibleIndex = -1;
-
-            questionElements.forEach((el, index) => {
-                const rect = el.getBoundingClientRect();
-                const visibleHeight = Math.min(rect.bottom, window.innerHeight) - Math.max(rect.top, containerTop);
-                
-                if (visibleHeight > 0 && firstVisibleIndex === -1) {
-                    firstVisibleIndex = index;
+            
+            for(let i = 0; i < questionElements.length; i++) {
+                const rect = questionElements[i].getBoundingClientRect();
+                // 寻找第一个顶部在导航栏下方且在屏幕内的题目
+                if (rect.top >= quizNavHeight && rect.top < window.innerHeight) {
+                    lastVisibleQuestionIndex = i;
+                    return; // 找到后即退出
                 }
-
-                if (visibleHeight > maxVisibleHeight) {
-                    maxVisibleHeight = visibleHeight;
-                    lastVisibleQuestionIndex = index;
-                }
-            });
-            // 如果没有任何元素占据主要视野，则将第一个可见元素作为当前位置
-            if (maxVisibleHeight <= 0 && firstVisibleIndex !== -1) {
-                lastVisibleQuestionIndex = firstVisibleIndex;
             }
-
         }, 150);
     }
     function setupQuizScrollListener() {
@@ -624,7 +614,11 @@
 
         const wipData = localStorage.getItem(`bingo_wip_${id}`);
         const resumeBtn = document.getElementById('btn-resume-quiz');
-        if (wipData) { // Simplified condition: just check for wipData
+        if (wipData) {
+            const wipState = JSON.parse(wipData);
+            const total = wipState.currentQuiz.length;
+            const current = (wipState.lastVisibleQuestionIndex || 0) + 1;
+            resumeBtn.innerHTML = `继续上次的进度 (${current}/${total} 根)`;
             resumeBtn.style.display = 'block';
         } else {
             resumeBtn.style.display = 'none';
@@ -706,6 +700,12 @@
     }
 
     function startWrongAnswerQuiz() {
+        const wipData = localStorage.getItem(`bingo_wip_${currentDb.id}`);
+        if (wipData) {
+            if (!confirm('汪！你之前藏的骨头还没啃完呢，现在就要挖个新坑吗？旧坑里的骨头可就没咯！')) {
+                return; // Abort starting a new quiz
+            }
+        }
         clearWipQuiz();
         const wrongQuestions = getAllWrongQuestions(currentDb.id);
 
@@ -793,7 +793,13 @@
         setTimeout(() => {
             const targetEl = document.getElementById(`q-${lastVisibleQuestionIndex}`);
             if (targetEl) {
-                targetEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                targetEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                // Add a temporary highlight to indicate position
+                targetEl.style.transition = 'outline 0.2s ease-in-out';
+                targetEl.style.outline = '3px solid var(--primary)';
+                setTimeout(() => {
+                    targetEl.style.outline = 'none';
+                }, 1500);
             }
         }, 100);
 
@@ -880,6 +886,12 @@
     }
     
     function startMockExam() {
+        const wipData = localStorage.getItem(`bingo_wip_${currentDb.id}`);
+        if (wipData) {
+            if (!confirm('汪！你之前藏的骨头还没啃完呢，现在就要挖个新坑吗？旧坑里的骨头可就没咯！')) {
+                return; // Abort starting a new quiz
+            }
+        }
         clearWipQuiz();
         const count = parseInt(document.getElementById('mock-exam-count').value);
         // 每题90秒
@@ -920,6 +932,12 @@
     let quizType = 'random'; 
 
     function startQuiz(type) {
+        const wipData = localStorage.getItem(`bingo_wip_${currentDb.id}`);
+        if (wipData) {
+            if (!confirm('汪！你之前藏的骨头还没啃完呢，现在就要挖个新坑吗？旧坑里的骨头可就没咯！')) {
+                return; // Abort starting a new quiz
+            }
+        }
         clearWipQuiz();
         quizType = type;
         isReviewMode = false;
