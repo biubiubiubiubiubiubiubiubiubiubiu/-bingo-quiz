@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <meta name="theme-color" content="#F2F2F7" id="theme-color-meta">
+    <meta name="theme-color" content="#F0F4F0" id="theme-color-meta">
     <title>斌狗！通关！</title>
     
     <!-- PWA Manifest -->
@@ -16,12 +16,12 @@
     <style>
         /* --- 样式定义 --- */
         :root {
-            --primary: #007AFF; --primary-light: rgba(0, 122, 255, 0.1);
-            --success: #34C759; --success-light: rgba(52, 199, 89, 0.1);
-            --danger: #FF3B30; --danger-light: rgba(255, 59, 48, 0.1);
-            --bg-body: #F2F2F7; --bg-card: #FFFFFF; --bg-input: #E5E5EA;
-            --text-main: #1C1C1E; --text-sub: #8E8E93; --text-inverse: #FFFFFF;
-            --shadow: 0 4px 16px rgba(0,0,0,0.04);
+            --primary: #4A7856; --primary-light: rgba(74, 120, 86, 0.15);
+            --success: #5A946E; --success-light: rgba(90, 148, 110, 0.15);
+            --danger: #A95C52; --danger-light: rgba(169, 92, 82, 0.15);
+            --bg-body: #F0F4F0; --bg-card: #F8F9F7; --bg-input: #E6EAE6;
+            --text-main: #3A4D39; --text-sub: #6A7B69; --text-inverse: #FFFFFF;
+            --shadow: 0 4px 16px rgba(0,0,0,0.06);
             --radius-l: 20px; --safe-area-bottom: env(safe-area-inset-bottom);
         }
         [data-theme="everforest"] {
@@ -1290,6 +1290,35 @@
         openDashboard(currentDb.id, { skipWipCheck: true });
     }
 
+</script>
+<script src="https://cdn.jsdelivr.net/npm/tinygesture@3.0.0/dist/TinyGesture.min.js"></script>
+<script>
+    // --- 手势处理 ---
+    window.addEventListener('load', () => {
+        const gesture = new TinyGesture(document.body);
+
+        gesture.on('swiperight', (event) => {
+            const dashboardView = document.getElementById('view-dashboard');
+            const quizView = document.getElementById('view-quiz');
+
+            // 在仪表盘页右滑 -> 返回主页
+            if (dashboardView.style.display === 'block') {
+                // 防止在选择文字或操作输入框时误触
+                if (event.target.tagName === 'INPUT' || event.target.tagName === 'SELECT' || window.getSelection().toString()) {
+                    return;
+                }
+                goHome();
+            }
+
+            // 在答题页右滑 -> 退出答题
+            if (quizView.style.display === 'block') {
+                 if (event.target.tagName === 'INPUT' || event.target.tagName === 'SELECT' || window.getSelection().toString()) {
+                    return;
+                }
+                exitQuiz();
+            }
+        });
+    });
 </script>
 <script src="xlsx.full.min.js"></script>
 </body>

@@ -2,9 +2,9 @@
   "name": "斌狗刷题 Pro",
   "short_name": "斌狗刷题",
   "start_url": "./index.html",
-  "display": "standalone",
-  "background_color": "#F2F2F7",
-  "theme_color": "#F2F2F7",
+  "display": "fullscreen",
+  "background_color": "#F0F4F0",
+  "theme_color": "#F0F4F0",
   "icons": [
     {
       "src": "icon.png",
