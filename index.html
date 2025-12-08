@@ -55,11 +55,11 @@
         /* 导航栏 */
         .nav-bar { padding: 40px 20px 10px; display: flex; justify-content: space-between; align-items: center; background: var(--bg-body); position: sticky; top:0; z-index: 90; }
         .nav-title { font-size: 28px; font-weight: 800; }
-        .bingo-badge { background: linear-gradient(135deg, var(--primary), #00C7BE); color: #fff; padding: 2px 8px; border-radius: 8px; font-size: 14px; margin-left: 8px; vertical-align: middle;}
+        .bingo-badge { background: linear-gradient(135deg, var(--primary), var(--success)); color: #fff; padding: 2px 8px; border-radius: 8px; font-size: 14px; margin-left: 8px; vertical-align: middle;}
 
         /* 卡片通用 */
         .ios-card { background: var(--bg-card); border-radius: var(--radius-l); padding: 20px; box-shadow: var(--shadow); margin-bottom: 20px; position: relative; transition: 0.2s; }
-        .ios-card:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(0,0,0,0.08); }
+        .ios-card:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(58, 77, 57, 0.08); }
         
         /* 按钮 */
         .btn { width: 100%; padding: 15px; border: none; border-radius: 15px; font-size: 17px; font-weight: 600; cursor: pointer; transition: 0.2s; display:flex; align-items:center; justify-content:center; gap:8px;}
@@ -68,7 +68,7 @@
         .btn-success { background: var(--success); color: white; }
         .btn-danger { background: var(--danger-light); color: var(--danger); }
         .btn-ghost { background: var(--bg-input); color: var(--text-sub); }
-        .btn-float { position: fixed; bottom: 40px; right: 30px; width: 60px; height: 60px; border-radius: 50%; background: var(--primary); color: white; font-size: 30px; box-shadow: 0 8px 20px rgba(0, 122, 255, 0.4); z-index: 100; display: flex; align-items: center; justify-content: center; }
+        .btn-float { position: fixed; bottom: 40px; right: 30px; width: 60px; height: 60px; border-radius: 50%; background: var(--primary); color: white; font-size: 30px; box-shadow: 0 8px 20px rgba(74, 120, 86, 0.4); z-index: 100; display: flex; align-items: center; justify-content: center; }
 
         /* 列表 */
         .db-list-item { display: flex; justify-content: space-between; align-items: center; padding: 20px; border: none; }
@@ -274,7 +274,7 @@
             <select id="category-select" class="btn btn-ghost" style="width:100%; -webkit-appearance: none; appearance: none; text-align: left;"></select>
         </div>
 
-        <button id="btn-resume-quiz" class="btn" style="display:none; margin-bottom: 20px; background: linear-gradient(135deg, #6a11cb, #2575fc); color: white;" onclick="resumeQuiz()">继续上次的进度</button>
+        <button id="btn-resume-quiz" class="btn" style="display:none; margin-bottom: 20px; background: linear-gradient(135deg, var(--primary), var(--success)); color: white;" onclick="resumeQuiz()">继续上次的进度</button>
 
         <div style="display:flex; gap:10px; margin-bottom: 15px;">
             <button class="btn btn-primary" style="flex-grow: 1;" onclick="startQuiz('sequence')">按顺序啃</button>
@@ -301,7 +301,7 @@
         </div>
         
         <div style="margin-top: 20px; border-top: 1px solid var(--bg-input); padding-top: 15px; display:flex; gap:10px;">
-            <button class="btn btn-primary" style="background: linear-gradient(135deg, #FF9500, #FFCC00); flex-grow: 1;" onclick="startMockExam()">模拟开啃</button>
+            <button class="btn btn-primary" style="background: linear-gradient(135deg, #D9A869, #C18842); flex-grow: 1;" onclick="startMockExam()">模拟开啃</button>
             <select id="mock-exam-count" class="btn btn-ghost" style="max-width: 100px; padding: 0 15px; -webkit-appearance: none; appearance: none; background-image: none;">
                 <option value="10">10根</option>
                 <option value="20">20根</option>
@@ -1314,11 +1314,11 @@
     window.addEventListener('load', () => {
         const gesture = new TinyGesture(document.body);
 
-        gesture.on('swiperight', (event) => {
+        gesture.on('swipedown', (event) => {
             const dashboardView = document.getElementById('view-dashboard');
             const quizView = document.getElementById('view-quiz');
 
-            // 在仪表盘页右滑 -> 返回主页
+            // 在仪表盘页下滑 -> 返回主页
             if (dashboardView.style.display === 'block') {
                 // 防止在选择文字或操作输入框时误触
                 if (event.target.tagName === 'INPUT' || event.target.tagName === 'SELECT' || window.getSelection().toString()) {
@@ -1327,7 +1327,7 @@
                 goHome();
             }
 
-            // 在答题页右滑 -> 退出答题
+            // 在答题页下滑 -> 退出答题
             if (quizView.style.display === 'block') {
                  if (event.target.tagName === 'INPUT' || event.target.tagName === 'SELECT' || window.getSelection().toString()) {
                     return;
