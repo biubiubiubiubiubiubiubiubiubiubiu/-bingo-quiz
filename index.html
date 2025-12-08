@@ -612,7 +612,7 @@
         if (currentDb) localStorage.removeItem(`bingo_wip_${currentDb.id}`);
     }
 
-    function openDashboard(id) {
+    function openDashboard(id, options = {}) {
         const meta = getMeta().find(m => m.id === id);
         if (!meta) { console.error("DB meta not found for id:", id); goHome(); return; }
         
@@ -620,35 +620,37 @@
         const progress = parseInt(localStorage.getItem(`bingo_prog_${id}`) || '0');
         currentDb = { ...meta, questions, progress };
 
-        const wipData = localStorage.getItem(`bingo_wip_${id}`);
-        if (wipData) {
-            if (confirm('您有一个未完成的练习，要继续吗？\n(选择“取消”将丢弃该进度)')) {
-                const wipState = JSON.parse(wipData);
-                currentQuiz = wipState.currentQuiz;
-                userAnswers = wipState.userAnswers;
-                quizType = wipState.quizType;
-                isReviewMode = false;
-                lastVisibleQuestionIndex = wipState.lastVisibleQuestionIndex || 0;
-                
-                document.getElementById('view-home').style.display = 'none';
-                document.getElementById('view-dashboard').style.display = 'none';
-                document.getElementById('view-quiz').style.display = 'block';
-                document.getElementById('quiz-fab-area').style.display = 'flex';
-                
-                renderQuizItems();
-                setupQuizScrollListener();
-                window.addEventListener('beforeunload', saveWipQuiz);
+        if (!options.skipWipCheck) {
+            const wipData = localStorage.getItem(`bingo_wip_${id}`);
+            if (wipData) {
+                if (confirm('您有一个未完成的练习，要继续吗？\n(选择“取消”将丢弃该进度)')) {
+                    const wipState = JSON.parse(wipData);
+                    currentQuiz = wipState.currentQuiz;
+                    userAnswers = wipState.userAnswers;
+                    quizType = wipState.quizType;
+                    isReviewMode = false;
+                    lastVisibleQuestionIndex = wipState.lastVisibleQuestionIndex || 0;
+                    
+                    document.getElementById('view-home').style.display = 'none';
+                    document.getElementById('view-dashboard').style.display = 'none';
+                    document.getElementById('view-quiz').style.display = 'block';
+                    document.getElementById('quiz-fab-area').style.display = 'flex';
+                    
+                    renderQuizItems();
+                    setupQuizScrollListener();
+                    window.addEventListener('beforeunload', saveWipQuiz);
 
-                setTimeout(() => {
-                    const targetEl = document.getElementById(`q-${lastVisibleQuestionIndex}`);
-                    if (targetEl) {
-                        targetEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                    }
-                }, 100);
+                    setTimeout(() => {
+                        const targetEl = document.getElementById(`q-${lastVisibleQuestionIndex}`);
+                        if (targetEl) {
+                            targetEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                        }
+                    }, 100);
 
-                return;
-            } else {
-                localStorage.removeItem(`bingo_wip_${id}`);
+                    return;
+                } else {
+                    localStorage.removeItem(`bingo_wip_${id}`);
+                }
             }
         }
 
@@ -1097,7 +1099,7 @@
         document.getElementById('view-dashboard').style.display = 'block';
         
         // 刷新 Dashboard 数据 (因为进度可能变了)
-        openDashboard(currentDb.id);
+        openDashboard(currentDb.id, { skipWipCheck: true });
     }
 
 </script>
