@@ -134,6 +134,21 @@
             background: var(--danger-light);
         }
 
+        .btn-mastered {
+            padding: 4px 8px;
+            font-size: 12px;
+            font-weight: 500;
+            border-radius: 8px;
+            background: var(--success-light);
+            color: var(--success);
+            border: none;
+            cursor: pointer;
+            flex-shrink: 0;
+        }
+        .btn-mastered:hover {
+            filter: brightness(1.1);
+        }
+
         /* Quiz View Header */
         #view-quiz .nav-bar {
             background: rgba(242, 242, 247, 0.8);
@@ -176,6 +191,12 @@
         <div style="display:flex; gap:10px;">
             <button class="btn btn-ghost btn-icon" onclick="toggleTheme()" title="切换主题">
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>
+            </button>
+            <button class="btn btn-ghost btn-icon btn-delete" onclick="deleteAllData()" title="删除所有数据">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+            </button>
+            <button id="btn-install-pwa" class="btn btn-ghost btn-icon" style="display: none;" title="安装应用">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="8 17 12 21 16 17"></polyline><line x1="12" y1="12" x2="12" y2="21"></line><path d="M20.88 18.09A5 5 0 0 0 18 9h-1.26A8 8 0 1 0 3 16.29"></path></svg>
             </button>
         </div>
     </div>
@@ -351,11 +372,41 @@
     let userAnswers = {}; // 用户当前选择
     let isReviewMode = false; // 是否处于回看模式
     let lastVisibleQuestionIndex = 0;
+    let deferredInstallPrompt = null;
 
     // --- 初始化 ---
     window.onload = function() {
         initTheme();
         renderDbList();
+
+        const installBtn = document.getElementById('btn-install-pwa');
+
+        window.addEventListener('beforeinstallprompt', (e) => {
+            e.preventDefault();
+            deferredInstallPrompt = e;
+            if (installBtn) {
+                installBtn.style.display = 'flex';
+            }
+        });
+
+        if(installBtn) {
+            installBtn.addEventListener('click', async () => {
+                if (deferredInstallPrompt) {
+                    deferredInstallPrompt.prompt();
+                    const { outcome } = await deferredInstallPrompt.userChoice;
+                    console.log(`User response to the install prompt: ${outcome}`);
+                    deferredInstallPrompt = null;
+                    installBtn.style.display = 'none';
+                }
+            });
+        }
+        
+        window.addEventListener('appinstalled', () => {
+            deferredInstallPrompt = null;
+            if (installBtn) {
+                installBtn.style.display = 'none';
+            }
+        });
     };
 
     // --- 主题切换 ---
@@ -680,6 +731,21 @@
         goHome();
     }
 
+    function deleteAllData() {
+        if (!confirm('【高危操作】警告！此操作将彻底删除所有题库、练习历史和设置，且无法恢复。您确定要清空所有狗窝吗？')) return;
+        if (!confirm('【二次确认】真的，所有东西都没了，确定吗？')) return;
+
+        // Iterate over all keys and remove the ones related to this app
+        Object.keys(localStorage).forEach(key => {
+            if (key.startsWith('bingo_') || key === 'app_theme') {
+                localStorage.removeItem(key);
+            }
+        });
+
+        alert('所有狗窝和骨头都已丢掉！');
+        location.reload();
+    }
+
     function getAllWrongQuestions(dbId) {
         const history = JSON.parse(localStorage.getItem(`bingo_hist_${dbId}`) || '[]');
         const wrongQuestions = {}; // Use object to deduplicate based on question text
@@ -996,6 +1062,12 @@
             const uAns = userAnswers[idx] || '';
             let cardClass = 'ios-card';
             let analysisHtml = '';
+            let masteredButtonHtml = '';
+
+            // 'wrong_review' mode is the "Hard Bones" quiz
+            if (quizType === 'wrong_review' && !isReviewMode) {
+                masteredButtonHtml = `<button class="btn-mastered" onclick="masterHardBone(${idx})">我啃会了</button>`;
+            }
 
             // 回看模式下，标记对错并显示解析
             if (isReviewMode) {
@@ -1029,9 +1101,12 @@
 
             const html = `
                 <div class="${cardClass}" id="q-${idx}">
-                    <div style="margin-bottom:10px;">
-                        <span class="bingo-badge" style="margin-left:0; margin-right:5px;">${item.t || '单选'}</span>
-                        <span style="font-weight:600; font-size:17px; line-height:1.4;">${idx+1}. ${item.q}</span>
+                    <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom:10px;">
+                        <span style="font-weight:600; font-size:17px; line-height:1.4; padding-right: 15px;">
+                            <span class="bingo-badge" style="margin-left:0; margin-right:5px;">${item.t || '单选'}</span>
+                            ${idx+1}. ${item.q}
+                        </span>
+                        ${masteredButtonHtml}
                     </div>
                     <div>${optionsHtml}</div>
                     ${analysisHtml}
@@ -1039,6 +1114,46 @@
             `;
             container.insertAdjacentHTML('beforeend', html);
         });
+    }
+
+    function masterHardBone(qIdx) {
+        if(!confirm('确定把这根骨头从硬骨头里扔掉吗？以后答错了还是会回来的哦。')) return;
+
+        const questionToMaster = currentQuiz[qIdx];
+        if (!questionToMaster) return;
+
+        const questionText = questionToMaster.q;
+        const historyKey = `bingo_hist_${currentDb.id}`;
+        let history = JSON.parse(localStorage.getItem(historyKey) || '[]');
+
+        // Iterate through all history records
+        history.forEach(record => {
+            if (!record.quizSnapshot || !record.userAnswers) return;
+            
+            record.quizSnapshot.forEach((question, index) => {
+                // If we find the question that the user wants to master
+                if (question.q === questionText) {
+                    // And if the answer for it was wrong
+                    if (record.userAnswers[index] !== question.a) {
+                        // Retroactively "correct" the answer in the history
+                        record.userAnswers[index] = question.a;
+                    }
+                }
+            });
+        });
+
+        // Save the modified history
+        localStorage.setItem(historyKey, JSON.stringify(history));
+
+        // Visually remove the question from the current quiz
+        const cardElement = document.getElementById(`q-${qIdx}`);
+        if (cardElement) {
+            cardElement.style.transition = 'opacity 0.3s';
+            cardElement.style.opacity = '0';
+            setTimeout(() => { cardElement.style.display = 'none'; }, 300);
+        }
+        
+        alert('这根骨头你已经啃会了！');
     }
 
     function selectOption(qIdx, optKey, type) {
@@ -1091,8 +1206,8 @@
 
         const score = Math.round((correctCount / currentQuiz.length) * 100);
         
-        // "错题回顾"或“模拟考试”模式不保存进度和历史
-        if (quizType !== 'wrong_review' && quizType !== 'mock_exam') {
+        // "错题回顾"模式不保存进度和历史
+        if (quizType !== 'wrong_review') {
             // 更新进度 (仅顺序模式)
             if (quizType === 'sequence') {
                 const newProg = currentDb.progress + currentQuiz.length;
@@ -1119,6 +1234,13 @@
     }
 
     function exitQuiz() {
+        if (quizType === 'mock_exam' && !isReviewMode) {
+            if (confirm('您正在进行模拟开啃，现在退出将直接交卷，确定吗？')) {
+                submitPaper(true); // silent submit
+            }
+            return;
+        }
+
         if (!isReviewMode) {
             saveWipQuiz();
         }
