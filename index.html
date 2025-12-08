@@ -223,6 +223,8 @@
             <select id="category-select" class="btn btn-ghost" style="width:100%; -webkit-appearance: none; appearance: none; text-align: left;"></select>
         </div>
 
+        <button id="btn-resume-quiz" class="btn" style="display:none; margin-bottom: 20px; background: linear-gradient(135deg, #6a11cb, #2575fc); color: white;" onclick="resumeQuiz()">继续上次的进度</button>
+
         <div style="display:flex; gap:10px; margin-bottom: 15px;">
             <button class="btn btn-primary" style="flex-grow: 1;" onclick="startQuiz('sequence')">按顺序啃</button>
             <select id="sequence-count" class="btn btn-ghost" style="max-width: 100px; padding: 0 15px; -webkit-appearance: none; appearance: none; background-image: none;">
@@ -620,38 +622,12 @@
         const progress = parseInt(localStorage.getItem(`bingo_prog_${id}`) || '0');
         currentDb = { ...meta, questions, progress };
 
-        if (!options.skipWipCheck) {
-            const wipData = localStorage.getItem(`bingo_wip_${id}`);
-            if (wipData) {
-                if (confirm('您有一个未完成的练习，要继续吗？\n(选择“取消”将丢弃该进度)')) {
-                    const wipState = JSON.parse(wipData);
-                    currentQuiz = wipState.currentQuiz;
-                    userAnswers = wipState.userAnswers;
-                    quizType = wipState.quizType;
-                    isReviewMode = false;
-                    lastVisibleQuestionIndex = wipState.lastVisibleQuestionIndex || 0;
-                    
-                    document.getElementById('view-home').style.display = 'none';
-                    document.getElementById('view-dashboard').style.display = 'none';
-                    document.getElementById('view-quiz').style.display = 'block';
-                    document.getElementById('quiz-fab-area').style.display = 'flex';
-                    
-                    renderQuizItems();
-                    setupQuizScrollListener();
-                    window.addEventListener('beforeunload', saveWipQuiz);
-
-                    setTimeout(() => {
-                        const targetEl = document.getElementById(`q-${lastVisibleQuestionIndex}`);
-                        if (targetEl) {
-                            targetEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                        }
-                    }, 100);
-
-                    return;
-                } else {
-                    localStorage.removeItem(`bingo_wip_${id}`);
-                }
-            }
+        const wipData = localStorage.getItem(`bingo_wip_${id}`);
+        const resumeBtn = document.getElementById('btn-resume-quiz');
+        if (wipData && !options.skipWipCheck) {
+            resumeBtn.style.display = 'block';
+        } else {
+            resumeBtn.style.display = 'none';
         }
 
         document.getElementById('view-home').style.display = 'none';
@@ -730,6 +706,7 @@
     }
 
     function startWrongAnswerQuiz() {
+        clearWipQuiz();
         const wrongQuestions = getAllWrongQuestions(currentDb.id);
 
         if (wrongQuestions.length === 0) {
@@ -788,6 +765,42 @@
             wrongAnswersBtn.innerText = `啃硬骨头 (${wrongQuestions.length} 根)`;
         } else {
             wrongAnswersBtn.style.display = 'none';
+        }
+    }
+
+    function resumeQuiz() {
+        const wipData = localStorage.getItem(`bingo_wip_${currentDb.id}`);
+        if (!wipData) {
+            console.error("No WIP data found to resume.");
+            return;
+        }
+
+        const wipState = JSON.parse(wipData);
+        currentQuiz = wipState.currentQuiz;
+        userAnswers = wipState.userAnswers;
+        quizType = wipState.quizType;
+        isReviewMode = false;
+        lastVisibleQuestionIndex = wipState.lastVisibleQuestionIndex || 0;
+        
+        document.getElementById('view-dashboard').style.display = 'none';
+        document.getElementById('view-quiz').style.display = 'block';
+        document.getElementById('quiz-fab-area').style.display = 'flex';
+        
+        renderQuizItems();
+        setupQuizScrollListener();
+        window.addEventListener('beforeunload', saveWipQuiz);
+
+        setTimeout(() => {
+            const targetEl = document.getElementById(`q-${lastVisibleQuestionIndex}`);
+            if (targetEl) {
+                targetEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }
+        }, 100);
+
+        if (quizType === 'mock_exam') {
+            const count = currentQuiz.length;
+            const totalTime = count * 90;
+            startTimer(totalTime);
         }
     }
 
@@ -867,6 +880,7 @@
     }
     
     function startMockExam() {
+        clearWipQuiz();
         const count = parseInt(document.getElementById('mock-exam-count').value);
         // 每题90秒
         const totalTime = count * 90; 
@@ -906,6 +920,7 @@
     let quizType = 'random'; 
 
     function startQuiz(type) {
+        clearWipQuiz();
         quizType = type;
         isReviewMode = false;
         userAnswers = {};
