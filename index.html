@@ -624,7 +624,7 @@
 
         const wipData = localStorage.getItem(`bingo_wip_${id}`);
         const resumeBtn = document.getElementById('btn-resume-quiz');
-        if (wipData && !options.skipWipCheck) {
+        if (wipData) { // Simplified condition: just check for wipData
             resumeBtn.style.display = 'block';
         } else {
             resumeBtn.style.display = 'none';
