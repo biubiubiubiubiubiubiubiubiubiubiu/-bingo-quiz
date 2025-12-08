@@ -389,6 +389,8 @@
     let currentQuiz = []; // 当前正在做的题
     let userAnswers = {}; // 用户当前选择
     let isReviewMode = false; // 是否处于回看模式
+    let lastCompletedQuiz = []; // 用于交卷后回看
+    let lastCompletedAnswers = {}; // 用于交卷后回看
     let lastVisibleQuestionIndex = 0;
     let deferredInstallPrompt = null;
 
@@ -1235,23 +1237,21 @@
             if ((userAnswers[i] || '') === q.a) correctCount++;
         });
 
-        const score = Math.round((correctCount / currentQuiz.length) * 100);
+        const score = Math.round((currentQuiz.length > 0 ? (correctCount / currentQuiz.length) : 0) * 100);
         
         // "错题回顾"模式不保存进度和历史
         if (quizType !== 'wrong_review') {
-            // 更新进度 (仅顺序模式)
-            if (quizType === 'sequence') {
-                const newProg = currentDb.progress + currentQuiz.length;
-                localStorage.setItem(`bingo_prog_${currentDb.id}`, newProg);
-            }
-
-            // 保存历史
             saveHistory(score, quizType);
         }
+
+        // 暂存刚完成的题目，用于“回味一下”
+        lastCompletedQuiz = currentQuiz;
+        lastCompletedAnswers = userAnswers;
 
         clearWipQuiz();
         quizType = null;
         currentQuiz = [];
+        userAnswers = {};
 
         // 显示弹窗
         document.getElementById('result-score').innerText = score;
@@ -1261,6 +1261,11 @@
     function enterReviewMode() {
         document.getElementById('modal-score').style.display = 'none';
         document.getElementById('quiz-fab-area').style.display = 'none';
+        
+        // 恢复刚完成的题目
+        currentQuiz = lastCompletedQuiz;
+        userAnswers = lastCompletedAnswers;
+        
         isReviewMode = true;
         renderQuizItems(); // 重绘带解析的界面
         window.scrollTo(0,0);
