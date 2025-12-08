@@ -248,7 +248,7 @@
 <!-- VIEW 2: 单个题库仪表盘 -->
 <div id="view-dashboard" class="container" style="padding: 0 20px; display:none;">
     <div class="nav-bar" style="padding-left:0; padding-right:0;">
-        <button class="btn btn-ghost btn-icon" onclick="goHome()" title="返回">
+        <button class="btn btn-ghost btn-icon" onclick="history.back()" title="返回">
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"></polyline></svg>
         </button>
         <div style="font-weight:bold; font-size:16px; max-width: 150px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" id="dash-title">狗窝详情</div>
@@ -325,7 +325,7 @@
     <div class="nav-bar">
         <div style="font-size:14px; font-weight:bold; color:var(--text-sub);" id="quiz-progress-text">1/20</div>
         <div style="font-size:16px; font-weight:bold; color:var(--primary);" id="quiz-timer"></div>
-        <button class="btn btn-ghost btn-icon" onclick="exitQuiz()" title="退出">
+        <button class="btn btn-ghost btn-icon" onclick="history.back()" title="退出">
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
         </button>
     </div>
@@ -374,7 +374,7 @@
         <div style="font-size:48px; font-weight:800; color:var(--primary);" id="result-score">90</div>
         <p style="color:var(--text-sub);">智力值</p>
         <div style="display:flex; gap:10px; margin-top:20px;">
-            <button class="btn btn-ghost" onclick="exitQuiz()">回狗窝</button>
+            <button class="btn btn-ghost" onclick="history.back()">回狗窝</button>
             <button class="btn btn-primary" onclick="enterReviewMode()">回味一下</button>
         </div>
     </div>
@@ -404,29 +404,123 @@
     let lastCompletedQuiz = []; // 用于交卷后回看
     let lastCompletedAnswers = {}; // 用于交卷后回看
     let lastVisibleQuestionIndex = 0;
+    let masteredInSession = 0; // 用于“啃硬骨头”模式的计数
     let deferredInstallPrompt = null;
+
+    // --- Navigation & History ---
+    function updateView(state) {
+        document.getElementById('view-home').style.display = 'none';
+        document.getElementById('view-dashboard').style.display = 'none';
+        document.getElementById('view-quiz').style.display = 'none';
+        document.getElementById('modal-score').style.display = 'none'; // 确保弹窗在视图切换时关闭
+        stopTimer(); 
+
+        if (!state || !state.view) {
+            state = { view: 'home' }; 
+        }
+
+        switch (state.view) {
+            case 'dashboard':
+                document.getElementById('view-dashboard').style.display = 'block';
+                setupDashboard(state.dbId); 
+                break;
+            case 'quiz':
+                document.getElementById('view-quiz').style.display = 'block';
+                break;
+            default: // home
+                document.getElementById('view-home').style.display = 'block';
+                renderDbList();
+                break;
+        }
+    }
+    
+    window.onpopstate = function(event) {
+        if (event.state) {
+            updateView(event.state);
+        } else {
+            updateView({ view: 'home' }); // Fallback
+        }
+    };
+    
+    function setupDashboard(id) {
+        const meta = getMeta().find(m => m.id === id);
+        if (!meta) { 
+            history.pushState({ view: 'home' }, '', '#home');
+            updateView({ view: 'home' });
+            return; 
+        }
+        
+        const questions = JSON.parse(localStorage.getItem(`bingo_db_${id}`) || '[]');
+        const progress = parseInt(localStorage.getItem(`bingo_prog_${id}`) || '0');
+        currentDb = { ...meta, questions, progress };
+
+        const wipData = localStorage.getItem(`bingo_wip_${id}`);
+        const resumeBtn = document.getElementById('btn-resume-quiz');
+        if (wipData) {
+            const wipState = JSON.parse(wipData);
+            const total = wipState.currentQuiz.length;
+            const current = (wipState.lastVisibleQuestionIndex || 0) + 1;
+            resumeBtn.innerHTML = `继续上次的进度 (${current}/${total} 根)`;
+            resumeBtn.style.display = 'block';
+        } else {
+            resumeBtn.style.display = 'none';
+        }
+        
+        document.getElementById('dash-title').innerText = meta.name;
+        document.getElementById('dash-count').innerText = questions.length;
+        document.getElementById('dash-progress').innerText = `${progress} / ${questions.length}`;
+
+        const categoryContainer = document.getElementById('category-container');
+        const categorySelect = document.getElementById('category-select');
+        const categories = [...new Set(questions.map(q => q.c || '未分类'))];
+        
+        if (categories.length > 1 || (categories.length === 1 && categories[0] !== '未分类')) {
+            categorySelect.innerHTML = '<option value="all">全部</option>';
+            categories.forEach(c => {
+                categorySelect.innerHTML += `<option value="${c}">${c}</option>`;
+            });
+            categoryContainer.style.display = 'block';
+        } else {
+            categoryContainer.style.display = 'none';
+        }
+
+        const allMeta = getMeta();
+        const target = allMeta.find(m => m.id === id);
+        if(target) {
+            target.lastUsed = Date.now();
+            saveMeta(allMeta);
+        }
+
+        renderHistoryList(id);
+    }
 
     // --- 初始化 ---
     window.onload = function() {
         initTheme();
-        renderDbList();
+        
+        const currentHash = window.location.hash;
+        if (currentHash.startsWith('#dashboard/')) {
+            const dbId = currentHash.split('/')[1];
+            history.replaceState({ view: 'dashboard', dbId: dbId }, '', currentHash);
+            updateView({ view: 'dashboard', dbId: dbId });
+        } else {
+            history.replaceState({ view: 'home' }, '', '#home');
+            updateView({ view: 'home' });
+        }
 
+        // PWA安装逻辑
         const installBtn = document.getElementById('btn-install-pwa');
-
         window.addEventListener('beforeinstallprompt', (e) => {
             e.preventDefault();
             deferredInstallPrompt = e;
-            if (installBtn) {
-                installBtn.style.display = 'flex';
-            }
+            if (installBtn) installBtn.style.display = 'flex';
         });
 
         if(installBtn) {
             installBtn.addEventListener('click', async () => {
                 if (deferredInstallPrompt) {
                     deferredInstallPrompt.prompt();
-                    const { outcome } = await deferredInstallPrompt.userChoice;
-                    console.log(`User response to the install prompt: ${outcome}`);
+                    await deferredInstallPrompt.userChoice;
                     deferredInstallPrompt = null;
                     installBtn.style.display = 'none';
                 }
@@ -435,9 +529,7 @@
         
         window.addEventListener('appinstalled', () => {
             deferredInstallPrompt = null;
-            if (installBtn) {
-                installBtn.style.display = 'none';
-            }
+            if (installBtn) installBtn.style.display = 'none';
         });
     };
 
@@ -687,65 +779,14 @@
         if (currentDb) localStorage.removeItem(`bingo_wip_${currentDb.id}`);
     }
 
-    function openDashboard(id, options = {}) {
-        const meta = getMeta().find(m => m.id === id);
-        if (!meta) { console.error("DB meta not found for id:", id); goHome(); return; }
-        
-        const questions = JSON.parse(localStorage.getItem(`bingo_db_${id}`) || '[]');
-        const progress = parseInt(localStorage.getItem(`bingo_prog_${id}`) || '0');
-        currentDb = { ...meta, questions, progress };
-
-        const wipData = localStorage.getItem(`bingo_wip_${id}`);
-        const resumeBtn = document.getElementById('btn-resume-quiz');
-        if (wipData) {
-            const wipState = JSON.parse(wipData);
-            const total = wipState.currentQuiz.length;
-            const current = (wipState.lastVisibleQuestionIndex || 0) + 1;
-            resumeBtn.innerHTML = `继续上次的进度 (${current}/${total} 根)`;
-            resumeBtn.style.display = 'block';
-        } else {
-            resumeBtn.style.display = 'none';
-        }
-
-        document.getElementById('view-home').style.display = 'none';
-        document.getElementById('view-dashboard').style.display = 'block';
-        
-        // 更新UI
-        document.getElementById('dash-title').innerText = meta.name;
-        document.getElementById('dash-count').innerText = questions.length;
-        document.getElementById('dash-progress').innerText = `${progress} / ${questions.length}`;
-
-        // 更新并填充分类下拉菜单
-        const categoryContainer = document.getElementById('category-container');
-        const categorySelect = document.getElementById('category-select');
-        const categories = [...new Set(questions.map(q => q.c || '未分类'))];
-        
-        if (categories.length > 1 || (categories.length === 1 && categories[0] !== '未分类')) {
-            categorySelect.innerHTML = '<option value="all">全部</option>';
-            categories.forEach(c => {
-                categorySelect.innerHTML += `<option value="${c}">${c}</option>`;
-            });
-            categoryContainer.style.display = 'block';
-        } else {
-            categoryContainer.style.display = 'none';
-        }
-
-
-        // 更新最近使用时间
-        const allMeta = getMeta();
-        const target = allMeta.find(m => m.id === id);
-        if(target) {
-            target.lastUsed = Date.now();
-            saveMeta(allMeta);
-        }
-
-        renderHistoryList(id);
+    function openDashboard(id) {
+        history.pushState({ view: 'dashboard', dbId: id }, '', `#dashboard/${id}`);
+        updateView({ view: 'dashboard', dbId: id });
     }
 
     function goHome() {
-        document.getElementById('view-dashboard').style.display = 'none';
-        document.getElementById('view-home').style.display = 'block';
-        renderDbList(); // 刷新顺序
+        history.pushState({ view: 'home' }, '', '#home');
+        updateView({ view: 'home' });
     }
 
     function deleteCurrentDb() {
@@ -815,13 +856,14 @@
         quizType = 'wrong_review'; // A new type for this mode
         isReviewMode = false;
         userAnswers = {};
+        masteredInSession = 0; // 重置计数器
         currentQuiz = wrongQuestions.sort(() => 0.5 - Math.random()); // Shuffle them
         lastVisibleQuestionIndex = 0;
 
-        document.getElementById('view-dashboard').style.display = 'none';
-        document.getElementById('view-quiz').style.display = 'block';
-        document.getElementById('quiz-fab-area').style.display = 'flex';
+        history.pushState({ view: 'quiz', dbId: currentDb.id }, '', '#quiz');
+        updateView({ view: 'quiz' });
         
+        document.getElementById('quiz-fab-area').style.display = 'flex';
         renderQuizItems();
         saveWipQuiz();
         setupQuizScrollListener();
@@ -885,82 +927,121 @@
         renderHistoryList(currentDb.id); // Refresh the list
     }
 
-    function resumeQuiz() {
-        const wipData = localStorage.getItem(`bingo_wip_${currentDb.id}`);
-        if (!wipData) {
-            console.error("No WIP data found to resume.");
-            return;
-        }
+        function resumeQuiz() {
 
-        const wipState = JSON.parse(wipData);
-        currentQuiz = wipState.currentQuiz;
-        userAnswers = wipState.userAnswers;
-        quizType = wipState.quizType;
-        isReviewMode = false;
-        lastVisibleQuestionIndex = wipState.lastVisibleQuestionIndex || 0;
-        
-        document.getElementById('view-dashboard').style.display = 'none';
-        document.getElementById('view-quiz').style.display = 'block';
-        document.getElementById('quiz-fab-area').style.display = 'flex';
-        
-        renderQuizItems();
-        setupQuizScrollListener();
-        window.addEventListener('beforeunload', saveWipQuiz);
+            const wipData = localStorage.getItem(`bingo_wip_${currentDb.id}`);
 
-        setTimeout(() => {
-            const targetEl = document.getElementById(`q-${lastVisibleQuestionIndex}`);
-            if (targetEl) {
-                targetEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                // Add a temporary highlight to indicate position
-                targetEl.style.transition = 'outline 0.2s ease-in-out';
-                targetEl.style.outline = '3px solid var(--primary)';
-                setTimeout(() => {
-                    targetEl.style.outline = 'none';
-                }, 1500);
+            if (!wipData) {
+
+                console.error("No WIP data found to resume.");
+
+                return;
+
             }
-        }, 100);
 
-        if (quizType === 'mock_exam') {
-            const count = currentQuiz.length;
-            const totalTime = count * 90;
-            startTimer(totalTime);
+    
+
+            const wipState = JSON.parse(wipData);
+
+            currentQuiz = wipState.currentQuiz;
+
+            userAnswers = wipState.userAnswers;
+
+            quizType = wipState.quizType;
+
+            isReviewMode = false;
+
+            lastVisibleQuestionIndex = wipState.lastVisibleQuestionIndex || 0;
+
+            
+
+            history.pushState({ view: 'quiz', dbId: currentDb.id }, '', '#quiz');
+
+            updateView({ view: 'quiz' });
+
+            document.getElementById('quiz-fab-area').style.display = 'flex';
+
+            
+
+            renderQuizItems();
+
+            setupQuizScrollListener();
+
+            window.addEventListener('beforeunload', saveWipQuiz);
+
+    
+
+            setTimeout(() => {
+
+                const targetEl = document.getElementById(`q-${lastVisibleQuestionIndex}`);
+
+                if (targetEl) {
+
+                    targetEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
+
+                    // Add a temporary highlight to indicate position
+
+                    targetEl.style.transition = 'outline 0.2s ease-in-out';
+
+                    targetEl.style.outline = '3px solid var(--primary)';
+
+                    setTimeout(() => {
+
+                        targetEl.style.outline = 'none';
+
+                    }, 1500);
+
+                }
+
+            }, 100);
+
+    
+
+            if (quizType === 'mock_exam') {
+
+                const count = currentQuiz.length;
+
+                const totalTime = count * 90;
+
+                startTimer(totalTime);
+
+            }
+
         }
-    }
 
-    function saveHistory(score, type) {
-        const id = currentDb.id;
-        const list = JSON.parse(localStorage.getItem(`bingo_hist_${id}`) || '[]');
-        list.push({
-            date: Date.now(),
-            score: score,
-            type: type,
-            quizSnapshot: currentQuiz, // 保存当时的题目和用户答案
-            userAnswers: userAnswers
-        });
-        // 限制只存最近20条，防止爆炸
-        if(list.length > 20) list.shift();
-        localStorage.setItem(`bingo_hist_${id}`, JSON.stringify(list));
-    }
+    ...
 
-    function loadReview(historyIndex) {
-        const id = currentDb.id;
-        const list = JSON.parse(localStorage.getItem(`bingo_hist_${id}`) || '[]');
-        // 注意：renderHistoryList是倒序显示的，但这里需要传入真实index
-        // 为了简单，上面的click事件传的是倒序后的对应真实index
-        
-        const record = list[historyIndex];
-        if(!record) return;
+        function loadReview(historyIndex) {
 
-        currentQuiz = record.quizSnapshot;
-        userAnswers = record.userAnswers;
-        isReviewMode = true;
+            const id = currentDb.id;
 
-        document.getElementById('view-dashboard').style.display = 'none';
-        document.getElementById('view-quiz').style.display = 'block';
-        document.getElementById('quiz-fab-area').style.display = 'none'; // 回看不能交卷
-        
-        renderQuizItems();
-    }
+            const list = JSON.parse(localStorage.getItem(`bingo_hist_${id}`) || '[]');
+
+            const record = list[historyIndex];
+
+            if(!record) return;
+
+    
+
+            currentQuiz = record.quizSnapshot;
+
+            userAnswers = record.userAnswers;
+
+            isReviewMode = true;
+
+    
+
+            history.pushState({ view: 'quiz', dbId: id, history: true }, '', '#quiz');
+
+            updateView({ view: 'quiz' });
+
+            document.getElementById('quiz-fab-area').style.display = 'none'; // 回看不能交卷
+
+            
+
+            renderQuizItems();
+
+        }
 
     // --- 模拟考试逻辑 ---
     let quizTimer = null;
@@ -1027,8 +1108,8 @@
         userAnswers = {};
         lastVisibleQuestionIndex = 0;
 
-        document.getElementById('view-dashboard').style.display = 'none';
-        document.getElementById('view-quiz').style.display = 'block';
+        history.pushState({ view: 'quiz', dbId: currentDb.id }, '', '#quiz');
+        updateView({ view: 'quiz' });
         document.getElementById('quiz-fab-area').style.display = 'flex';
         
         renderQuizItems();
@@ -1085,8 +1166,8 @@
             if (currentQuiz.length === 0) return alert('斌狗！这堆骨头啃完了！');
         }
 
-        document.getElementById('view-dashboard').style.display = 'none';
-        document.getElementById('view-quiz').style.display = 'block';
+        history.pushState({ view: 'quiz', dbId: currentDb.id }, '', '#quiz');
+        updateView({ view: 'quiz' });
         document.getElementById('quiz-fab-area').style.display = 'flex';
         
         renderQuizItems();
@@ -1193,11 +1274,16 @@
         // Visually remove the question from the current quiz
         const cardElement = document.getElementById(`q-${qIdx}`);
         if (cardElement) {
-            cardElement.style.transition = 'opacity 0.3s';
+            cardElement.style.transition = 'opacity 0.3s, transform 0.3s';
             cardElement.style.opacity = '0';
+            cardElement.style.transform = 'scale(0.95)';
             setTimeout(() => { cardElement.style.display = 'none'; }, 300);
         }
         
+        masteredInSession++;
+        const totalInQuiz = currentQuiz.length;
+        document.getElementById('quiz-progress-text').innerText = `本轮 ${totalInQuiz - masteredInSession} / ${totalInQuiz} 根`;
+
         alert('这根骨头你已经啃会了！');
     }
 
@@ -1272,14 +1358,16 @@
 
     function enterReviewMode() {
         document.getElementById('modal-score').style.display = 'none';
-        document.getElementById('quiz-fab-area').style.display = 'none';
         
         // 恢复刚完成的题目
         currentQuiz = lastCompletedQuiz;
         userAnswers = lastCompletedAnswers;
         
         isReviewMode = true;
-        renderQuizItems(); // 重绘带解析的界面
+
+        updateView({ view: 'quiz' });
+        document.getElementById('quiz-fab-area').style.display = 'none';
+        renderQuizItems(); 
         window.scrollTo(0,0);
     }
 
@@ -1287,24 +1375,16 @@
         if (quizType === 'mock_exam' && !isReviewMode) {
             if (confirm('您正在进行模拟开啃，现在退出将直接交卷，确定吗？')) {
                 submitPaper(true); // silent submit
+            } else {
+                return; // Do not exit if user cancels
             }
-            return;
         }
 
         if (!isReviewMode) {
             saveWipQuiz();
         }
-
-        stopTimer();
-        removeQuizScrollListener();
-        window.removeEventListener('beforeunload', saveWipQuiz);
-
-        document.getElementById('modal-score').style.display = 'none';
-        document.getElementById('view-quiz').style.display = 'none';
-        document.getElementById('view-dashboard').style.display = 'block';
         
-        // 刷新 Dashboard 数据 (因为进度可能变了)
-        openDashboard(currentDb.id, { skipWipCheck: true });
+        history.back();
     }
 
 </script>
@@ -1314,25 +1394,25 @@
     window.addEventListener('load', () => {
         const gesture = new TinyGesture(document.body);
 
-        gesture.on('swipedown', (event) => {
+        gesture.on('swiperight', (event) => {
             const dashboardView = document.getElementById('view-dashboard');
             const quizView = document.getElementById('view-quiz');
 
-            // 在仪表盘页下滑 -> 返回主页
+            // 在仪表盘页右滑 -> 返回主页
             if (dashboardView.style.display === 'block') {
                 // 防止在选择文字或操作输入框时误触
                 if (event.target.tagName === 'INPUT' || event.target.tagName === 'SELECT' || window.getSelection().toString()) {
                     return;
                 }
-                goHome();
+                history.back();
             }
 
-            // 在答题页下滑 -> 退出答题
+            // 在答题页右滑 -> 退出答题
             if (quizView.style.display === 'block') {
                  if (event.target.tagName === 'INPUT' || event.target.tagName === 'SELECT' || window.getSelection().toString()) {
                     return;
                 }
-                exitQuiz();
+                history.back();
             }
         });
     });
