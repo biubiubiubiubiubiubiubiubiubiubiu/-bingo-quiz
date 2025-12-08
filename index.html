@@ -989,12 +989,6 @@
     }
     
     function startMockExam() {
-        const wipData = localStorage.getItem(`bingo_wip_${currentDb.id}`);
-        if (wipData) {
-            if (!confirm('汪！你之前藏的骨头还没啃完呢，现在就要挖个新坑吗？旧坑里的骨头可就没咯！')) {
-                return; // Abort starting a new quiz
-            }
-        }
         clearWipQuiz();
         const count = parseInt(document.getElementById('mock-exam-count').value);
         // 每题90秒
