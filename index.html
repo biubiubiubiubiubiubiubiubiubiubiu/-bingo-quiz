@@ -348,6 +348,7 @@
     let currentQuiz = []; // 当前正在做的题
     let userAnswers = {}; // 用户当前选择
     let isReviewMode = false; // 是否处于回看模式
+    let lastVisibleQuestionIndex = 0;
 
     // --- 初始化 ---
     window.onload = function() {
@@ -365,6 +366,43 @@
         const isDark = html.getAttribute('data-theme') === 'everforest';
         html.setAttribute('data-theme', isDark ? 'light' : 'everforest');
         localStorage.setItem('app_theme', isDark ? 'light' : 'everforest');
+    }
+
+    // --- 滚动位置追踪 ---
+    let scrollTimeout;
+    function handleQuizScroll() {
+        if (scrollTimeout) clearTimeout(scrollTimeout);
+        scrollTimeout = setTimeout(() => {
+            const containerTop = document.getElementById('view-quiz').getBoundingClientRect().top;
+            const questionElements = document.querySelectorAll('#quiz-container .ios-card');
+            let maxVisibleHeight = 0;
+            let firstVisibleIndex = -1;
+
+            questionElements.forEach((el, index) => {
+                const rect = el.getBoundingClientRect();
+                const visibleHeight = Math.min(rect.bottom, window.innerHeight) - Math.max(rect.top, containerTop);
+                
+                if (visibleHeight > 0 && firstVisibleIndex === -1) {
+                    firstVisibleIndex = index;
+                }
+
+                if (visibleHeight > maxVisibleHeight) {
+                    maxVisibleHeight = visibleHeight;
+                    lastVisibleQuestionIndex = index;
+                }
+            });
+            // 如果没有任何元素占据主要视野，则将第一个可见元素作为当前位置
+            if (maxVisibleHeight <= 0 && firstVisibleIndex !== -1) {
+                lastVisibleQuestionIndex = firstVisibleIndex;
+            }
+
+        }, 150);
+    }
+    function setupQuizScrollListener() {
+        window.addEventListener('scroll', handleQuizScroll, true);
+    }
+    function removeQuizScrollListener() {
+        window.removeEventListener('scroll', handleQuizScroll, true);
     }
 
     // --- 首页：题库列表逻辑 ---
@@ -560,11 +598,12 @@
 
     // --- 仪表盘逻辑 ---
     function saveWipQuiz() {
-        if (!currentDb || !currentQuiz.length) return;
+        if (!currentDb || !currentQuiz.length || isReviewMode) return;
         const wipState = {
             quizType: quizType,
             currentQuiz: currentQuiz,
-            userAnswers: userAnswers
+            userAnswers: userAnswers,
+            lastVisibleQuestionIndex: lastVisibleQuestionIndex
         };
         localStorage.setItem(`bingo_wip_${currentDb.id}`, JSON.stringify(wipState));
     }
@@ -589,12 +628,24 @@
                 userAnswers = wipState.userAnswers;
                 quizType = wipState.quizType;
                 isReviewMode = false;
+                lastVisibleQuestionIndex = wipState.lastVisibleQuestionIndex || 0;
                 
                 document.getElementById('view-home').style.display = 'none';
                 document.getElementById('view-dashboard').style.display = 'none';
                 document.getElementById('view-quiz').style.display = 'block';
                 document.getElementById('quiz-fab-area').style.display = 'flex';
+                
                 renderQuizItems();
+                setupQuizScrollListener();
+                window.addEventListener('beforeunload', saveWipQuiz);
+
+                setTimeout(() => {
+                    const targetEl = document.getElementById(`q-${lastVisibleQuestionIndex}`);
+                    if (targetEl) {
+                        targetEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    }
+                }, 100);
+
                 return;
             } else {
                 localStorage.removeItem(`bingo_wip_${id}`);
@@ -688,6 +739,7 @@
         isReviewMode = false;
         userAnswers = {};
         currentQuiz = wrongQuestions.sort(() => 0.5 - Math.random()); // Shuffle them
+        lastVisibleQuestionIndex = 0;
 
         document.getElementById('view-dashboard').style.display = 'none';
         document.getElementById('view-quiz').style.display = 'block';
@@ -695,6 +747,8 @@
         
         renderQuizItems();
         saveWipQuiz();
+        setupQuizScrollListener();
+        window.addEventListener('beforeunload', saveWipQuiz);
     }
 
     // --- 历史记录 ---
@@ -832,14 +886,16 @@
         quizType = 'mock_exam';
         isReviewMode = false;
         userAnswers = {};
+        lastVisibleQuestionIndex = 0;
 
         document.getElementById('view-dashboard').style.display = 'none';
         document.getElementById('view-quiz').style.display = 'block';
         document.getElementById('quiz-fab-area').style.display = 'flex';
         
         renderQuizItems();
-        // 模拟考试不保存WIP，增加挑战性
-        clearWipQuiz();
+        saveWipQuiz();
+        setupQuizScrollListener();
+        window.addEventListener('beforeunload', saveWipQuiz);
 
         startTimer(totalTime);
     }
@@ -851,6 +907,7 @@
         quizType = type;
         isReviewMode = false;
         userAnswers = {};
+        lastVisibleQuestionIndex = 0;
 
         const selectedCategory = document.getElementById('category-select')?.value;
         let questionsForQuiz = currentDb.questions;
@@ -888,6 +945,8 @@
         
         renderQuizItems();
         saveWipQuiz();
+        setupQuizScrollListener();
+        window.addEventListener('beforeunload', saveWipQuiz);
     }
 
     function renderQuizItems() {
@@ -987,6 +1046,8 @@
         if (!autoSubmit && !confirm('不改了？真的交卷了哦？')) return;
         
         stopTimer();
+        removeQuizScrollListener();
+        window.removeEventListener('beforeunload', saveWipQuiz);
         
         let correctCount = 0;
         currentQuiz.forEach((q, i) => {
@@ -1023,7 +1084,14 @@
     }
 
     function exitQuiz() {
+        if (!isReviewMode) {
+            saveWipQuiz();
+        }
+
         stopTimer();
+        removeQuizScrollListener();
+        window.removeEventListener('beforeunload', saveWipQuiz);
+
         document.getElementById('modal-score').style.display = 'none';
         document.getElementById('view-quiz').style.display = 'none';
         document.getElementById('view-dashboard').style.display = 'block';
