@@ -120,7 +120,9 @@
         }
 
         /* 统一高度 */
-        .btn, .input-ghost, select.btn-ghost {
+        .btn,
+        .input-ghost,
+        select.btn-ghost {
             height: 52px;
             line-height: normal;
             box-sizing: border-box;
@@ -159,7 +161,8 @@
             transition: 0.2s;
             width: 100%;
             padding: 0;
-            -moz-appearance: textfield; /* Firefox 隐藏箭头 */
+            -moz-appearance: textfield;
+            /* Firefox 隐藏箭头 */
         }
 
         /* Chrome, Safari, Edge, Opera 隐藏箭头 */
@@ -177,24 +180,32 @@
 
         /* 关键修复：下拉框样式 & 隐藏默认箭头 */
         select.btn-ghost {
-            appearance: none; /* 标准 */
-            -webkit-appearance: none; /* Safari/Chrome 必须 */
-            -moz-appearance: none; /* Firefox */
+            appearance: none;
+            /* 标准 */
+            -webkit-appearance: none;
+            /* Safari/Chrome 必须 */
+            -moz-appearance: none;
+            /* Firefox */
             background-color: var(--bg-input);
-            padding-right: 35px !important; /* 给自定义箭头留位置 */
-            padding-left: 15px; /* 左侧留白 */
-            text-align: center; /* 文字居中 */
-            text-align-last: center; /* 强制部分浏览器居中 */
+            padding-right: 35px !important;
+            /* 给自定义箭头留位置 */
+            padding-left: 15px;
+            /* 左侧留白 */
+            text-align: center;
+            /* 文字居中 */
+            text-align-last: center;
+            /* 强制部分浏览器居中 */
             border-radius: 16px;
             border: none;
             font-size: 15px;
             font-weight: 600;
             width: 100%;
-            
+
             /* 自定义箭头图标 SVG */
             background-image: url('data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%238E8E93%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13-5.4H18.4c-5%200-9.3%201.8-12.9%205.4A17.6%2017.6%200%200%200%200%2082.2c0%205%201.8%209.3%205.4%2012.9l128%20127.9c3.6%203.6%207.8%205.4%2012.8%205.4s9.2-1.8%2012.8-5.4L287%2095c3.5-3.5%205.4-7.8%205.4-12.8%200-5-1.9-9.2-5.4-12.8z%22%2F%3E%3C%2Fsvg%3E');
             background-repeat: no-repeat;
-            background-position: right 12px center; /* 调整箭头位置 */
+            background-position: right 12px center;
+            /* 调整箭头位置 */
             background-size: 10px;
         }
 
@@ -624,9 +635,11 @@
 
             <!-- 按顺序啃区域优化 -->
             <div style="margin-bottom: 10px;">
-                <div style="font-size:12px; color:var(--text-sub); margin-bottom:8px; display:flex; justify-content:space-between; align-items:center;">
+                <div
+                    style="font-size:12px; color:var(--text-sub); margin-bottom:8px; display:flex; justify-content:space-between; align-items:center;">
                     <span>📍 起始序号</span>
-                    <span id="max-count-hint" style="background:var(--bg-input); padding:2px 6px; border-radius:4px;">共 0 根</span>
+                    <span id="max-count-hint" style="background:var(--bg-input); padding:2px 6px; border-radius:4px;">共
+                        0 根</span>
                 </div>
 
                 <!-- 修复后的布局 -->
@@ -1029,7 +1042,7 @@
                 loader.style.display = 'none';
                 try {
                     const data = new Uint8Array(e.target.result);
-                    const workbook = XLSX.read(data, { type: 'array' });
+                    const workbook = XLSX.read(data, { type: 'array', cellDates: true },);
 
                     tempImportData = {};
                     const sheetSelectionContainer = document.getElementById('sheet-selection-container');
@@ -1037,7 +1050,10 @@
 
                     workbook.SheetNames.forEach(sheetName => {
                         const worksheet = workbook.Sheets[sheetName];
-                        const json = XLSX.utils.sheet_to_json(worksheet);
+                        const json = XLSX.utils.sheet_to_json(worksheet, {
+                            raw: false,
+                            dateNF: 'yyyy/mm/dd' // 你可以改成 'yyyy-mm-dd' 或其他格式
+                        });
                         const parsedData = parseImportData(json);
                         if (parsedData.length > 0) {
                             tempImportData[sheetName] = parsedData;
