@@ -1127,6 +1127,7 @@
             return parsed;
         }
 
+                // --- 核心修改：支持更新题库并保留进度的导入逻辑 ---
         function confirmImport() {
             const selectedSheets = Array.from(document.querySelectorAll('#sheet-selection-container input[name="sheet"]:checked'))
                 .map(input => input.value);
@@ -1136,23 +1137,80 @@
                 return;
             }
 
-            const meta = getMeta();
-            selectedSheets.forEach(sheetName => {
-                const id = Date.now().toString() + '_' + Math.random().toString(36).substr(2, 9);
-                const data = tempImportData[sheetName];
+            const meta = getMeta(); // 获取现有题库列表
+            let updatedCount = 0;
+            let newCount = 0;
 
-                try {
-                    localStorage.setItem(`bingo_db_${id}`, JSON.stringify(data));
-                    meta.push({ id, name: sheetName, count: data.length, lastUsed: Date.now() });
-                } catch (e) {
-                    alert('狗窝满了！快丢掉点旧骨头。');
-                    return;
+            selectedSheets.forEach(sheetName => {
+                const data = tempImportData[sheetName];
+                
+                // 1. 检查是否存在同名题库
+                const existingDb = meta.find(m => m.name === sheetName);
+
+                if (existingDb) {
+                    // 2. 如果存在，询问用户意图
+                    const userWantsUpdate = confirm(
+                        `发现已存在的狗窝：【${sheetName}】\n\n` +
+                        `🦴 点击【确定】：更新题目，但保留你的刷题进度和历史成绩。\n` +
+                        `🆕 点击【取消】：把它当作一个新的狗窝导入（不覆盖旧的）。`
+                    );
+
+                    if (userWantsUpdate) {
+                        // --- A. 更新模式 ---
+                        try {
+                            // 覆盖题目数据
+                            localStorage.setItem(`bingo_db_${existingDb.id}`, JSON.stringify(data));
+                            
+                            // 更新元数据中的数量和时间
+                            existingDb.count = data.length;
+                            existingDb.lastUsed = Date.now();
+
+                            // 关键：清除“中断暂存”的状态。因为题目变了，之前的断点可能对应不上，防止报错。
+                            localStorage.removeItem(`bingo_wip_${existingDb.id}`);
+
+                            // 修正进度：如果新题目变少了，而你进度已经超出了新总数，把进度重置为最大值
+                            let currentProg = parseInt(localStorage.getItem(`bingo_prog_${existingDb.id}`) || '0');
+                            if (currentProg > data.length) {
+                                localStorage.setItem(`bingo_prog_${existingDb.id}`, data.length);
+                                existingDb.progress = data.length; // 如果内存中有也要更新
+                            }
+
+                            updatedCount++;
+                        } catch (e) {
+                            alert('更新失败，可能是存储空间不足！');
+                            console.error(e);
+                        }
+                    } else {
+                        // --- B. 新建模式 (用户点击了取消) ---
+                        createNewDb(sheetName, data, meta);
+                        newCount++;
+                    }
+                } else {
+                    // --- C. 新建模式 (原本就不存在) ---
+                    createNewDb(sheetName, data, meta);
+                    newCount++;
                 }
             });
 
             saveMeta(meta);
             closeImportModal();
-            renderDbList();
+            renderDbList(); // 刷新列表
+            
+            // 提示结果
+            if (updatedCount > 0 || newCount > 0) {
+                alert(`汪！操作完成：\n🛠 更新了 ${updatedCount} 个旧狗窝\n✨ 挖掘了 ${newCount} 个新狗窝`);
+            }
+        }
+
+        // 辅助函数：创建新题库
+        function createNewDb(name, data, metaArray) {
+            try {
+                const id = Date.now().toString() + '_' + Math.random().toString(36).substr(2, 9);
+                localStorage.setItem(`bingo_db_${id}`, JSON.stringify(data));
+                metaArray.push({ id, name: name, count: data.length, lastUsed: Date.now() });
+            } catch (e) {
+                alert(`导入【${name}】失败，狗窝满了（存储空间不足）！快丢掉点旧骨头。`);
+            }
         }
 
         // --- 仪表盘逻辑 ---
