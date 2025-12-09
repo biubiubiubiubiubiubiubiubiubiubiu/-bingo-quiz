@@ -133,6 +133,32 @@
             align-items: center;
             justify-content: center;
             gap: 8px;
+            height: 50px;
+            /* 新增：固定高度，确保一行内的元素对齐 */
+            box-sizing: border-box;
+            /* 确保 padding 不会撑大高度 */
+        }
+
+        .input-ghost {
+            background: var(--bg-input);
+            color: var(--primary);
+            /* 数字用主色调，显眼 */
+            border: 2px solid transparent;
+            border-radius: 15px;
+            font-size: 18px;
+            /* 数字大一点 */
+            font-weight: 800;
+            text-align: center;
+            transition: 0.2s;
+            height: 50px;
+            /* 与按钮高度一致 */
+            width: 100%;
+        }
+
+        .input-ghost:focus {
+            background: var(--bg-card);
+            border-color: var(--primary);
+            box-shadow: 0 0 0 4px var(--primary-light);
         }
 
         .btn:active {
@@ -572,30 +598,33 @@
                 style="display:none; margin-bottom: 20px; background: linear-gradient(135deg, var(--primary), var(--success)); color: white;"
                 onclick="resumeQuiz()">继续上次的进度</button>
 
-            <!-- 原有的代码位置在 view-dashboard 内 -->
             <div style="margin-bottom: 10px;">
                 <div
-                    style="font-size:12px; color:var(--text-sub); margin-bottom:5px; display:flex; justify-content:space-between;">
-                    <span>从第几根开始啃？</span>
-                    <span id="max-count-hint"></span>
+                    style="font-size:12px; color:var(--text-sub); margin-bottom:8px; display:flex; justify-content:space-between; align-items:center;">
+                    <span>🏁 起始位置</span>
+                    <span id="max-count-hint" style="background:var(--bg-input); padding:2px 6px; border-radius:4px;">共
+                        0 根</span>
                 </div>
-                <div style="display:flex; gap:10px;">
-                    <!-- 新增：起始位置输入框 -->
-                    <input type="number" id="sequence-start-input" class="btn btn-ghost"
-                        style="width: 80px; text-align:center; padding:0; background:var(--bg-white); border:2px solid var(--bg-input);"
-                        onclick="this.select()">
 
-                    <!-- 这种组合比“起止时间”更灵活 -->
+                <div style="display:flex; gap:10px; align-items: center;">
+                    <!-- 输入框：风格优化 -->
+                    <div style="flex-shrink: 0; width: 80px;">
+                        <input type="number" id="sequence-start-input" class="input-ghost" onclick="this.select()">
+                    </div>
+
+                    <!-- 按钮 -->
                     <button class="btn btn-primary" style="flex-grow: 1;" onclick="startQuiz('sequence')">按顺序啃</button>
 
-                    <select id="sequence-count" class="btn btn-ghost"
-                        style="max-width: 100px; padding: 0 15px; -webkit-appearance: none; appearance: none; background-image: none;">
-                        <option value="10">10根</option>
-                        <option value="20">20根</option>
-                        <option value="50" selected>50根</option>
-                        <option value="100">100根</option>
-                        <option value="all">梭哈</option>
-                    </select>
+                    <!-- 下拉框：加回背景图，不然用户不知道是下拉菜单 -->
+                    <div style="flex-shrink: 0;">
+                        <select id="sequence-count" class="btn btn-ghost" style="width: auto; padding-right: 35px;">
+                            <option value="10">10根</option>
+                            <option value="20">20根</option>
+                            <option value="50" selected>50根</option>
+                            <option value="100">100根</option>
+                            <option value="all">梭哈</option>
+                        </select>
+                    </div>
                 </div>
             </div>
 
@@ -1401,29 +1430,53 @@
             const selectedCategory = document.getElementById('category-select')?.value;
             let questionsForQuiz = currentDb.questions;
 
+            // 处理分类筛选
             if (selectedCategory && selectedCategory !== 'all') {
                 questionsForQuiz = currentDb.questions.filter(q => (q.c || '未分类') === selectedCategory);
             }
 
             if (type === 'random') {
+                // 随机模式
                 const countValue = document.getElementById('random-count').value;
                 const count = countValue === 'all' ? questionsForQuiz.length : parseInt(countValue);
                 const shuffled = [...questionsForQuiz].sort(() => 0.5 - Math.random());
                 currentQuiz = shuffled.slice(0, count);
             } else {
-                currentQuiz = questionsForQuiz.slice(startIndex, startIndex + count);
-            }
+                // 顺序模式 (修复版)
+                const countValue = document.getElementById('sequence-count').value;
+                const totalQuestions = questionsForQuiz.length;
+                const count = countValue === 'all' ? totalQuestions : parseInt(countValue);
 
-            if (currentQuiz.length === 0) {
-                // 智能处理：如果是从最后开始还没题，提示是否重头开始
-                if (startIndex >= totalQuestions) {
-                    if (confirm('这堆骨头已经啃到底了！要从第 1 根重新开始啃吗？')) {
-                        document.getElementById('sequence-start-input').value = 1;
-                        startQuiz('sequence'); // 递归调用一次
-                        return;
-                    }
+                // 1. 获取输入框的值
+                let inputStart = parseInt(document.getElementById('sequence-start-input').value);
+
+                // 2. 校验合法性
+                if (isNaN(inputStart) || inputStart < 1) inputStart = 1;
+                // 如果输入超过总数，自动修正为最后一题（或者也可以提示用户）
+                // 这里不做强制修正为总数，允许逻辑判断后续是否为空
+
+                // 3. 计算数组索引 (输入是1开始，索引是0开始)
+                const startIndex = inputStart - 1;
+
+                // 4. 切片
+                if (countValue === 'all') {
+                    currentQuiz = questionsForQuiz.slice(startIndex);
+                } else {
+                    currentQuiz = questionsForQuiz.slice(startIndex, startIndex + count);
                 }
-                return alert('这个位置后面没有骨头啦！');
+
+                // 5. 空数据处理
+                if (currentQuiz.length === 0) {
+                    // 如果是因为其实位置超过了总数
+                    if (startIndex >= totalQuestions) {
+                        if (confirm('这就啃到底啦！要从第 1 根重新开始吗？')) {
+                            document.getElementById('sequence-start-input').value = 1;
+                            startQuiz('sequence'); // 递归调用，重新开始
+                            return;
+                        }
+                    }
+                    return alert('这个位置后面没有骨头啦！请调整起始位置。');
+                }
             }
 
             history.pushState({ view: 'quiz', dbId: currentDb.id }, '', '#quiz');
