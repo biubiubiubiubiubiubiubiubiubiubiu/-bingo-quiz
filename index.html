@@ -522,6 +522,46 @@
             background: rgba(46, 56, 60, 0.7);
         }
 
+        /* 偷偷看一眼按钮 */
+        .btn-peek {
+            background: transparent;
+            border: 1px dashed var(--text-sub);
+            color: var(--text-sub);
+            padding: 4px 10px;
+            font-size: 13px;
+            font-weight: 600;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+
+        .btn-peek:hover {
+            background: var(--bg-input);
+            border-style: solid;
+        }
+
+        /* 偷偷看一眼的答案区域 */
+        .analysis-box {
+            margin-top: 15px;
+            padding: 12px;
+            background: var(--primary-light);
+            border-radius: 12px;
+            font-size: 14px;
+            border: 1px solid var(--primary);
+            animation: fadeIn 0.3s;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(-5px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
         @media (min-width: 600px) {
             .container {
                 max-width: 800px;
@@ -1628,24 +1668,29 @@
                 let cardClass = 'ios-card';
                 let analysisHtml = '';
                 let masteredButtonHtml = '';
+                let peekButtonHtml = '';
 
                 if (quizType === 'wrong_review' && !isReviewMode) {
                     masteredButtonHtml = `<button class="btn-mastered" onclick="masterHardBone(${idx})">我啃会了</button>`;
                 }
+                
+                const answerContent = `
+                    <div style="font-weight:bold; margin-bottom:4px;">
+                        汪的答案：<span style="color:var(--success)">${item.a}</span>
+                        ${isReviewMode && uAns !== item.a ? `<span style="margin-left:10px; color:var(--danger)">你刨的：${uAns || '未选'}</span>` : ''}
+                    </div>
+                    <div style="color:var(--text-sub);">${item.e || '只能意会'}</div>
+                `;
 
                 if (isReviewMode) {
                     const isCorrect = uAns === item.a;
                     cardClass += isCorrect ? ' correct' : ' wrong';
-                    analysisHtml = `
-                    <div style="margin-top:15px; padding:10px; background:var(--bg-input); border-radius:8px; font-size:14px;">
-                        <div style="font-weight:bold; margin-bottom:4px;">
-                            汪的答案：<span style="color:var(--success)">${item.a}</span>
-                            ${!isCorrect ? `<span style="margin-left:10px; color:var(--danger)">你刨的：${uAns || '未选'}</span>` : ''}
-                        </div>
-                        <div style="color:var(--text-sub);">${item.e || '只能意会'}</div>
-                    </div>
-                `;
+                    analysisHtml = `<div style="margin-top:15px; padding:10px; background:var(--bg-input); border-radius:8px; font-size:14px;">${answerContent}</div>`;
+                } else if (quizType !== 'mock_exam') {
+                    peekButtonHtml = `<div style="text-align:right; margin-top:10px;"><button class="btn-peek" onclick="toggleAnalysis(${idx})">👀 偷偷看一眼</button></div>`;
+                    analysisHtml = `<div class="analysis-box" id="analysis-${idx}" style="display:none;">${answerContent}</div>`;
                 }
+
 
                 let optionsHtml = '';
                 for (let key in item.o) {
@@ -1670,6 +1715,7 @@
                         ${masteredButtonHtml}
                     </div>
                     <div>${optionsHtml}</div>
+                    ${peekButtonHtml}
                     ${analysisHtml}
                 </div>
             `;
@@ -1748,6 +1794,13 @@
                     else row.classList.remove('selected');
                 }
             });
+        }
+
+        function toggleAnalysis(qIdx) {
+            const analysisEl = document.getElementById(`analysis-${qIdx}`);
+            if (analysisEl) {
+                analysisEl.style.display = analysisEl.style.display === 'block' ? 'none' : 'block';
+            }
         }
 
         // --- 新增: 保存历史记录 (修复缺失函数) ---
