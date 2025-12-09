@@ -8,10 +8,10 @@
     
     <!-- PWA Manifest -->
     <link rel="manifest" href="manifest.json">
-    <link rel="apple-touch-icon" href="icon.png"> <!-- 建议你自己放一个192x192的icon.png在同级目录 -->
+    <link rel="apple-touch-icon" href="icon.png"> 
 
-    <!-- 引入 SheetJS 用于解析 Excel -->
-    <!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script> -->
+    <!-- 修复1: 引入 SheetJS CDN，确保无需本地文件即可导入 -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 
     <style>
         /* --- 样式定义 --- */
@@ -115,91 +115,32 @@
             background-repeat: no-repeat;
             background-position: right 15px center;
             background-size: 10px;
-            padding-right: 40px !important; /* Make space for arrow */
+            padding-right: 40px !important;
         }
         [data-theme="everforest"] select.btn-ghost {
             background-image: url('data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%239DA9A0%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13-5.4H18.4c-5%200-9.3%201.8-12.9%205.4A17.6%2017.6%200%200%200%200%2082.2c0%205%201.8%209.3%205.4%2012.9l128%20127.9c3.6%203.6%207.8%205.4%2012.8%205.4s9.2-1.8%2012.8-5.4L287%2095c3.5-3.5%205.4-7.8%205.4-12.8%200-5-1.9-9.2-5.4-12.8z%22%2F%3E%3C%2Fsvg%3E');
         }
 
-        /* Hover effects */
-        .btn-primary:hover, .btn-success:hover {
-            filter: brightness(1.1);
-        }
-        .btn-ghost:not(select):hover { /* Exclude select to avoid conflict with arrow */
-            background: var(--bg-card); /* A slightly different shade */
-        }
+        .btn-primary:hover, .btn-success:hover { filter: brightness(1.1); }
+        .btn-ghost:not(select):hover { background: var(--bg-card); }
 
-        .nav-bar .btn-icon {
-            width: 40px;
-            height: 40px;
-            padding: 0;
-            border-radius: 50%;
-        }
-        .nav-bar .btn-icon svg {
-            width: 20px;
-            height: 20px;
-        }
-        .nav-bar .btn-icon.btn-delete {
-            color: var(--danger);
-        }
-        .nav-bar .btn-icon.btn-delete:hover {
-            background: var(--danger-light);
-        }
+        .nav-bar .btn-icon { width: 40px; height: 40px; padding: 0; border-radius: 50%; }
+        .nav-bar .btn-icon svg { width: 20px; height: 20px; }
+        .nav-bar .btn-icon.btn-delete { color: var(--danger); }
+        .nav-bar .btn-icon.btn-delete:hover { background: var(--danger-light); }
 
-        .btn-mastered {
-            padding: 4px 8px;
-            font-size: 12px;
-            font-weight: 500;
-            border-radius: 8px;
-            background: var(--success-light);
-            color: var(--success);
-            border: none;
-            cursor: pointer;
-            flex-shrink: 0;
-        }
-        .btn-mastered:hover {
-            filter: brightness(1.1);
-        }
+        .btn-mastered { padding: 4px 8px; font-size: 12px; font-weight: 500; border-radius: 8px; background: var(--success-light); color: var(--success); border: none; cursor: pointer; flex-shrink: 0; }
+        .btn-mastered:hover { filter: brightness(1.1); }
 
-        .btn-delete-hist {
-            background: var(--danger-light);
-            color: var(--danger);
-            border: none;
-            border-radius: 50%;
-            width: 28px;
-            height: 28px;
-            line-height: 28px;
-            text-align: center;
-            cursor: pointer;
-            font-weight: 600;
-            margin-left: 15px;
-            flex-shrink: 0;
-        }
-        .btn-delete-hist:hover {
-            filter: brightness(1.05);
-        }
+        .btn-delete-hist { background: var(--danger-light); color: var(--danger); border: none; border-radius: 50%; width: 28px; height: 28px; line-height: 28px; text-align: center; cursor: pointer; font-weight: 600; margin-left: 15px; flex-shrink: 0; }
+        .btn-delete-hist:hover { filter: brightness(1.05); }
 
-        /* Quiz View Header */
-        #view-quiz .nav-bar {
-            background: rgba(242, 242, 247, 0.8);
-            backdrop-filter: blur(12px);
-            -webkit-backdrop-filter: blur(12px);
-            border-bottom: 1px solid var(--bg-input);
-            padding: 10px 20px;
-            padding-top: calc(10px + env(safe-area-inset-top)); /* For iOS notch */
-        }
-        [data-theme="everforest"] #view-quiz .nav-bar {
-            background: rgba(46, 56, 60, 0.7);
-        }
+        #view-quiz .nav-bar { background: rgba(242, 242, 247, 0.8); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); border-bottom: 1px solid var(--bg-input); padding: 10px 20px; padding-top: calc(10px + env(safe-area-inset-top)); }
+        [data-theme="everforest"] #view-quiz .nav-bar { background: rgba(46, 56, 60, 0.7); }
 
         @media (min-width: 600px) {
-            .container {
-                max-width: 800px;
-                margin: 0 auto;
-            }
-            .modal-box {
-                max-width: 400px;
-            }
+            .container { max-width: 800px; margin: 0 auto; }
+            .modal-box { max-width: 400px; }
         }
     </style>
 </head>
@@ -231,9 +172,7 @@
         </div>
     </div>
 
-    <div id="db-list-container">
-        <!-- JS 填充列表 -->
-    </div>
+    <div id="db-list-container"></div>
 
     <div class="ios-card" id="empty-state" style="text-align:center; padding:40px 20px; display:none; cursor: pointer;" onclick="showImportModal()">
         <div style="font-size:40px; margin-bottom:10px;">🦴</div>
@@ -241,7 +180,6 @@
         <p style="color:var(--text-sub);">快去挖点新骨头 (+)，支持表格文件</p>
     </div>
 
-    <!-- 悬浮添加按钮 -->
     <div class="btn-float" onclick="showImportModal()">+</div>
 </div>
 
@@ -313,9 +251,7 @@
 
     <div class="ios-card">
         <h4 style="margin:0 0 15px 0;">📜 啃骨头的记忆 (点击回看)</h4>
-        <div id="history-list">
-            <!-- 历史记录 JS 填充 -->
-        </div>
+        <div id="history-list"></div>
         <button class="btn btn-ghost" id="no-history-btn" style="display:none;">还没啃过呢</button>
     </div>
 </div>
@@ -390,13 +326,6 @@
         });
     }
 
-    // --- 核心数据结构 ---
-    // localStorage keys:
-    // 'bingo_meta': [ {id, name, count, lastUsed} ]
-    // 'bingo_db_[id]': [Question Array]
-    // 'bingo_prog_[id]': int (sequence progress)
-    // 'bingo_hist_[id]': [ {date, score, answers, type} ]
-
     let currentDb = null; // { id, name, questions, progress }
     let currentQuiz = []; // 当前正在做的题
     let userAnswers = {}; // 用户当前选择
@@ -406,13 +335,14 @@
     let lastVisibleQuestionIndex = 0;
     let masteredInSession = 0; // 用于“啃硬骨头”模式的计数
     let deferredInstallPrompt = null;
+    let quizType = 'random'; 
 
     // --- Navigation & History ---
     function updateView(state) {
         document.getElementById('view-home').style.display = 'none';
         document.getElementById('view-dashboard').style.display = 'none';
         document.getElementById('view-quiz').style.display = 'none';
-        document.getElementById('modal-score').style.display = 'none'; // 确保弹窗在视图切换时关闭
+        document.getElementById('modal-score').style.display = 'none'; 
         stopTimer(); 
 
         if (!state || !state.view) {
@@ -438,7 +368,7 @@
         if (event.state) {
             updateView(event.state);
         } else {
-            updateView({ view: 'home' }); // Fallback
+            updateView({ view: 'home' }); 
         }
     };
     
@@ -557,10 +487,9 @@
             
             for(let i = 0; i < questionElements.length; i++) {
                 const rect = questionElements[i].getBoundingClientRect();
-                // 寻找第一个顶部在导航栏下方且在屏幕内的题目
                 if (rect.top >= quizNavHeight && rect.top < window.innerHeight) {
                     lastVisibleQuestionIndex = i;
-                    return; // 找到后即退出
+                    return; 
                 }
             }
         }, 150);
@@ -588,7 +517,7 @@
         }
         empty.style.display = 'none';
 
-        list.sort((a,b) => b.lastUsed - a.lastUsed); // 最近使用的排前面
+        list.sort((a,b) => b.lastUsed - a.lastUsed); 
 
         list.forEach(db => {
             const div = document.createElement('div');
@@ -610,7 +539,6 @@
 
     function showImportModal() {
         document.getElementById('modal-import').style.display = 'flex';
-        // Reset state on open
         document.getElementById('import-feedback').style.display = 'none';
         document.getElementById('import-status').innerText = '';
         document.getElementById('import-loader').style.display = 'none';
@@ -691,32 +619,23 @@
     }
 
     function parseImportData(json) {
-        // 智能映射字段 (支持常见列名)
         const parsed = json.map(row => {
-            // 寻找题目
             const qKey = Object.keys(row).find(k => /题目|问题|Question/i.test(k));
-            // 寻找答案
             const aKey = Object.keys(row).find(k => /答案|Answer/i.test(k));
-            // 寻找解析
             const eKey = Object.keys(row).find(k => /解析|解释|Explanation/i.test(k));
-            // 寻找题型
             const tKey = Object.keys(row).find(k => /题型|Type/i.test(k));
-            // 寻找类别
             const cKey = Object.keys(row).find(k => /类别|分类|Category/i.test(k));
 
-            if (!qKey || !aKey) return null; // 关键字段缺失则跳过
+            if (!qKey || !aKey) return null; 
 
-            // 寻找选项
             const options = {};
             ['A','B','C','D','E','F'].forEach(opt => {
                 const optKey = Object.keys(row).find(k => k.toUpperCase().trim() === `选项${opt}` || k.toUpperCase().trim() === opt);
                 if (optKey && row[optKey]) options[opt] = row[optKey];
             });
 
-            // 处理答案格式 (清洗非字母字符)
             let cleanAns = String(row[aKey]).toUpperCase().replace(/[^A-Z]/g, '');
             
-            // 特殊处理：判断题
             if (Object.keys(options).length === 0 && (String(row[aKey]).includes('对') || String(row[aKey]).includes('错'))) {
                 options['A'] = '正确'; options['B'] = '错误';
                 if (String(row[aKey]).includes('对')) cleanAns = 'A';
@@ -729,7 +648,7 @@
                 o: options,
                 e: eKey ? row[eKey] : '',
                 t: tKey ? row[tKey] : (cleanAns.length > 1 ? '多选' : '单选'),
-                c: cKey ? row[cKey] : '未分类' // 新增类别字段
+                c: cKey ? row[cKey] : '未分类'
             };
         }).filter(item => item !== null);
         return parsed;
@@ -796,7 +715,7 @@
         localStorage.removeItem(`bingo_db_${id}`);
         localStorage.removeItem(`bingo_prog_${id}`);
         localStorage.removeItem(`bingo_hist_${id}`);
-        localStorage.removeItem(`bingo_wip_${id}`); // Also clear WIP
+        localStorage.removeItem(`bingo_wip_${id}`); 
         
         const meta = getMeta().filter(m => m.id !== id);
         saveMeta(meta);
@@ -808,7 +727,6 @@
         if (!confirm('【高危操作】警告！此操作将彻底删除所有题库、练习历史和设置，且无法恢复。您确定要清空所有狗窝吗？')) return;
         if (!confirm('【二次确认】真的，所有东西都没了，确定吗？')) return;
 
-        // Iterate over all keys and remove the ones related to this app
         Object.keys(localStorage).forEach(key => {
             if (key.startsWith('bingo_') || key === 'app_theme') {
                 localStorage.removeItem(key);
@@ -821,7 +739,7 @@
 
     function getAllWrongQuestions(dbId) {
         const history = JSON.parse(localStorage.getItem(`bingo_hist_${dbId}`) || '[]');
-        const wrongQuestions = {}; // Use object to deduplicate based on question text
+        const wrongQuestions = {}; 
 
         history.forEach(record => {
             if (!record.quizSnapshot || !record.userAnswers) return;
@@ -829,7 +747,6 @@
             record.quizSnapshot.forEach((question, index) => {
                 const userAnswer = record.userAnswers[index] || '';
                 if (userAnswer !== question.a) {
-                    // Use question content as key to avoid duplicates
                     wrongQuestions[question.q] = question;
                 }
             });
@@ -842,7 +759,7 @@
         const wipData = localStorage.getItem(`bingo_wip_${currentDb.id}`);
         if (wipData) {
             if (!confirm('汪！你之前藏的骨头还没啃完呢，现在就要挖个新坑吗？旧坑里的骨头可就没咯！')) {
-                return; // Abort starting a new quiz
+                return; 
             }
         }
         clearWipQuiz();
@@ -853,11 +770,11 @@
             return;
         }
 
-        quizType = 'wrong_review'; // A new type for this mode
+        quizType = 'wrong_review'; 
         isReviewMode = false;
         userAnswers = {};
-        masteredInSession = 0; // 重置计数器
-        currentQuiz = wrongQuestions.sort(() => 0.5 - Math.random()); // Shuffle them
+        masteredInSession = 0; 
+        currentQuiz = wrongQuestions.sort(() => 0.5 - Math.random()); 
         lastVisibleQuestionIndex = 0;
 
         history.pushState({ view: 'quiz', dbId: currentDb.id }, '', '#quiz');
@@ -880,14 +797,12 @@
             document.getElementById('no-history-btn').style.display = 'block';
         } else {
             document.getElementById('no-history-btn').style.display = 'none';
-            // 倒序显示最近10条
             list.slice().reverse().slice(0, 10).forEach((item, index) => {
                 const originalIndex = list.length - 1 - index;
                 const scoreClass = item.score >= 90 ? 'score-high' : (item.score < 60 ? 'score-low' : '');
                 const el = document.createElement('div');
                 el.className = 'history-item';
                 
-                // Also update the history item name for mock exams
                 let quizName = '随便刨一个';
                 if(item.type === 'sequence') quizName = '按序开啃';
                 if(item.type === 'mock_exam') quizName = '模拟开啃';
@@ -904,7 +819,6 @@
             });
         }
 
-        // 更新错题按钮状态
         const wrongQuestions = getAllWrongQuestions(dbId);
         const wrongAnswersBtn = document.getElementById('btn-wrong-answers');
         if (wrongQuestions.length > 0) {
@@ -921,134 +835,81 @@
         const historyKey = `bingo_hist_${currentDb.id}`;
         let history = JSON.parse(localStorage.getItem(historyKey) || '[]');
         
-        history.splice(index, 1); // Remove the element at the original index
+        history.splice(index, 1); 
 
         localStorage.setItem(historyKey, JSON.stringify(history));
-        renderHistoryList(currentDb.id); // Refresh the list
+        renderHistoryList(currentDb.id); 
     }
 
-        function resumeQuiz() {
-
-            const wipData = localStorage.getItem(`bingo_wip_${currentDb.id}`);
-
-            if (!wipData) {
-
-                console.error("No WIP data found to resume.");
-
-                return;
-
-            }
-
-    
-
-            const wipState = JSON.parse(wipData);
-
-            currentQuiz = wipState.currentQuiz;
-
-            userAnswers = wipState.userAnswers;
-
-            quizType = wipState.quizType;
-
-            isReviewMode = false;
-
-            lastVisibleQuestionIndex = wipState.lastVisibleQuestionIndex || 0;
-
-            
-
-            history.pushState({ view: 'quiz', dbId: currentDb.id }, '', '#quiz');
-
-            updateView({ view: 'quiz' });
-
-            document.getElementById('quiz-fab-area').style.display = 'flex';
-
-            
-
-            renderQuizItems();
-
-            setupQuizScrollListener();
-
-            window.addEventListener('beforeunload', saveWipQuiz);
-
-    
-
-            setTimeout(() => {
-
-                const targetEl = document.getElementById(`q-${lastVisibleQuestionIndex}`);
-
-                if (targetEl) {
-
-                    targetEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
-
-                    // Add a temporary highlight to indicate position
-
-                    targetEl.style.transition = 'outline 0.2s ease-in-out';
-
-                    targetEl.style.outline = '3px solid var(--primary)';
-
-                    setTimeout(() => {
-
-                        targetEl.style.outline = 'none';
-
-                    }, 1500);
-
-                }
-
-            }, 100);
-
-    
-
-            if (quizType === 'mock_exam') {
-
-                const count = currentQuiz.length;
-
-                const totalTime = count * 90;
-
-                startTimer(totalTime);
-
-            }
-
+    // --- 修复后的 resumeQuiz 函数 ---
+    function resumeQuiz() {
+        const wipData = localStorage.getItem(`bingo_wip_${currentDb.id}`);
+        if (!wipData) {
+            console.error("No WIP data found to resume.");
+            return;
         }
 
-    ...
+        const wipState = JSON.parse(wipData);
+        currentQuiz = wipState.currentQuiz;
+        userAnswers = wipState.userAnswers;
+        quizType = wipState.quizType;
+        isReviewMode = false;
+        lastVisibleQuestionIndex = wipState.lastVisibleQuestionIndex || 0;
+        
+        history.pushState({ view: 'quiz', dbId: currentDb.id }, '', '#quiz');
+        updateView({ view: 'quiz' });
+        document.getElementById('quiz-fab-area').style.display = 'flex';
+        
+        renderQuizItems();
+        setupQuizScrollListener();
+        window.addEventListener('beforeunload', saveWipQuiz);
 
-        function loadReview(historyIndex) {
+        setTimeout(() => {
+            const targetEl = document.getElementById(`q-${lastVisibleQuestionIndex}`);
+            if (targetEl) {
+                targetEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                // 增加临时高亮
+                targetEl.style.transition = 'outline 0.2s ease-in-out';
+                targetEl.style.outline = '3px solid var(--primary)';
+                setTimeout(() => {
+                    targetEl.style.outline = 'none';
+                }, 1500);
+            }
+        }, 100);
 
-            const id = currentDb.id;
-
-            const list = JSON.parse(localStorage.getItem(`bingo_hist_${id}`) || '[]');
-
-            const record = list[historyIndex];
-
-            if(!record) return;
-
-    
-
-            currentQuiz = record.quizSnapshot;
-
-            userAnswers = record.userAnswers;
-
-            isReviewMode = true;
-
-    
-
-            history.pushState({ view: 'quiz', dbId: id, history: true }, '', '#quiz');
-
-            updateView({ view: 'quiz' });
-
-            document.getElementById('quiz-fab-area').style.display = 'none'; // 回看不能交卷
-
-            
-
-            renderQuizItems();
-
+        if (quizType === 'mock_exam') {
+            const count = currentQuiz.length;
+            const totalTime = count * 90;
+            // 恢复考试时简单重置计时器（简化处理，不记忆剩余时间）
+            startTimer(totalTime); 
         }
+    }
+
+    // --- 修复后的 loadReview 函数 ---
+    function loadReview(historyIndex) {
+        const id = currentDb.id;
+        const list = JSON.parse(localStorage.getItem(`bingo_hist_${id}`) || '[]');
+        const record = list[historyIndex];
+
+        if(!record) return;
+
+        currentQuiz = record.quizSnapshot;
+        userAnswers = record.userAnswers;
+        isReviewMode = true;
+
+        history.pushState({ view: 'quiz', dbId: id, history: true }, '', '#quiz');
+        updateView({ view: 'quiz' });
+        document.getElementById('quiz-fab-area').style.display = 'none'; // 回看不能交卷
+        
+        renderQuizItems();
+    }
 
     // --- 模拟考试逻辑 ---
     let quizTimer = null;
     let timeLeft = 0;
 
     function startTimer(duration) {
-        stopTimer(); // Ensure no multiple timers
+        stopTimer(); 
         timeLeft = duration;
         updateTimerDisplay();
         quizTimer = setInterval(() => {
@@ -1057,7 +918,7 @@
             if (timeLeft <= 0) {
                 stopTimer();
                 alert('时间到，自动交卷！');
-                submitPaper(true); // Pass a flag to bypass confirm
+                submitPaper(true); 
             }
         }, 1000);
     }
@@ -1073,7 +934,7 @@
         const seconds = timeLeft % 60;
         const timerEl = document.getElementById('quiz-timer');
         timerEl.innerText = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
-        // 时间紧急时变色
+        
         if (timeLeft <= 30 && timeLeft > 10) {
             timerEl.style.color = 'var(--primary)';
         } else if (timeLeft <= 10) {
@@ -1086,7 +947,6 @@
     function startMockExam() {
         clearWipQuiz();
         const count = parseInt(document.getElementById('mock-exam-count').value);
-        // 每题90秒
         const totalTime = count * 90; 
 
         const selectedCategory = document.getElementById('category-select')?.value;
@@ -1121,13 +981,11 @@
     }
 
     // --- 答题逻辑 ---
-    let quizType = 'random'; 
-
     function startQuiz(type) {
         const wipData = localStorage.getItem(`bingo_wip_${currentDb.id}`);
         if (wipData) {
             if (!confirm('汪！你之前藏的骨头还没啃完呢，现在就要挖个新坑吗？旧坑里的骨头可就没咯！')) {
-                return; // Abort starting a new quiz
+                return; 
             }
         }
         clearWipQuiz();
@@ -1152,9 +1010,6 @@
             // 顺序
             const countValue = document.getElementById('sequence-count').value;
             const count = countValue === 'all' ? questionsForQuiz.length : parseInt(countValue);
-            
-            // 注意：顺序模式下的进度是基于完整题库的，分类练习时，这个进度可能不太适用
-            // 简化处理：顺序分类练习也从0开始
             const start = (selectedCategory && selectedCategory !== 'all') ? 0 : currentDb.progress;
             
             if (countValue === 'all') {
@@ -1190,12 +1045,10 @@
             let analysisHtml = '';
             let masteredButtonHtml = '';
 
-            // 'wrong_review' mode is the "Hard Bones" quiz
             if (quizType === 'wrong_review' && !isReviewMode) {
                 masteredButtonHtml = `<button class="btn-mastered" onclick="masterHardBone(${idx})">我啃会了</button>`;
             }
 
-            // 回看模式下，标记对错并显示解析
             if (isReviewMode) {
                 const isCorrect = uAns === item.a;
                 cardClass += isCorrect ? ' correct' : ' wrong';
@@ -1210,11 +1063,9 @@
                 `;
             }
 
-            // 渲染选项
             let optionsHtml = '';
             for (let key in item.o) {
                 const isSelected = uAns.includes(key) ? 'selected' : '';
-                // 回看模式下，高亮正确答案（即使用户没选）
                 const isRealAnswer = isReviewMode && item.a.includes(key) ? 'correct-answer' : '';
                 
                 optionsHtml += `
@@ -1252,26 +1103,20 @@
         const historyKey = `bingo_hist_${currentDb.id}`;
         let history = JSON.parse(localStorage.getItem(historyKey) || '[]');
 
-        // Iterate through all history records
         history.forEach(record => {
             if (!record.quizSnapshot || !record.userAnswers) return;
             
             record.quizSnapshot.forEach((question, index) => {
-                // If we find the question that the user wants to master
                 if (question.q === questionText) {
-                    // And if the answer for it was wrong
                     if (record.userAnswers[index] !== question.a) {
-                        // Retroactively "correct" the answer in the history
                         record.userAnswers[index] = question.a;
                     }
                 }
             });
         });
 
-        // Save the modified history
         localStorage.setItem(historyKey, JSON.stringify(history));
 
-        // Visually remove the question from the current quiz
         const cardElement = document.getElementById(`q-${qIdx}`);
         if (cardElement) {
             cardElement.style.transition = 'opacity 0.3s, transform 0.3s';
@@ -1288,7 +1133,7 @@
     }
 
     function selectOption(qIdx, optKey, type) {
-        if (isReviewMode) return; // 回看不可选
+        if (isReviewMode) return; 
 
         const isMulti = type.includes('多');
         let current = userAnswers[qIdx] || '';
@@ -1296,7 +1141,6 @@
         if (!isMulti) {
             current = optKey;
         } else {
-            // 多选逻辑
             if (current.includes(optKey)) {
                 current = current.replace(optKey, '');
             } else {
@@ -1308,7 +1152,6 @@
         userAnswers[qIdx] = current;
         saveWipQuiz();
         
-        // 更新UI选中状态
         const card = document.getElementById(`q-${qIdx}`);
         const rows = card.querySelectorAll('.option-row');
         rows.forEach(row => {
@@ -1321,6 +1164,34 @@
                 else row.classList.remove('selected');
             }
         });
+    }
+
+    // --- 新增: 保存历史记录 (修复缺失函数) ---
+    function saveHistory(score, type) {
+        if (!currentDb) return;
+        const id = currentDb.id;
+        const histKey = `bingo_hist_${id}`;
+        const history = JSON.parse(localStorage.getItem(histKey) || '[]');
+
+        const record = {
+            date: Date.now(),
+            score: score,
+            type: type,
+            quizSnapshot: currentQuiz, // 保存当时的题目快照
+            userAnswers: userAnswers   // 保存用户答案
+        };
+
+        history.push(record);
+        localStorage.setItem(histKey, JSON.stringify(history));
+
+        // 如果是顺序练习，更新进度
+        if (type === 'sequence') {
+            let newProg = (parseInt(localStorage.getItem(`bingo_prog_${id}`)) || 0) + currentQuiz.length;
+            // 防止溢出
+            if (newProg > currentDb.questions.length) newProg = currentDb.questions.length;
+            localStorage.setItem(`bingo_prog_${id}`, newProg);
+            currentDb.progress = newProg;
+        }
     }
 
     function submitPaper(autoSubmit = false) {
@@ -1337,12 +1208,10 @@
 
         const score = Math.round((currentQuiz.length > 0 ? (correctCount / currentQuiz.length) : 0) * 100);
         
-        // "错题回顾"模式不保存进度和历史
         if (quizType !== 'wrong_review') {
             saveHistory(score, quizType);
         }
 
-        // 暂存刚完成的题目，用于“回味一下”
         lastCompletedQuiz = currentQuiz;
         lastCompletedAnswers = userAnswers;
 
@@ -1351,7 +1220,6 @@
         currentQuiz = [];
         userAnswers = {};
 
-        // 显示弹窗
         document.getElementById('result-score').innerText = score;
         document.getElementById('modal-score').style.display = 'flex';
     }
@@ -1359,7 +1227,6 @@
     function enterReviewMode() {
         document.getElementById('modal-score').style.display = 'none';
         
-        // 恢复刚完成的题目
         currentQuiz = lastCompletedQuiz;
         userAnswers = lastCompletedAnswers;
         
@@ -1374,9 +1241,9 @@
     function exitQuiz() {
         if (quizType === 'mock_exam' && !isReviewMode) {
             if (confirm('您正在进行模拟开啃，现在退出将直接交卷，确定吗？')) {
-                submitPaper(true); // silent submit
+                submitPaper(true); 
             } else {
-                return; // Do not exit if user cancels
+                return; 
             }
         }
 
@@ -1392,31 +1259,26 @@
 <script>
     // --- 手势处理 ---
     window.addEventListener('load', () => {
-        const gesture = new TinyGesture(document.body);
+        try {
+            const gesture = new TinyGesture(document.body);
+            gesture.on('swiperight', (event) => {
+                const dashboardView = document.getElementById('view-dashboard');
+                const quizView = document.getElementById('view-quiz');
 
-        gesture.on('swiperight', (event) => {
-            const dashboardView = document.getElementById('view-dashboard');
-            const quizView = document.getElementById('view-quiz');
-
-            // 在仪表盘页右滑 -> 返回主页
-            if (dashboardView.style.display === 'block') {
-                // 防止在选择文字或操作输入框时误触
-                if (event.target.tagName === 'INPUT' || event.target.tagName === 'SELECT' || window.getSelection().toString()) {
-                    return;
+                if (dashboardView.style.display === 'block') {
+                    if (event.target.tagName === 'INPUT' || event.target.tagName === 'SELECT' || window.getSelection().toString()) return;
+                    history.back();
                 }
-                history.back();
-            }
 
-            // 在答题页右滑 -> 退出答题
-            if (quizView.style.display === 'block') {
-                 if (event.target.tagName === 'INPUT' || event.target.tagName === 'SELECT' || window.getSelection().toString()) {
-                    return;
+                if (quizView.style.display === 'block') {
+                    if (event.target.tagName === 'INPUT' || event.target.tagName === 'SELECT' || window.getSelection().toString()) return;
+                    history.back();
                 }
-                history.back();
-            }
-        });
+            });
+        } catch (e) {
+            console.log("Gesture library load failed or not compatible", e);
+        }
     });
 </script>
-<script src="xlsx.full.min.js"></script>
 </body>
 </html>
