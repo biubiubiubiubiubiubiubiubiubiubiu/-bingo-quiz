@@ -1,14 +1,16 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
+
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="viewport"
+        content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <meta name="theme-color" content="#F0F4F0" id="theme-color-meta">
     <title>斌狗！通关！</title>
-    
+
     <!-- PWA Manifest -->
     <link rel="manifest" href="manifest.json">
-    <link rel="apple-touch-icon" href="icon.png"> 
+    <link rel="apple-touch-icon" href="icon.png">
 
     <!-- 修复1: 引入 SheetJS CDN，确保无需本地文件即可导入 -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
@@ -16,34 +18,56 @@
     <style>
         /* --- 样式定义 --- */
         :root {
-            --primary: #4A7856; --primary-light: rgba(74, 120, 86, 0.15);
-            --success: #5A946E; --success-light: rgba(90, 148, 110, 0.15);
-            --danger: #A95C52; --danger-light: rgba(169, 92, 82, 0.15);
-            --bg-body: #F0F4F0; --bg-card: #F8F9F7; --bg-input: #E6EAE6;
-            --text-main: #3A4D39; --text-sub: #6A7B69; --text-inverse: #FFFFFF;
-            --shadow: 0 4px 16px rgba(0,0,0,0.06);
-            --radius-l: 20px; --safe-area-bottom: env(safe-area-inset-bottom);
+            --primary: #4A7856;
+            --primary-light: rgba(74, 120, 86, 0.15);
+            --success: #5A946E;
+            --success-light: rgba(90, 148, 110, 0.15);
+            --danger: #A95C52;
+            --danger-light: rgba(169, 92, 82, 0.15);
+            --bg-body: #F0F4F0;
+            --bg-card: #F8F9F7;
+            --bg-input: #E6EAE6;
+            --text-main: #3A4D39;
+            --text-sub: #6A7B69;
+            --text-inverse: #FFFFFF;
+            --shadow: 0 4px 16px rgba(0, 0, 0, 0.06);
+            --radius-l: 20px;
+            --safe-area-bottom: env(safe-area-inset-bottom);
         }
+
         [data-theme="everforest"] {
-            --primary: #7FBBB3; --primary-light: rgba(127, 187, 179, 0.15);
-            --success: #A7C080; --success-light: rgba(167, 192, 128, 0.15);
-            --danger: #E67E80; --danger-light: rgba(230, 126, 128, 0.15);
-            --bg-body: #272E33; --bg-card: #2E383C; --bg-input: #374145;
-            --text-main: #D3C6AA; --text-sub: #9DA9A0; --text-inverse: #272E33;
-            --shadow: 0 4px 16px rgba(0,0,0,0.2);
+            --primary: #7FBBB3;
+            --primary-light: rgba(127, 187, 179, 0.15);
+            --success: #A7C080;
+            --success-light: rgba(167, 192, 128, 0.15);
+            --danger: #E67E80;
+            --danger-light: rgba(230, 126, 128, 0.15);
+            --bg-body: #272E33;
+            --bg-card: #2E383C;
+            --bg-input: #374145;
+            --text-main: #D3C6AA;
+            --text-sub: #9DA9A0;
+            --text-inverse: #272E33;
+            --shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
         }
 
         html {
             overscroll-behavior-x: contain;
         }
-        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; outline: none; }
-        body { 
-            margin: 0; 
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol"; 
-            background: var(--bg-body); 
-            color: var(--text-main); 
-            padding-bottom: calc(80px + var(--safe-area-bottom)); 
-            transition: background 0.3s; 
+
+        * {
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+            outline: none;
+        }
+
+        body {
+            margin: 0;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
+            background: var(--bg-body);
+            color: var(--text-main);
+            padding-bottom: calc(80px + var(--safe-area-bottom));
+            transition: background 0.3s;
             touch-action: pan-y;
             overscroll-behavior-x: contain;
         }
@@ -53,61 +77,299 @@
         }
 
         /* 导航栏 */
-        .nav-bar { padding: 40px 20px 10px; display: flex; justify-content: space-between; align-items: center; background: var(--bg-body); position: sticky; top:0; z-index: 90; }
-        .nav-title { font-size: 28px; font-weight: 800; }
-        .bingo-badge { background: linear-gradient(135deg, var(--primary), var(--success)); color: #fff; padding: 2px 8px; border-radius: 8px; font-size: 14px; margin-left: 8px; vertical-align: middle;}
+        .nav-bar {
+            padding: 40px 20px 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: var(--bg-body);
+            position: sticky;
+            top: 0;
+            z-index: 90;
+        }
+
+        .nav-title {
+            font-size: 28px;
+            font-weight: 800;
+        }
+
+        .bingo-badge {
+            background: linear-gradient(135deg, var(--primary), var(--success));
+            color: #fff;
+            padding: 2px 8px;
+            border-radius: 8px;
+            font-size: 14px;
+            margin-left: 8px;
+            vertical-align: middle;
+        }
 
         /* 卡片通用 */
-        .ios-card { background: var(--bg-card); border-radius: var(--radius-l); padding: 20px; box-shadow: var(--shadow); margin-bottom: 20px; position: relative; transition: 0.2s; }
-        .ios-card:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(58, 77, 57, 0.08); }
-        
+        .ios-card {
+            background: var(--bg-card);
+            border-radius: var(--radius-l);
+            padding: 20px;
+            box-shadow: var(--shadow);
+            margin-bottom: 20px;
+            position: relative;
+            transition: 0.2s;
+        }
+
+        .ios-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 24px rgba(58, 77, 57, 0.08);
+        }
+
         /* 按钮 */
-        .btn { width: 100%; padding: 15px; border: none; border-radius: 15px; font-size: 17px; font-weight: 600; cursor: pointer; transition: 0.2s; display:flex; align-items:center; justify-content:center; gap:8px;}
-        .btn:active { transform: scale(0.98); opacity: 0.9; }
-        .btn-primary { background: var(--primary); color: white; }
-        .btn-success { background: var(--success); color: white; }
-        .btn-danger { background: var(--danger-light); color: var(--danger); }
-        .btn-ghost { background: var(--bg-input); color: var(--text-sub); }
-        .btn-float { position: fixed; bottom: 40px; right: 30px; width: 60px; height: 60px; border-radius: 50%; background: var(--primary); color: white; font-size: 30px; box-shadow: 0 8px 20px rgba(74, 120, 86, 0.4); z-index: 100; display: flex; align-items: center; justify-content: center; }
+        .btn {
+            width: 100%;
+            padding: 15px;
+            border: none;
+            border-radius: 15px;
+            font-size: 17px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .btn:active {
+            transform: scale(0.98);
+            opacity: 0.9;
+        }
+
+        .btn-primary {
+            background: var(--primary);
+            color: white;
+        }
+
+        .btn-success {
+            background: var(--success);
+            color: white;
+        }
+
+        .btn-danger {
+            background: var(--danger-light);
+            color: var(--danger);
+        }
+
+        .btn-ghost {
+            background: var(--bg-input);
+            color: var(--text-sub);
+        }
+
+        .btn-float {
+            position: fixed;
+            bottom: 40px;
+            right: 30px;
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background: var(--primary);
+            color: white;
+            font-size: 30px;
+            box-shadow: 0 8px 20px rgba(74, 120, 86, 0.4);
+            z-index: 100;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
 
         /* 列表 */
-        .db-list-item { display: flex; justify-content: space-between; align-items: center; padding: 20px; border: none; }
-        .db-info h4 { margin: 0 0 8px 0; font-size: 18px; font-weight: 600; }
-        .db-info p { margin: 0; font-size: 14px; color: var(--text-sub); }
-        
+        .db-list-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px;
+            border: none;
+        }
+
+        .db-info h4 {
+            margin: 0 0 8px 0;
+            font-size: 18px;
+            font-weight: 600;
+        }
+
+        .db-info p {
+            margin: 0;
+            font-size: 14px;
+            color: var(--text-sub);
+        }
+
         /* 历史记录项 */
-        .history-item { background: var(--bg-input); padding: 15px; border-radius: 12px; margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center; }
-        .score-badge { font-weight: 800; font-size: 20px; }
-        .score-high { color: var(--success); }
-        .score-low { color: var(--danger); }
+        .history-item {
+            background: var(--bg-input);
+            padding: 15px;
+            border-radius: 12px;
+            margin-bottom: 12px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .score-badge {
+            font-weight: 800;
+            font-size: 20px;
+        }
+
+        .score-high {
+            color: var(--success);
+        }
+
+        .score-low {
+            color: var(--danger);
+        }
 
         /* 答题区 */
-        .option-row { padding: 15px; background: var(--bg-input); border-radius: 15px; margin-bottom: 10px; display: flex; align-items: center; cursor: pointer; border: 2px solid transparent; transition:0.2s; }
-        .option-row.selected { background: var(--primary-light); border-color: var(--primary); }
-        .option-circle { width: 26px; height: 26px; border-radius: 50%; border: 2px solid var(--text-sub); margin-right: 15px; display: flex; justify-content: center; align-items: center; font-size: 14px; font-weight: bold; flex-shrink: 0; }
-        .selected .option-circle { background: var(--primary); border-color: var(--primary); color: white; }
-        
+        .option-row {
+            padding: 15px;
+            background: var(--bg-input);
+            border-radius: 15px;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            cursor: pointer;
+            border: 2px solid transparent;
+            transition: 0.2s;
+        }
+
+        .option-row.selected {
+            background: var(--primary-light);
+            border-color: var(--primary);
+        }
+
+        .option-circle {
+            width: 26px;
+            height: 26px;
+            border-radius: 50%;
+            border: 2px solid var(--text-sub);
+            margin-right: 15px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 14px;
+            font-weight: bold;
+            flex-shrink: 0;
+        }
+
+        .selected .option-circle {
+            background: var(--primary);
+            border-color: var(--primary);
+            color: white;
+        }
+
         /* 错题/回看样式 */
-        .ios-card.correct { border: 2px solid var(--success); }
-        .ios-card.wrong { border: 2px solid var(--danger); }
-        .review-mode .selected .option-circle { color: white; } 
-        .review-mode .ios-card.correct .selected .option-circle { background: var(--success); border-color: var(--success); }
-        .review-mode .ios-card.wrong .selected .option-circle { background: var(--danger); border-color: var(--danger); }
-        .review-mode .option-row.correct-answer { background: var(--success-light); border: 2px dashed var(--success); }
+        .ios-card.correct {
+            border: 2px solid var(--success);
+        }
+
+        .ios-card.wrong {
+            border: 2px solid var(--danger);
+        }
+
+        .review-mode .selected .option-circle {
+            color: white;
+        }
+
+        .review-mode .ios-card.correct .selected .option-circle {
+            background: var(--success);
+            border-color: var(--success);
+        }
+
+        .review-mode .ios-card.wrong .selected .option-circle {
+            background: var(--danger);
+            border-color: var(--danger);
+        }
+
+        .review-mode .option-row.correct-answer {
+            background: var(--success-light);
+            border: 2px dashed var(--success);
+        }
 
         /* Modal */
-        .modal-mask { position: fixed; top:0; left:0; width:100%; height:100%; background: rgba(0,0,0,0.4); backdrop-filter: blur(8px); z-index: 200; display: none; align-items: center; justify-content: center; }
-        .modal-box { background: var(--bg-card); width: 90%; max-width: 350px; border-radius: 25px; padding: 25px; box-shadow: 0 10px 40px rgba(0,0,0,0.2); animation: popIn 0.3s cubic-bezier(0.25, 0.8, 0.25, 1); }
-        @keyframes popIn { from { transform: scale(0.9); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+        .modal-mask {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.4);
+            backdrop-filter: blur(8px);
+            z-index: 200;
+            display: none;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-box {
+            background: var(--bg-card);
+            width: 90%;
+            max-width: 350px;
+            border-radius: 25px;
+            padding: 25px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+            animation: popIn 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+        }
+
+        @keyframes popIn {
+            from {
+                transform: scale(0.9);
+                opacity: 0;
+            }
+
+            to {
+                transform: scale(1);
+                opacity: 1;
+            }
+        }
 
         /* Loading */
-        .loader-overlay { position: fixed; top:0; left:0; width:100%; height:100%; background: var(--bg-body); z-index: 999; display: flex; flex-direction: column; align-items: center; justify-content: center; display:none;}
-        .spinner { width: 45px; height: 45px; border: 5px solid var(--primary-light); border-top-color: var(--primary); border-radius: 50%; animation: spin 1s linear infinite; }
-        @keyframes spin { to { transform: rotate(360deg); } }
+        .loader-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: var(--bg-body);
+            z-index: 999;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            display: none;
+        }
 
-        #sheet-selection-container label { display: block; padding: 10px; border-radius: 8px; cursor: pointer; }
-        #sheet-selection-container label:hover { background: var(--bg-input); }
-        #sheet-selection-container input { margin-right: 10px; }
+        .spinner {
+            width: 45px;
+            height: 45px;
+            border: 5px solid var(--primary-light);
+            border-top-color: var(--primary);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        #sheet-selection-container label {
+            display: block;
+            padding: 10px;
+            border-radius: 8px;
+            cursor: pointer;
+        }
+
+        #sheet-selection-container label:hover {
+            background: var(--bg-input);
+        }
+
+        #sheet-selection-container input {
+            margin-right: 10px;
+        }
 
         /* Select dropdowns with arrow */
         select.btn-ghost {
@@ -117,697 +379,839 @@
             background-size: 10px;
             padding-right: 40px !important;
         }
+
         [data-theme="everforest"] select.btn-ghost {
             background-image: url('data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%239DA9A0%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13-5.4H18.4c-5%200-9.3%201.8-12.9%205.4A17.6%2017.6%200%200%200%200%2082.2c0%205%201.8%209.3%205.4%2012.9l128%20127.9c3.6%203.6%207.8%205.4%2012.8%205.4s9.2-1.8%2012.8-5.4L287%2095c3.5-3.5%205.4-7.8%205.4-12.8%200-5-1.9-9.2-5.4-12.8z%22%2F%3E%3C%2Fsvg%3E');
         }
 
-        .btn-primary:hover, .btn-success:hover { filter: brightness(1.1); }
-        .btn-ghost:not(select):hover { background: var(--bg-card); }
+        .btn-primary:hover,
+        .btn-success:hover {
+            filter: brightness(1.1);
+        }
 
-        .nav-bar .btn-icon { width: 40px; height: 40px; padding: 0; border-radius: 50%; }
-        .nav-bar .btn-icon svg { width: 20px; height: 20px; }
-        .nav-bar .btn-icon.btn-delete { color: var(--danger); }
-        .nav-bar .btn-icon.btn-delete:hover { background: var(--danger-light); }
+        .btn-ghost:not(select):hover {
+            background: var(--bg-card);
+        }
 
-        .btn-mastered { padding: 4px 8px; font-size: 12px; font-weight: 500; border-radius: 8px; background: var(--success-light); color: var(--success); border: none; cursor: pointer; flex-shrink: 0; }
-        .btn-mastered:hover { filter: brightness(1.1); }
+        .nav-bar .btn-icon {
+            width: 40px;
+            height: 40px;
+            padding: 0;
+            border-radius: 50%;
+        }
 
-        .btn-delete-hist { background: var(--danger-light); color: var(--danger); border: none; border-radius: 50%; width: 28px; height: 28px; line-height: 28px; text-align: center; cursor: pointer; font-weight: 600; margin-left: 15px; flex-shrink: 0; }
-        .btn-delete-hist:hover { filter: brightness(1.05); }
+        .nav-bar .btn-icon svg {
+            width: 20px;
+            height: 20px;
+        }
 
-        #view-quiz .nav-bar { background: rgba(242, 242, 247, 0.8); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); border-bottom: 1px solid var(--bg-input); padding: 10px 20px; padding-top: calc(10px + env(safe-area-inset-top)); }
-        [data-theme="everforest"] #view-quiz .nav-bar { background: rgba(46, 56, 60, 0.7); }
+        .nav-bar .btn-icon.btn-delete {
+            color: var(--danger);
+        }
+
+        .nav-bar .btn-icon.btn-delete:hover {
+            background: var(--danger-light);
+        }
+
+        .btn-mastered {
+            padding: 4px 8px;
+            font-size: 12px;
+            font-weight: 500;
+            border-radius: 8px;
+            background: var(--success-light);
+            color: var(--success);
+            border: none;
+            cursor: pointer;
+            flex-shrink: 0;
+        }
+
+        .btn-mastered:hover {
+            filter: brightness(1.1);
+        }
+
+        .btn-delete-hist {
+            background: var(--danger-light);
+            color: var(--danger);
+            border: none;
+            border-radius: 50%;
+            width: 28px;
+            height: 28px;
+            line-height: 28px;
+            text-align: center;
+            cursor: pointer;
+            font-weight: 600;
+            margin-left: 15px;
+            flex-shrink: 0;
+        }
+
+        .btn-delete-hist:hover {
+            filter: brightness(1.05);
+        }
+
+        #view-quiz .nav-bar {
+            background: rgba(242, 242, 247, 0.8);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border-bottom: 1px solid var(--bg-input);
+            padding: 10px 20px;
+            padding-top: calc(10px + env(safe-area-inset-top));
+        }
+
+        [data-theme="everforest"] #view-quiz .nav-bar {
+            background: rgba(46, 56, 60, 0.7);
+        }
 
         @media (min-width: 600px) {
-            .container { max-width: 800px; margin: 0 auto; }
-            .modal-box { max-width: 400px; }
+            .container {
+                max-width: 800px;
+                margin: 0 auto;
+            }
+
+            .modal-box {
+                max-width: 400px;
+            }
         }
     </style>
 </head>
+
 <body>
 
-<!-- Loading -->
-<div class="loader-overlay" id="global-loader">
-    <div class="spinner"></div>
-    <p style="color:var(--text-sub); margin-top:10px;" id="loader-text">猛犬挖掘中...</p>
-</div>
-
-<!-- VIEW 1: 题库列表首页 -->
-<div id="view-home" class="container" style="padding: 0 20px;">
-    <div class="nav-bar" style="padding-left:0; padding-right:0;">
-        <div>
-            <div class="nav-title">我的狗窝 <span class="bingo-badge">Pro</span></div>
-            <div style="font-size:13px; color:var(--text-sub);">离线可用 · 无限狗窝 · 随时复盘</div>
-        </div>
-        <div style="display:flex; gap:10px;">
-            <button class="btn btn-ghost btn-icon" onclick="toggleTheme()" title="切换主题">
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>
-            </button>
-            <button class="btn btn-ghost btn-icon btn-delete" onclick="deleteAllData()" title="删除所有数据">
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
-            </button>
-            <button id="btn-install-pwa" class="btn btn-ghost btn-icon" style="display: none;" title="安装应用">
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="8 17 12 21 16 17"></polyline><line x1="12" y1="12" x2="12" y2="21"></line><path d="M20.88 18.09A5 5 0 0 0 18 9h-1.26A8 8 0 1 0 3 16.29"></path></svg>
-            </button>
-        </div>
+    <!-- Loading -->
+    <div class="loader-overlay" id="global-loader">
+        <div class="spinner"></div>
+        <p style="color:var(--text-sub); margin-top:10px;" id="loader-text">猛犬挖掘中...</p>
     </div>
 
-    <div id="db-list-container"></div>
-
-    <div class="ios-card" id="empty-state" style="text-align:center; padding:40px 20px; display:none; cursor: pointer;" onclick="showImportModal()">
-        <div style="font-size:40px; margin-bottom:10px;">🦴</div>
-        <h3 style="margin:0;">狗窝空空如也</h3>
-        <p style="color:var(--text-sub);">快去挖点新骨头 (+)，支持表格文件</p>
-    </div>
-
-    <div class="btn-float" onclick="showImportModal()">+</div>
-</div>
-
-<!-- VIEW 2: 单个题库仪表盘 -->
-<div id="view-dashboard" class="container" style="padding: 0 20px; display:none;">
-    <div class="nav-bar" style="padding-left:0; padding-right:0;">
-        <button class="btn btn-ghost btn-icon" onclick="history.back()" title="返回">
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"></polyline></svg>
-        </button>
-        <div style="font-weight:bold; font-size:16px; max-width: 150px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" id="dash-title">狗窝详情</div>
-        <button class="btn btn-ghost btn-icon btn-delete" onclick="deleteCurrentDb()" title="删除题库">
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path><line x1="10" y1="11" x2="10" y2="17"></line><line x1="14" y1="11" x2="14" y2="17"></line></svg>
-        </button>
-    </div>
-
-    <div class="ios-card">
-        <div style="display:flex; justify-content:space-between; margin-bottom:15px;">
+    <!-- VIEW 1: 题库列表首页 -->
+    <div id="view-home" class="container" style="padding: 0 20px;">
+        <div class="nav-bar" style="padding-left:0; padding-right:0;">
             <div>
-                <h2 style="margin:0; font-size:28px;" id="dash-count">0</h2>
-                <div style="font-size:12px; color:var(--text-sub);">骨头总数</div>
+                <div class="nav-title">我的狗窝 <span class="bingo-badge">Pro</span></div>
+                <div style="font-size:13px; color:var(--text-sub);">离线可用 · 无限狗窝 · 随时复盘</div>
             </div>
-            <div style="text-align:right;">
-                <h2 style="margin:0; font-size:28px; color:var(--success);" id="dash-progress">0</h2>
-                <div style="font-size:12px; color:var(--text-sub);">啃骨头进度</div>
+            <div style="display:flex; gap:10px;">
+                <button class="btn btn-ghost btn-icon" onclick="toggleTheme()" title="切换主题">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                        stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+                    </svg>
+                </button>
+                <button class="btn btn-ghost btn-icon btn-delete" onclick="deleteAllData()" title="删除所有数据">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                        stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                        <polyline points="3 6 5 6 21 6"></polyline>
+                        <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                    </svg>
+                </button>
+                <button id="btn-install-pwa" class="btn btn-ghost btn-icon" style="display: none;" title="安装应用">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                        stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                        <polyline points="8 17 12 21 16 17"></polyline>
+                        <line x1="12" y1="12" x2="12" y2="21"></line>
+                        <path d="M20.88 18.09A5 5 0 0 0 18 9h-1.26A8 8 0 1 0 3 16.29"></path>
+                    </svg>
+                </button>
             </div>
         </div>
-        
-        <div id="category-container" style="margin-bottom: 20px; border-top: 1px solid var(--bg-input); padding-top: 15px;">
-            <label for="category-select" style="font-weight: bold; font-size: 14px; color: var(--text-sub); margin-bottom: 8px; display: block;">选择分类</label>
-            <select id="category-select" class="btn btn-ghost" style="width:100%; -webkit-appearance: none; appearance: none; text-align: left;"></select>
+
+        <div id="db-list-container"></div>
+
+        <div class="ios-card" id="empty-state"
+            style="text-align:center; padding:40px 20px; display:none; cursor: pointer;" onclick="showImportModal()">
+            <div style="font-size:40px; margin-bottom:10px;">🦴</div>
+            <h3 style="margin:0;">狗窝空空如也</h3>
+            <p style="color:var(--text-sub);">快去挖点新骨头 (+)，支持表格文件</p>
         </div>
 
-        <button id="btn-resume-quiz" class="btn" style="display:none; margin-bottom: 20px; background: linear-gradient(135deg, var(--primary), var(--success)); color: white;" onclick="resumeQuiz()">继续上次的进度</button>
+        <div class="btn-float" onclick="showImportModal()">+</div>
+    </div>
 
-        <div style="display:flex; gap:10px; margin-bottom: 15px;">
-            <button class="btn btn-primary" style="flex-grow: 1;" onclick="startQuiz('sequence')">按顺序啃</button>
-            <select id="sequence-count" class="btn btn-ghost" style="max-width: 100px; padding: 0 15px; -webkit-appearance: none; appearance: none; background-image: none;">
-                <option value="10">10根</option>
-                <option value="20">20根</option>
-                <option value="50" selected>50根</option>
-                <option value="100">100根</option>
-                <option value="all">梭哈</option>
-            </select>
+    <!-- VIEW 2: 单个题库仪表盘 -->
+    <div id="view-dashboard" class="container" style="padding: 0 20px; display:none;">
+        <div class="nav-bar" style="padding-left:0; padding-right:0;">
+            <button class="btn btn-ghost btn-icon" onclick="history.back()" title="返回">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                    stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                    <polyline points="15 18 9 12 15 6"></polyline>
+                </svg>
+            </button>
+            <div style="font-weight:bold; font-size:16px; max-width: 150px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;"
+                id="dash-title">狗窝详情</div>
+            <button class="btn btn-ghost btn-icon btn-delete" onclick="deleteCurrentDb()" title="删除题库">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                    stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                    <polyline points="3 6 5 6 21 6"></polyline>
+                    <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                    <line x1="10" y1="11" x2="10" y2="17"></line>
+                    <line x1="14" y1="11" x2="14" y2="17"></line>
+                </svg>
+            </button>
         </div>
-        <div style="display:flex; gap:10px;">
-            <button class="btn btn-success" style="flex-grow: 1;" onclick="startQuiz('random')">随便刨一个</button>
-            <select id="random-count" class="btn btn-ghost" style="max-width: 100px; padding: 0 15px; -webkit-appearance: none; appearance: none; background-image: none;">
-                <option value="10">10根</option>
-                <option value="20" selected>20根</option>
-                <option value="50">50根</option>
-                <option value="100">100根</option>
-                <option value="all">梭哈</option>
-            </select>
+
+        <div class="ios-card">
+            <div style="display:flex; justify-content:space-between; margin-bottom:15px;">
+                <div>
+                    <h2 style="margin:0; font-size:28px;" id="dash-count">0</h2>
+                    <div style="font-size:12px; color:var(--text-sub);">骨头总数</div>
+                </div>
+                <div style="text-align:right;">
+                    <h2 style="margin:0; font-size:28px; color:var(--success);" id="dash-progress">0</h2>
+                    <div style="font-size:12px; color:var(--text-sub);">啃骨头进度</div>
+                </div>
+            </div>
+
+            <div id="category-container"
+                style="margin-bottom: 20px; border-top: 1px solid var(--bg-input); padding-top: 15px;">
+                <label for="category-select"
+                    style="font-weight: bold; font-size: 14px; color: var(--text-sub); margin-bottom: 8px; display: block;">选择分类</label>
+                <select id="category-select" class="btn btn-ghost"
+                    style="width:100%; -webkit-appearance: none; appearance: none; text-align: left;"></select>
+            </div>
+
+            <button id="btn-resume-quiz" class="btn"
+                style="display:none; margin-bottom: 20px; background: linear-gradient(135deg, var(--primary), var(--success)); color: white;"
+                onclick="resumeQuiz()">继续上次的进度</button>
+
+            <!-- 原有的代码位置在 view-dashboard 内 -->
+            <div style="margin-bottom: 10px;">
+                <div
+                    style="font-size:12px; color:var(--text-sub); margin-bottom:5px; display:flex; justify-content:space-between;">
+                    <span>从第几根开始啃？</span>
+                    <span id="max-count-hint"></span>
+                </div>
+                <div style="display:flex; gap:10px;">
+                    <!-- 新增：起始位置输入框 -->
+                    <input type="number" id="sequence-start-input" class="btn btn-ghost"
+                        style="width: 80px; text-align:center; padding:0; background:var(--bg-white); border:2px solid var(--bg-input);"
+                        onclick="this.select()">
+
+                    <!-- 这种组合比“起止时间”更灵活 -->
+                    <button class="btn btn-primary" style="flex-grow: 1;" onclick="startQuiz('sequence')">按顺序啃</button>
+
+                    <select id="sequence-count" class="btn btn-ghost"
+                        style="max-width: 100px; padding: 0 15px; -webkit-appearance: none; appearance: none; background-image: none;">
+                        <option value="10">10根</option>
+                        <option value="20">20根</option>
+                        <option value="50" selected>50根</option>
+                        <option value="100">100根</option>
+                        <option value="all">梭哈</option>
+                    </select>
+                </div>
+            </div>
+
+            <div style="display:flex; gap:10px;">
+                <button class="btn btn-success" style="flex-grow: 1;" onclick="startQuiz('random')">随便刨一个</button>
+                <select id="random-count" class="btn btn-ghost"
+                    style="max-width: 100px; padding: 0 15px; -webkit-appearance: none; appearance: none; background-image: none;">
+                    <option value="10">10根</option>
+                    <option value="20" selected>20根</option>
+                    <option value="50">50根</option>
+                    <option value="100">100根</option>
+                    <option value="all">梭哈</option>
+                </select>
+            </div>
+            <div style="margin-top: 15px;">
+                <button id="btn-wrong-answers" class="btn btn-danger" onclick="startWrongAnswerQuiz()">啃硬骨头</button>
+            </div>
+
+            <div
+                style="margin-top: 20px; border-top: 1px solid var(--bg-input); padding-top: 15px; display:flex; gap:10px;">
+                <button class="btn btn-primary"
+                    style="background: linear-gradient(135deg, #D9A869, #C18842); flex-grow: 1;"
+                    onclick="startMockExam()">模拟开啃</button>
+                <select id="mock-exam-count" class="btn btn-ghost"
+                    style="max-width: 100px; padding: 0 15px; -webkit-appearance: none; appearance: none; background-image: none;">
+                    <option value="10">10根</option>
+                    <option value="20">20根</option>
+                    <option value="50" selected>50根</option>
+                    <option value="100">100根</option>
+                </select>
+            </div>
         </div>
-        <div style="margin-top: 15px;">
-            <button id="btn-wrong-answers" class="btn btn-danger" onclick="startWrongAnswerQuiz()">啃硬骨头</button>
-        </div>
-        
-        <div style="margin-top: 20px; border-top: 1px solid var(--bg-input); padding-top: 15px; display:flex; gap:10px;">
-            <button class="btn btn-primary" style="background: linear-gradient(135deg, #D9A869, #C18842); flex-grow: 1;" onclick="startMockExam()">模拟开啃</button>
-            <select id="mock-exam-count" class="btn btn-ghost" style="max-width: 100px; padding: 0 15px; -webkit-appearance: none; appearance: none; background-image: none;">
-                <option value="10">10根</option>
-                <option value="20">20根</option>
-                <option value="50" selected>50根</option>
-                <option value="100">100根</option>
-            </select>
+
+        <div class="ios-card">
+            <h4 style="margin:0 0 15px 0;">📜 啃骨头的记忆 (点击回看)</h4>
+            <div id="history-list"></div>
+            <button class="btn btn-ghost" id="no-history-btn" style="display:none;">还没啃过呢</button>
         </div>
     </div>
 
-    <div class="ios-card">
-        <h4 style="margin:0 0 15px 0;">📜 啃骨头的记忆 (点击回看)</h4>
-        <div id="history-list"></div>
-        <button class="btn btn-ghost" id="no-history-btn" style="display:none;">还没啃过呢</button>
-    </div>
-</div>
-
-<!-- VIEW 3: 答题/回看界面 -->
-<div id="view-quiz" style="display:none;">
-    <div class="nav-bar">
-        <div style="font-size:14px; font-weight:bold; color:var(--text-sub);" id="quiz-progress-text">1/20</div>
-        <div style="font-size:16px; font-weight:bold; color:var(--primary);" id="quiz-timer"></div>
-        <button class="btn btn-ghost btn-icon" onclick="history.back()" title="退出">
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
-        </button>
-    </div>
-
-    <div class="container" style="padding: 0 16px 100px 16px;">
-        <div id="quiz-container"></div>
-    </div>
-
-    <!-- 提交按钮区 -->
-    <div id="quiz-fab-area" style="position:fixed; bottom:0; left:0; width:100%; padding:20px; background:var(--bg-body); border-top:1px solid var(--bg-input); display:flex; gap:10px;">
-        <button class="btn btn-success" onclick="submitPaper()">汪！交卷！</button>
-    </div>
-</div>
-
-<!-- Modal: 导入 -->
-<div class="modal-mask" id="modal-import">
-    <div class="modal-box">
-        <h3 style="margin-top:0;">挖掘新宝藏</h3>
-        <p style="font-size:13px; color:var(--text-sub);">宝藏地图 (.xlsx/.xls) 指南：<br>必须标明 "题目"、"答案" 等...</p>
-        
-        <div id="import-feedback" style="margin-top:15px; display:none;">
-            <div id="import-loader" class="spinner" style="display:none; margin: 0 auto 10px auto; width:25px; height:25px; border-width: 3px;"></div>
-            <p id="import-status" style="font-size:13px; color:var(--danger); text-align:center; margin:0;"></p>
+    <!-- VIEW 3: 答题/回看界面 -->
+    <div id="view-quiz" style="display:none;">
+        <div class="nav-bar">
+            <div style="font-size:14px; font-weight:bold; color:var(--text-sub);" id="quiz-progress-text">1/20</div>
+            <div style="font-size:16px; font-weight:bold; color:var(--primary);" id="quiz-timer"></div>
+            <button class="btn btn-ghost btn-icon" onclick="history.back()" title="退出">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                    stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="18" y1="6" x2="6" y2="18"></line>
+                    <line x1="6" y1="6" x2="18" y2="18"></line>
+                </svg>
+            </button>
         </div>
 
-        <input type="file" id="file-input" accept=".xlsx, .xls" style="display:none" onchange="handleFileSelect(this)">
-        
-        <button class="btn btn-primary" id="btn-select-file" onclick="document.getElementById('file-input').click()">📂 选择藏宝图</button>
-        
-        <div id="import-preview" style="display:none; margin-top:15px;">
-            <div id="sheet-selection-container"></div>
-            <div style="font-size:12px; color:var(--success);">发现宝藏！</div>
+        <div class="container" style="padding: 0 16px 100px 16px;">
+            <div id="quiz-container"></div>
         </div>
 
-        <div style="display:flex; gap:10px; margin-top:20px;">
-            <button class="btn btn-ghost" onclick="closeImportModal()">溜了溜了</button>
-            <button class="btn btn-primary" id="btn-confirm-import" style="display:none;" onclick="confirmImport()">埋进狗窝</button>
+        <!-- 提交按钮区 -->
+        <div id="quiz-fab-area"
+            style="position:fixed; bottom:0; left:0; width:100%; padding:20px; background:var(--bg-body); border-top:1px solid var(--bg-input); display:flex; gap:10px;">
+            <button class="btn btn-success" onclick="submitPaper()">汪！交卷！</button>
         </div>
     </div>
-</div>
 
-<!-- Modal: 成绩单 -->
-<div class="modal-mask" id="modal-score">
-    <div class="modal-box" style="text-align:center;">
-        <h2 style="margin:10px 0;">啃完啦！</h2>
-        <div style="font-size:48px; font-weight:800; color:var(--primary);" id="result-score">90</div>
-        <p style="color:var(--text-sub);">智力值</p>
-        <div style="display:flex; gap:10px; margin-top:20px;">
-            <button class="btn btn-ghost" onclick="history.back()">回狗窝</button>
-            <button class="btn btn-primary" onclick="enterReviewMode()">回味一下</button>
+    <!-- Modal: 导入 -->
+    <div class="modal-mask" id="modal-import">
+        <div class="modal-box">
+            <h3 style="margin-top:0;">挖掘新宝藏</h3>
+            <p style="font-size:13px; color:var(--text-sub);">宝藏地图 (.xlsx/.xls) 指南：<br>必须标明 "题目"、"答案" 等...</p>
+
+            <div id="import-feedback" style="margin-top:15px; display:none;">
+                <div id="import-loader" class="spinner"
+                    style="display:none; margin: 0 auto 10px auto; width:25px; height:25px; border-width: 3px;"></div>
+                <p id="import-status" style="font-size:13px; color:var(--danger); text-align:center; margin:0;"></p>
+            </div>
+
+            <input type="file" id="file-input" accept=".xlsx, .xls" style="display:none"
+                onchange="handleFileSelect(this)">
+
+            <button class="btn btn-primary" id="btn-select-file"
+                onclick="document.getElementById('file-input').click()">📂 选择藏宝图</button>
+
+            <div id="import-preview" style="display:none; margin-top:15px;">
+                <div id="sheet-selection-container"></div>
+                <div style="font-size:12px; color:var(--success);">发现宝藏！</div>
+            </div>
+
+            <div style="display:flex; gap:10px; margin-top:20px;">
+                <button class="btn btn-ghost" onclick="closeImportModal()">溜了溜了</button>
+                <button class="btn btn-primary" id="btn-confirm-import" style="display:none;"
+                    onclick="confirmImport()">埋进狗窝</button>
+            </div>
         </div>
     </div>
-</div>
 
-<script>
-    // --- PWA Service Worker 注册 ---
-    if ('serviceWorker' in navigator) {
-        window.addEventListener('load', () => {
-            navigator.serviceWorker.register('sw.js').then(reg => {
-                console.log('SW registered:', reg);
-            }).catch(err => console.log('SW failed:', err));
-        });
-    }
+    <!-- Modal: 成绩单 -->
+    <div class="modal-mask" id="modal-score">
+        <div class="modal-box" style="text-align:center;">
+            <h2 style="margin:10px 0;">啃完啦！</h2>
+            <div style="font-size:48px; font-weight:800; color:var(--primary);" id="result-score">90</div>
+            <p style="color:var(--text-sub);">智力值</p>
+            <div style="display:flex; gap:10px; margin-top:20px;">
+                <button class="btn btn-ghost" onclick="history.back()">回狗窝</button>
+                <button class="btn btn-primary" onclick="enterReviewMode()">回味一下</button>
+            </div>
+        </div>
+    </div>
 
-    let currentDb = null; // { id, name, questions, progress }
-    let currentQuiz = []; // 当前正在做的题
-    let userAnswers = {}; // 用户当前选择
-    let isReviewMode = false; // 是否处于回看模式
-    let lastCompletedQuiz = []; // 用于交卷后回看
-    let lastCompletedAnswers = {}; // 用于交卷后回看
-    let lastVisibleQuestionIndex = 0;
-    let masteredInSession = 0; // 用于“啃硬骨头”模式的计数
-    let deferredInstallPrompt = null;
-    let quizType = 'random'; 
-
-    // --- Navigation & History ---
-    function updateView(state) {
-        document.getElementById('view-home').style.display = 'none';
-        document.getElementById('view-dashboard').style.display = 'none';
-        document.getElementById('view-quiz').style.display = 'none';
-        document.getElementById('modal-score').style.display = 'none'; 
-        stopTimer(); 
-
-        if (!state || !state.view) {
-            state = { view: 'home' }; 
-        }
-
-        switch (state.view) {
-            case 'dashboard':
-                document.getElementById('view-dashboard').style.display = 'block';
-                setupDashboard(state.dbId); 
-                break;
-            case 'quiz':
-                document.getElementById('view-quiz').style.display = 'block';
-                break;
-            default: // home
-                document.getElementById('view-home').style.display = 'block';
-                renderDbList();
-                break;
-        }
-    }
-    
-    window.onpopstate = function(event) {
-        if (event.state) {
-            updateView(event.state);
-        } else {
-            updateView({ view: 'home' }); 
-        }
-    };
-    
-    function setupDashboard(id) {
-        const meta = getMeta().find(m => m.id === id);
-        if (!meta) { 
-            history.pushState({ view: 'home' }, '', '#home');
-            updateView({ view: 'home' });
-            return; 
-        }
-        
-        const questions = JSON.parse(localStorage.getItem(`bingo_db_${id}`) || '[]');
-        const progress = parseInt(localStorage.getItem(`bingo_prog_${id}`) || '0');
-        currentDb = { ...meta, questions, progress };
-
-        const wipData = localStorage.getItem(`bingo_wip_${id}`);
-        const resumeBtn = document.getElementById('btn-resume-quiz');
-        if (wipData) {
-            const wipState = JSON.parse(wipData);
-            const total = wipState.currentQuiz.length;
-            const current = (wipState.lastVisibleQuestionIndex || 0) + 1;
-            resumeBtn.innerHTML = `继续上次的进度 (${current}/${total} 根)`;
-            resumeBtn.style.display = 'block';
-        } else {
-            resumeBtn.style.display = 'none';
-        }
-        
-        document.getElementById('dash-title').innerText = meta.name;
-        document.getElementById('dash-count').innerText = questions.length;
-        document.getElementById('dash-progress').innerText = `${progress} / ${questions.length}`;
-
-        const categoryContainer = document.getElementById('category-container');
-        const categorySelect = document.getElementById('category-select');
-        const categories = [...new Set(questions.map(q => q.c || '未分类'))];
-        
-        if (categories.length > 1 || (categories.length === 1 && categories[0] !== '未分类')) {
-            categorySelect.innerHTML = '<option value="all">全部</option>';
-            categories.forEach(c => {
-                categorySelect.innerHTML += `<option value="${c}">${c}</option>`;
-            });
-            categoryContainer.style.display = 'block';
-        } else {
-            categoryContainer.style.display = 'none';
-        }
-
-        const allMeta = getMeta();
-        const target = allMeta.find(m => m.id === id);
-        if(target) {
-            target.lastUsed = Date.now();
-            saveMeta(allMeta);
-        }
-
-        renderHistoryList(id);
-    }
-
-    // --- 初始化 ---
-    window.onload = function() {
-        initTheme();
-        
-        const currentHash = window.location.hash;
-        if (currentHash.startsWith('#dashboard/')) {
-            const dbId = currentHash.split('/')[1];
-            history.replaceState({ view: 'dashboard', dbId: dbId }, '', currentHash);
-            updateView({ view: 'dashboard', dbId: dbId });
-        } else {
-            history.replaceState({ view: 'home' }, '', '#home');
-            updateView({ view: 'home' });
-        }
-
-        // PWA安装逻辑
-        const installBtn = document.getElementById('btn-install-pwa');
-        window.addEventListener('beforeinstallprompt', (e) => {
-            e.preventDefault();
-            deferredInstallPrompt = e;
-            if (installBtn) installBtn.style.display = 'flex';
-        });
-
-        if(installBtn) {
-            installBtn.addEventListener('click', async () => {
-                if (deferredInstallPrompt) {
-                    deferredInstallPrompt.prompt();
-                    await deferredInstallPrompt.userChoice;
-                    deferredInstallPrompt = null;
-                    installBtn.style.display = 'none';
-                }
+    <script>
+        // --- PWA Service Worker 注册 ---
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('sw.js').then(reg => {
+                    console.log('SW registered:', reg);
+                }).catch(err => console.log('SW failed:', err));
             });
         }
-        
-        window.addEventListener('appinstalled', () => {
-            deferredInstallPrompt = null;
-            if (installBtn) installBtn.style.display = 'none';
-        });
-    };
 
-    // --- 主题切换 ---
-    function initTheme() {
-        const t = localStorage.getItem('app_theme');
-        if (t) document.documentElement.setAttribute('data-theme', t);
-    }
-    function toggleTheme() {
-        const html = document.documentElement;
-        const isDark = html.getAttribute('data-theme') === 'everforest';
-        html.setAttribute('data-theme', isDark ? 'light' : 'everforest');
-        localStorage.setItem('app_theme', isDark ? 'light' : 'everforest');
-    }
+        let currentDb = null; // { id, name, questions, progress }
+        let currentQuiz = []; // 当前正在做的题
+        let userAnswers = {}; // 用户当前选择
+        let isReviewMode = false; // 是否处于回看模式
+        let lastCompletedQuiz = []; // 用于交卷后回看
+        let lastCompletedAnswers = {}; // 用于交卷后回看
+        let lastVisibleQuestionIndex = 0;
+        let masteredInSession = 0; // 用于“啃硬骨头”模式的计数
+        let deferredInstallPrompt = null;
+        let quizType = 'random';
 
-    // --- 滚动位置追踪 ---
-    let scrollTimeout;
-    function handleQuizScroll() {
-        if (scrollTimeout) clearTimeout(scrollTimeout);
-        scrollTimeout = setTimeout(() => {
-            const quizNav = document.querySelector('#view-quiz .nav-bar');
-            if (!quizNav) return;
-            const quizNavHeight = quizNav.offsetHeight;
-            const questionElements = document.querySelectorAll('#quiz-container .ios-card');
-            
-            for(let i = 0; i < questionElements.length; i++) {
-                const rect = questionElements[i].getBoundingClientRect();
-                if (rect.top >= quizNavHeight && rect.top < window.innerHeight) {
-                    lastVisibleQuestionIndex = i;
-                    return; 
-                }
+        // --- Navigation & History ---
+        function updateView(state) {
+            document.getElementById('view-home').style.display = 'none';
+            document.getElementById('view-dashboard').style.display = 'none';
+            document.getElementById('view-quiz').style.display = 'none';
+            document.getElementById('modal-score').style.display = 'none';
+            stopTimer();
+
+            if (!state || !state.view) {
+                state = { view: 'home' };
             }
-        }, 150);
-    }
-    function setupQuizScrollListener() {
-        window.addEventListener('scroll', handleQuizScroll, true);
-    }
-    function removeQuizScrollListener() {
-        window.removeEventListener('scroll', handleQuizScroll, true);
-    }
 
-    // --- 首页：题库列表逻辑 ---
-    function getMeta() { return JSON.parse(localStorage.getItem('bingo_meta') || '[]'); }
-    function saveMeta(list) { localStorage.setItem('bingo_meta', JSON.stringify(list)); }
-
-    function renderDbList() {
-        const list = getMeta();
-        const container = document.getElementById('db-list-container');
-        const empty = document.getElementById('empty-state');
-        
-        container.innerHTML = '';
-        if (list.length === 0) {
-            empty.style.display = 'block';
-            return;
+            switch (state.view) {
+                case 'dashboard':
+                    document.getElementById('view-dashboard').style.display = 'block';
+                    setupDashboard(state.dbId);
+                    break;
+                case 'quiz':
+                    document.getElementById('view-quiz').style.display = 'block';
+                    break;
+                default: // home
+                    document.getElementById('view-home').style.display = 'block';
+                    renderDbList();
+                    break;
+            }
         }
-        empty.style.display = 'none';
 
-        list.sort((a,b) => b.lastUsed - a.lastUsed); 
+        window.onpopstate = function (event) {
+            if (event.state) {
+                updateView(event.state);
+            } else {
+                updateView({ view: 'home' });
+            }
+        };
 
-        list.forEach(db => {
-            const div = document.createElement('div');
-            div.className = 'db-list-item ios-card';
-            div.innerHTML = `
+        function setupDashboard(id) {
+            const meta = getMeta().find(m => m.id === id);
+            if (!meta) {
+                history.pushState({ view: 'home' }, '', '#home');
+                updateView({ view: 'home' });
+                return;
+            }
+
+            const questions = JSON.parse(localStorage.getItem(`bingo_db_${id}`) || '[]');
+            const progress = parseInt(localStorage.getItem(`bingo_prog_${id}`) || '0');
+            currentDb = { ...meta, questions, progress };
+
+            const wipData = localStorage.getItem(`bingo_wip_${id}`);
+            const resumeBtn = document.getElementById('btn-resume-quiz');
+            if (wipData) {
+                const wipState = JSON.parse(wipData);
+                const total = wipState.currentQuiz.length;
+                const current = (wipState.lastVisibleQuestionIndex || 0) + 1;
+                resumeBtn.innerHTML = `继续上次的进度 (${current}/${total} 根)`;
+                resumeBtn.style.display = 'block';
+            } else {
+                resumeBtn.style.display = 'none';
+            }
+
+            document.getElementById('dash-title').innerText = meta.name;
+            document.getElementById('dash-count').innerText = questions.length;
+            document.getElementById('dash-progress').innerText = `${progress} / ${questions.length}`;
+
+            // --- 新增代码 START ---
+            // 设置顺序练习的输入框逻辑
+            const startInput = document.getElementById('sequence-start-input');
+            const maxHint = document.getElementById('max-count-hint');
+
+            // 默认从当前进度+1开始（如果是0就是1，如果是10就是11）
+            // 如果进度等于总数，为了方便复习，可以重置为1，或者保持在最后
+            let defaultStart = progress >= questions.length ? 1 : progress + 1;
+
+            startInput.value = defaultStart;
+            startInput.max = questions.length;
+            startInput.min = 1;
+            maxHint.innerText = `(共 ${questions.length} 根)`;
+            // --- 新增代码 END ---
+
+            const categoryContainer = document.getElementById('category-container');
+            const categorySelect = document.getElementById('category-select');
+            const categories = [...new Set(questions.map(q => q.c || '未分类'))];
+
+            if (categories.length > 1 || (categories.length === 1 && categories[0] !== '未分类')) {
+                categorySelect.innerHTML = '<option value="all">全部</option>';
+                categories.forEach(c => {
+                    categorySelect.innerHTML += `<option value="${c}">${c}</option>`;
+                });
+                categoryContainer.style.display = 'block';
+            } else {
+                categoryContainer.style.display = 'none';
+            }
+
+            const allMeta = getMeta();
+            const target = allMeta.find(m => m.id === id);
+            if (target) {
+                target.lastUsed = Date.now();
+                saveMeta(allMeta);
+            }
+
+            renderHistoryList(id);
+        }
+
+        // --- 初始化 ---
+        window.onload = function () {
+            initTheme();
+
+            const currentHash = window.location.hash;
+            if (currentHash.startsWith('#dashboard/')) {
+                const dbId = currentHash.split('/')[1];
+                history.replaceState({ view: 'dashboard', dbId: dbId }, '', currentHash);
+                updateView({ view: 'dashboard', dbId: dbId });
+            } else {
+                history.replaceState({ view: 'home' }, '', '#home');
+                updateView({ view: 'home' });
+            }
+
+            // PWA安装逻辑
+            const installBtn = document.getElementById('btn-install-pwa');
+            window.addEventListener('beforeinstallprompt', (e) => {
+                e.preventDefault();
+                deferredInstallPrompt = e;
+                if (installBtn) installBtn.style.display = 'flex';
+            });
+
+            if (installBtn) {
+                installBtn.addEventListener('click', async () => {
+                    if (deferredInstallPrompt) {
+                        deferredInstallPrompt.prompt();
+                        await deferredInstallPrompt.userChoice;
+                        deferredInstallPrompt = null;
+                        installBtn.style.display = 'none';
+                    }
+                });
+            }
+
+            window.addEventListener('appinstalled', () => {
+                deferredInstallPrompt = null;
+                if (installBtn) installBtn.style.display = 'none';
+            });
+        };
+
+        // --- 主题切换 ---
+        function initTheme() {
+            const t = localStorage.getItem('app_theme');
+            if (t) document.documentElement.setAttribute('data-theme', t);
+        }
+        function toggleTheme() {
+            const html = document.documentElement;
+            const isDark = html.getAttribute('data-theme') === 'everforest';
+            html.setAttribute('data-theme', isDark ? 'light' : 'everforest');
+            localStorage.setItem('app_theme', isDark ? 'light' : 'everforest');
+        }
+
+        // --- 滚动位置追踪 ---
+        let scrollTimeout;
+        function handleQuizScroll() {
+            if (scrollTimeout) clearTimeout(scrollTimeout);
+            scrollTimeout = setTimeout(() => {
+                const quizNav = document.querySelector('#view-quiz .nav-bar');
+                if (!quizNav) return;
+                const quizNavHeight = quizNav.offsetHeight;
+                const questionElements = document.querySelectorAll('#quiz-container .ios-card');
+
+                for (let i = 0; i < questionElements.length; i++) {
+                    const rect = questionElements[i].getBoundingClientRect();
+                    if (rect.top >= quizNavHeight && rect.top < window.innerHeight) {
+                        lastVisibleQuestionIndex = i;
+                        return;
+                    }
+                }
+            }, 150);
+        }
+        function setupQuizScrollListener() {
+            window.addEventListener('scroll', handleQuizScroll, true);
+        }
+        function removeQuizScrollListener() {
+            window.removeEventListener('scroll', handleQuizScroll, true);
+        }
+
+        // --- 首页：题库列表逻辑 ---
+        function getMeta() { return JSON.parse(localStorage.getItem('bingo_meta') || '[]'); }
+        function saveMeta(list) { localStorage.setItem('bingo_meta', JSON.stringify(list)); }
+
+        function renderDbList() {
+            const list = getMeta();
+            const container = document.getElementById('db-list-container');
+            const empty = document.getElementById('empty-state');
+
+            container.innerHTML = '';
+            if (list.length === 0) {
+                empty.style.display = 'block';
+                return;
+            }
+            empty.style.display = 'none';
+
+            list.sort((a, b) => b.lastUsed - a.lastUsed);
+
+            list.forEach(db => {
+                const div = document.createElement('div');
+                div.className = 'db-list-item ios-card';
+                div.innerHTML = `
                 <div class="db-info">
                     <h4>${db.name}</h4>
                     <p>共 ${db.count} 根骨头 · 上次开啃 ${new Date(db.lastUsed).toLocaleDateString()}</p>
                 </div>
                 <div style="color:var(--text-sub);">ᐳ</div>
             `;
-            div.onclick = () => openDashboard(db.id);
-            container.appendChild(div);
-        });
-    }
+                div.onclick = () => openDashboard(db.id);
+                container.appendChild(div);
+            });
+        }
 
-    // --- 导入逻辑 (SheetJS) ---
-    let tempImportData = null;
+        // --- 导入逻辑 (SheetJS) ---
+        let tempImportData = null;
 
-    function showImportModal() {
-        document.getElementById('modal-import').style.display = 'flex';
-        document.getElementById('import-feedback').style.display = 'none';
-        document.getElementById('import-status').innerText = '';
-        document.getElementById('import-loader').style.display = 'none';
-        document.getElementById('import-preview').style.display = 'none';
-        document.getElementById('btn-confirm-import').style.display = 'none';
-        document.getElementById('btn-select-file').style.display = 'inline-flex';
-    }
-    function closeImportModal() { 
-        document.getElementById('modal-import').style.display = 'none'; 
-        document.getElementById('file-input').value = '';
-    }
+        function showImportModal() {
+            document.getElementById('modal-import').style.display = 'flex';
+            document.getElementById('import-feedback').style.display = 'none';
+            document.getElementById('import-status').innerText = '';
+            document.getElementById('import-loader').style.display = 'none';
+            document.getElementById('import-preview').style.display = 'none';
+            document.getElementById('btn-confirm-import').style.display = 'none';
+            document.getElementById('btn-select-file').style.display = 'inline-flex';
+        }
+        function closeImportModal() {
+            document.getElementById('modal-import').style.display = 'none';
+            document.getElementById('file-input').value = '';
+        }
 
-    function handleFileSelect(input) {
-        const file = input.files[0];
-        if (!file) return;
+        function handleFileSelect(input) {
+            const file = input.files[0];
+            if (!file) return;
 
-        const feedbackContainer = document.getElementById('import-feedback');
-        const loader = document.getElementById('import-loader');
-        const status = document.getElementById('import-status');
-        const preview = document.getElementById('import-preview');
+            const feedbackContainer = document.getElementById('import-feedback');
+            const loader = document.getElementById('import-loader');
+            const status = document.getElementById('import-status');
+            const preview = document.getElementById('import-preview');
 
-        feedbackContainer.style.display = 'block';
-        loader.style.display = 'block';
-        status.innerText = '';
-        preview.style.display = 'none';
-        document.getElementById('btn-confirm-import').style.display = 'none';
-        document.getElementById('btn-select-file').style.display = 'none';
+            feedbackContainer.style.display = 'block';
+            loader.style.display = 'block';
+            status.innerText = '';
+            preview.style.display = 'none';
+            document.getElementById('btn-confirm-import').style.display = 'none';
+            document.getElementById('btn-select-file').style.display = 'none';
 
-        const reader = new FileReader();
-        reader.onload = function(e) {
-            loader.style.display = 'none';
-            try {
-                const data = new Uint8Array(e.target.result);
-                const workbook = XLSX.read(data, {type: 'array'});
-                
-                tempImportData = {};
-                const sheetSelectionContainer = document.getElementById('sheet-selection-container');
-                sheetSelectionContainer.innerHTML = '';
+            const reader = new FileReader();
+            reader.onload = function (e) {
+                loader.style.display = 'none';
+                try {
+                    const data = new Uint8Array(e.target.result);
+                    const workbook = XLSX.read(data, { type: 'array' });
 
-                workbook.SheetNames.forEach(sheetName => {
-                    const worksheet = workbook.Sheets[sheetName];
-                    const json = XLSX.utils.sheet_to_json(worksheet);
-                    const parsedData = parseImportData(json);
-                    if (parsedData.length > 0) {
-                        tempImportData[sheetName] = parsedData;
+                    tempImportData = {};
+                    const sheetSelectionContainer = document.getElementById('sheet-selection-container');
+                    sheetSelectionContainer.innerHTML = '';
 
-                        const checkbox = document.createElement('div');
-                        checkbox.innerHTML = `
+                    workbook.SheetNames.forEach(sheetName => {
+                        const worksheet = workbook.Sheets[sheetName];
+                        const json = XLSX.utils.sheet_to_json(worksheet);
+                        const parsedData = parseImportData(json);
+                        if (parsedData.length > 0) {
+                            tempImportData[sheetName] = parsedData;
+
+                            const checkbox = document.createElement('div');
+                            checkbox.innerHTML = `
                             <label>
                                 <input type="checkbox" name="sheet" value="${sheetName}" checked>
                                 ${sheetName} (${parsedData.length} 根骨头)
                             </label>
                         `;
-                        sheetSelectionContainer.appendChild(checkbox);
-                    }
-                });
+                            sheetSelectionContainer.appendChild(checkbox);
+                        }
+                    });
 
-                if (Object.keys(tempImportData).length > 0) {
-                    feedbackContainer.style.display = 'none';
-                    preview.style.display = 'block';
-                    document.getElementById('btn-confirm-import').style.display = 'inline-block';
-                } else {
-                    status.innerText = '解析失败！请检查您的 Excel 文件，确保其中包含 "题目" 和 "答案" 列。';
+                    if (Object.keys(tempImportData).length > 0) {
+                        feedbackContainer.style.display = 'none';
+                        preview.style.display = 'block';
+                        document.getElementById('btn-confirm-import').style.display = 'inline-block';
+                    } else {
+                        status.innerText = '解析失败！请检查您的 Excel 文件，确保其中包含 "题目" 和 "答案" 列。';
+                        document.getElementById('btn-select-file').style.display = 'inline-flex';
+                    }
+                } catch (err) {
+                    console.error("File parsing error:", err);
+                    status.innerText = '文件读取出错，可能不是一个有效的 Excel 文件。';
                     document.getElementById('btn-select-file').style.display = 'inline-flex';
                 }
-            } catch (err) {
-                console.error("File parsing error:", err);
-                status.innerText = '文件读取出错，可能不是一个有效的 Excel 文件。';
-                document.getElementById('btn-select-file').style.display = 'inline-flex';
-            }
-        };
-        reader.onerror = function() {
-            loader.style.display = 'none';
-            status.innerText = '无法读取文件。';
-            document.getElementById('btn-select-file').style.display = 'inline-flex';
-        };
-        reader.readAsArrayBuffer(file);
-    }
-
-    function parseImportData(json) {
-        const parsed = json.map(row => {
-            const qKey = Object.keys(row).find(k => /题目|问题|Question/i.test(k));
-            const aKey = Object.keys(row).find(k => /答案|Answer/i.test(k));
-            const eKey = Object.keys(row).find(k => /解析|解释|Explanation/i.test(k));
-            const tKey = Object.keys(row).find(k => /题型|Type/i.test(k));
-            const cKey = Object.keys(row).find(k => /类别|分类|Category/i.test(k));
-
-            if (!qKey || !aKey) return null; 
-
-            const options = {};
-            ['A','B','C','D','E','F'].forEach(opt => {
-                const optKey = Object.keys(row).find(k => k.toUpperCase().trim() === `选项${opt}` || k.toUpperCase().trim() === opt);
-                if (optKey && row[optKey]) options[opt] = row[optKey];
-            });
-
-            let cleanAns = String(row[aKey]).toUpperCase().replace(/[^A-Z]/g, '');
-            
-            if (Object.keys(options).length === 0 && (String(row[aKey]).includes('对') || String(row[aKey]).includes('错'))) {
-                options['A'] = '正确'; options['B'] = '错误';
-                if (String(row[aKey]).includes('对')) cleanAns = 'A';
-                if (String(row[aKey]).includes('错')) cleanAns = 'B';
-            }
-
-            return {
-                q: row[qKey],
-                a: cleanAns,
-                o: options,
-                e: eKey ? row[eKey] : '',
-                t: tKey ? row[tKey] : (cleanAns.length > 1 ? '多选' : '单选'),
-                c: cKey ? row[cKey] : '未分类'
             };
-        }).filter(item => item !== null);
-        return parsed;
-    }
-
-    function confirmImport() {
-        const selectedSheets = Array.from(document.querySelectorAll('#sheet-selection-container input[name="sheet"]:checked'))
-                                    .map(input => input.value);
-
-        if (selectedSheets.length === 0) {
-            alert('总得选个地方挖吧？');
-            return;
+            reader.onerror = function () {
+                loader.style.display = 'none';
+                status.innerText = '无法读取文件。';
+                document.getElementById('btn-select-file').style.display = 'inline-flex';
+            };
+            reader.readAsArrayBuffer(file);
         }
 
-        const meta = getMeta();
-        selectedSheets.forEach(sheetName => {
-            const id = Date.now().toString() + '_' + Math.random().toString(36).substr(2, 9);
-            const data = tempImportData[sheetName];
-            
-            try {
-                localStorage.setItem(`bingo_db_${id}`, JSON.stringify(data));
-                meta.push({ id, name: sheetName, count: data.length, lastUsed: Date.now() });
-            } catch (e) {
-                alert('狗窝满了！快丢掉点旧骨头。');
+        function parseImportData(json) {
+            const parsed = json.map(row => {
+                const qKey = Object.keys(row).find(k => /题目|问题|Question/i.test(k));
+                const aKey = Object.keys(row).find(k => /答案|Answer/i.test(k));
+                const eKey = Object.keys(row).find(k => /解析|解释|Explanation/i.test(k));
+                const tKey = Object.keys(row).find(k => /题型|Type/i.test(k));
+                const cKey = Object.keys(row).find(k => /类别|分类|Category/i.test(k));
+
+                if (!qKey || !aKey) return null;
+
+                const options = {};
+                ['A', 'B', 'C', 'D', 'E', 'F'].forEach(opt => {
+                    const optKey = Object.keys(row).find(k => k.toUpperCase().trim() === `选项${opt}` || k.toUpperCase().trim() === opt);
+                    if (optKey && row[optKey]) options[opt] = row[optKey];
+                });
+
+                let cleanAns = String(row[aKey]).toUpperCase().replace(/[^A-Z]/g, '');
+
+                if (Object.keys(options).length === 0 && (String(row[aKey]).includes('对') || String(row[aKey]).includes('错'))) {
+                    options['A'] = '正确'; options['B'] = '错误';
+                    if (String(row[aKey]).includes('对')) cleanAns = 'A';
+                    if (String(row[aKey]).includes('错')) cleanAns = 'B';
+                }
+
+                return {
+                    q: row[qKey],
+                    a: cleanAns,
+                    o: options,
+                    e: eKey ? row[eKey] : '',
+                    t: tKey ? row[tKey] : (cleanAns.length > 1 ? '多选' : '单选'),
+                    c: cKey ? row[cKey] : '未分类'
+                };
+            }).filter(item => item !== null);
+            return parsed;
+        }
+
+        function confirmImport() {
+            const selectedSheets = Array.from(document.querySelectorAll('#sheet-selection-container input[name="sheet"]:checked'))
+                .map(input => input.value);
+
+            if (selectedSheets.length === 0) {
+                alert('总得选个地方挖吧？');
                 return;
             }
-        });
 
-        saveMeta(meta);
-        closeImportModal();
-        renderDbList();
-    }
+            const meta = getMeta();
+            selectedSheets.forEach(sheetName => {
+                const id = Date.now().toString() + '_' + Math.random().toString(36).substr(2, 9);
+                const data = tempImportData[sheetName];
 
-    // --- 仪表盘逻辑 ---
-    function saveWipQuiz() {
-        if (!currentDb || !currentQuiz.length || isReviewMode) return;
-        const wipState = {
-            quizType: quizType,
-            currentQuiz: currentQuiz,
-            userAnswers: userAnswers,
-            lastVisibleQuestionIndex: lastVisibleQuestionIndex
-        };
-        localStorage.setItem(`bingo_wip_${currentDb.id}`, JSON.stringify(wipState));
-    }
-
-    function clearWipQuiz() {
-        if (currentDb) localStorage.removeItem(`bingo_wip_${currentDb.id}`);
-    }
-
-    function openDashboard(id) {
-        history.pushState({ view: 'dashboard', dbId: id }, '', `#dashboard/${id}`);
-        updateView({ view: 'dashboard', dbId: id });
-    }
-
-    function goHome() {
-        history.pushState({ view: 'home' }, '', '#home');
-        updateView({ view: 'home' });
-    }
-
-    function deleteCurrentDb() {
-        if(!confirm('真要把这窝骨头都扔了？再也找不回了哦！')) return;
-        
-        const id = currentDb.id;
-        localStorage.removeItem(`bingo_db_${id}`);
-        localStorage.removeItem(`bingo_prog_${id}`);
-        localStorage.removeItem(`bingo_hist_${id}`);
-        localStorage.removeItem(`bingo_wip_${id}`); 
-        
-        const meta = getMeta().filter(m => m.id !== id);
-        saveMeta(meta);
-        
-        goHome();
-    }
-
-    function deleteAllData() {
-        if (!confirm('【高危操作】警告！此操作将彻底删除所有题库、练习历史和设置，且无法恢复。您确定要清空所有狗窝吗？')) return;
-        if (!confirm('【二次确认】真的，所有东西都没了，确定吗？')) return;
-
-        Object.keys(localStorage).forEach(key => {
-            if (key.startsWith('bingo_') || key === 'app_theme') {
-                localStorage.removeItem(key);
-            }
-        });
-
-        alert('所有狗窝和骨头都已丢掉！');
-        location.reload();
-    }
-
-    function getAllWrongQuestions(dbId) {
-        const history = JSON.parse(localStorage.getItem(`bingo_hist_${dbId}`) || '[]');
-        const wrongQuestions = {}; 
-
-        history.forEach(record => {
-            if (!record.quizSnapshot || !record.userAnswers) return;
-
-            record.quizSnapshot.forEach((question, index) => {
-                const userAnswer = record.userAnswers[index] || '';
-                if (userAnswer !== question.a) {
-                    wrongQuestions[question.q] = question;
+                try {
+                    localStorage.setItem(`bingo_db_${id}`, JSON.stringify(data));
+                    meta.push({ id, name: sheetName, count: data.length, lastUsed: Date.now() });
+                } catch (e) {
+                    alert('狗窝满了！快丢掉点旧骨头。');
+                    return;
                 }
             });
-        });
 
-        return Object.values(wrongQuestions);
-    }
+            saveMeta(meta);
+            closeImportModal();
+            renderDbList();
+        }
 
-    function startWrongAnswerQuiz() {
-        const wipData = localStorage.getItem(`bingo_wip_${currentDb.id}`);
-        if (wipData) {
-            if (!confirm('汪！你之前藏的骨头还没啃完呢，现在就要挖个新坑吗？旧坑里的骨头可就没咯！')) {
-                return; 
+        // --- 仪表盘逻辑 ---
+        function saveWipQuiz() {
+            if (!currentDb || !currentQuiz.length || isReviewMode) return;
+            const wipState = {
+                quizType: quizType,
+                currentQuiz: currentQuiz,
+                userAnswers: userAnswers,
+                lastVisibleQuestionIndex: lastVisibleQuestionIndex
+            };
+            localStorage.setItem(`bingo_wip_${currentDb.id}`, JSON.stringify(wipState));
+        }
+
+        function clearWipQuiz() {
+            if (currentDb) localStorage.removeItem(`bingo_wip_${currentDb.id}`);
+        }
+
+        function openDashboard(id) {
+            history.pushState({ view: 'dashboard', dbId: id }, '', `#dashboard/${id}`);
+            updateView({ view: 'dashboard', dbId: id });
+        }
+
+        function goHome() {
+            history.pushState({ view: 'home' }, '', '#home');
+            updateView({ view: 'home' });
+        }
+
+        function deleteCurrentDb() {
+            if (!confirm('真要把这窝骨头都扔了？再也找不回了哦！')) return;
+
+            const id = currentDb.id;
+            localStorage.removeItem(`bingo_db_${id}`);
+            localStorage.removeItem(`bingo_prog_${id}`);
+            localStorage.removeItem(`bingo_hist_${id}`);
+            localStorage.removeItem(`bingo_wip_${id}`);
+
+            const meta = getMeta().filter(m => m.id !== id);
+            saveMeta(meta);
+
+            goHome();
+        }
+
+        function deleteAllData() {
+            if (!confirm('【高危操作】警告！此操作将彻底删除所有题库、练习历史和设置，且无法恢复。您确定要清空所有狗窝吗？')) return;
+            if (!confirm('【二次确认】真的，所有东西都没了，确定吗？')) return;
+
+            Object.keys(localStorage).forEach(key => {
+                if (key.startsWith('bingo_') || key === 'app_theme') {
+                    localStorage.removeItem(key);
+                }
+            });
+
+            alert('所有狗窝和骨头都已丢掉！');
+            location.reload();
+        }
+
+        function getAllWrongQuestions(dbId) {
+            const history = JSON.parse(localStorage.getItem(`bingo_hist_${dbId}`) || '[]');
+            const wrongQuestions = {};
+
+            history.forEach(record => {
+                if (!record.quizSnapshot || !record.userAnswers) return;
+
+                record.quizSnapshot.forEach((question, index) => {
+                    const userAnswer = record.userAnswers[index] || '';
+                    if (userAnswer !== question.a) {
+                        wrongQuestions[question.q] = question;
+                    }
+                });
+            });
+
+            return Object.values(wrongQuestions);
+        }
+
+        function startWrongAnswerQuiz() {
+            const wipData = localStorage.getItem(`bingo_wip_${currentDb.id}`);
+            if (wipData) {
+                if (!confirm('汪！你之前藏的骨头还没啃完呢，现在就要挖个新坑吗？旧坑里的骨头可就没咯！')) {
+                    return;
+                }
             }
+            clearWipQuiz();
+            const wrongQuestions = getAllWrongQuestions(currentDb.id);
+
+            if (wrongQuestions.length === 0) {
+                alert('太棒了，没有发现错题！你就是最聪明的斌狗！');
+                return;
+            }
+
+            quizType = 'wrong_review';
+            isReviewMode = false;
+            userAnswers = {};
+            masteredInSession = 0;
+            currentQuiz = wrongQuestions.sort(() => 0.5 - Math.random());
+            lastVisibleQuestionIndex = 0;
+
+            history.pushState({ view: 'quiz', dbId: currentDb.id }, '', '#quiz');
+            updateView({ view: 'quiz' });
+
+            document.getElementById('quiz-fab-area').style.display = 'flex';
+            renderQuizItems();
+            saveWipQuiz();
+            setupQuizScrollListener();
+            window.addEventListener('beforeunload', saveWipQuiz);
         }
-        clearWipQuiz();
-        const wrongQuestions = getAllWrongQuestions(currentDb.id);
 
-        if (wrongQuestions.length === 0) {
-            alert('太棒了，没有发现错题！你就是最聪明的斌狗！');
-            return;
-        }
+        // --- 历史记录 ---
+        function renderHistoryList(dbId) {
+            const list = JSON.parse(localStorage.getItem(`bingo_hist_${dbId}`) || '[]');
+            const container = document.getElementById('history-list');
+            container.innerHTML = '';
 
-        quizType = 'wrong_review'; 
-        isReviewMode = false;
-        userAnswers = {};
-        masteredInSession = 0; 
-        currentQuiz = wrongQuestions.sort(() => 0.5 - Math.random()); 
-        lastVisibleQuestionIndex = 0;
+            if (list.length === 0) {
+                document.getElementById('no-history-btn').style.display = 'block';
+            } else {
+                document.getElementById('no-history-btn').style.display = 'none';
+                list.slice().reverse().slice(0, 10).forEach((item, index) => {
+                    const originalIndex = list.length - 1 - index;
+                    const scoreClass = item.score >= 90 ? 'score-high' : (item.score < 60 ? 'score-low' : '');
+                    const el = document.createElement('div');
+                    el.className = 'history-item';
 
-        history.pushState({ view: 'quiz', dbId: currentDb.id }, '', '#quiz');
-        updateView({ view: 'quiz' });
-        
-        document.getElementById('quiz-fab-area').style.display = 'flex';
-        renderQuizItems();
-        saveWipQuiz();
-        setupQuizScrollListener();
-        window.addEventListener('beforeunload', saveWipQuiz);
-    }
+                    let quizName = '随便刨一个';
+                    if (item.type === 'sequence') quizName = '按序开啃';
+                    if (item.type === 'mock_exam') quizName = '模拟开啃';
 
-    // --- 历史记录 ---
-    function renderHistoryList(dbId) {
-        const list = JSON.parse(localStorage.getItem(`bingo_hist_${dbId}`) || '[]');
-        const container = document.getElementById('history-list');
-        container.innerHTML = '';
-
-        if (list.length === 0) {
-            document.getElementById('no-history-btn').style.display = 'block';
-        } else {
-            document.getElementById('no-history-btn').style.display = 'none';
-            list.slice().reverse().slice(0, 10).forEach((item, index) => {
-                const originalIndex = list.length - 1 - index;
-                const scoreClass = item.score >= 90 ? 'score-high' : (item.score < 60 ? 'score-low' : '');
-                const el = document.createElement('div');
-                el.className = 'history-item';
-                
-                let quizName = '随便刨一个';
-                if(item.type === 'sequence') quizName = '按序开啃';
-                if(item.type === 'mock_exam') quizName = '模拟开啃';
-
-                el.innerHTML = `
+                    el.innerHTML = `
                     <div style="flex-grow: 1; cursor: pointer;" onclick="loadReview(${originalIndex})">
                         <div style="font-weight:bold; font-size:14px;">${quizName}</div>
                         <div style="font-size:12px; color:var(--text-sub);">${new Date(item.date).toLocaleString()}</div>
@@ -815,244 +1219,245 @@
                     <div class="score-badge ${scoreClass}">${item.score}</div>
                     <button class="btn-delete-hist" onclick="event.stopPropagation(); deleteHistoryRecord(${originalIndex})">×</button>
                 `;
-                container.appendChild(el);
-            });
-        }
-
-        const wrongQuestions = getAllWrongQuestions(dbId);
-        const wrongAnswersBtn = document.getElementById('btn-wrong-answers');
-        if (wrongQuestions.length > 0) {
-            wrongAnswersBtn.style.display = 'block';
-            wrongAnswersBtn.innerText = `啃硬骨头 (${wrongQuestions.length} 根)`;
-        } else {
-            wrongAnswersBtn.style.display = 'none';
-        }
-    }
-
-    function deleteHistoryRecord(index) {
-        if (!confirm('确定要删除这条啃骨头记忆吗？')) return;
-
-        const historyKey = `bingo_hist_${currentDb.id}`;
-        let history = JSON.parse(localStorage.getItem(historyKey) || '[]');
-        
-        history.splice(index, 1); 
-
-        localStorage.setItem(historyKey, JSON.stringify(history));
-        renderHistoryList(currentDb.id); 
-    }
-
-    // --- 修复后的 resumeQuiz 函数 ---
-    function resumeQuiz() {
-        const wipData = localStorage.getItem(`bingo_wip_${currentDb.id}`);
-        if (!wipData) {
-            console.error("No WIP data found to resume.");
-            return;
-        }
-
-        const wipState = JSON.parse(wipData);
-        currentQuiz = wipState.currentQuiz;
-        userAnswers = wipState.userAnswers;
-        quizType = wipState.quizType;
-        isReviewMode = false;
-        lastVisibleQuestionIndex = wipState.lastVisibleQuestionIndex || 0;
-        
-        history.pushState({ view: 'quiz', dbId: currentDb.id }, '', '#quiz');
-        updateView({ view: 'quiz' });
-        document.getElementById('quiz-fab-area').style.display = 'flex';
-        
-        renderQuizItems();
-        setupQuizScrollListener();
-        window.addEventListener('beforeunload', saveWipQuiz);
-
-        setTimeout(() => {
-            const targetEl = document.getElementById(`q-${lastVisibleQuestionIndex}`);
-            if (targetEl) {
-                targetEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                // 增加临时高亮
-                targetEl.style.transition = 'outline 0.2s ease-in-out';
-                targetEl.style.outline = '3px solid var(--primary)';
-                setTimeout(() => {
-                    targetEl.style.outline = 'none';
-                }, 1500);
+                    container.appendChild(el);
+                });
             }
-        }, 100);
 
-        if (quizType === 'mock_exam') {
-            const count = currentQuiz.length;
-            const totalTime = count * 90;
-            // 恢复考试时简单重置计时器（简化处理，不记忆剩余时间）
-            startTimer(totalTime); 
+            const wrongQuestions = getAllWrongQuestions(dbId);
+            const wrongAnswersBtn = document.getElementById('btn-wrong-answers');
+            if (wrongQuestions.length > 0) {
+                wrongAnswersBtn.style.display = 'block';
+                wrongAnswersBtn.innerText = `啃硬骨头 (${wrongQuestions.length} 根)`;
+            } else {
+                wrongAnswersBtn.style.display = 'none';
+            }
         }
-    }
 
-    // --- 修复后的 loadReview 函数 ---
-    function loadReview(historyIndex) {
-        const id = currentDb.id;
-        const list = JSON.parse(localStorage.getItem(`bingo_hist_${id}`) || '[]');
-        const record = list[historyIndex];
+        function deleteHistoryRecord(index) {
+            if (!confirm('确定要删除这条啃骨头记忆吗？')) return;
 
-        if(!record) return;
+            const historyKey = `bingo_hist_${currentDb.id}`;
+            let history = JSON.parse(localStorage.getItem(historyKey) || '[]');
 
-        currentQuiz = record.quizSnapshot;
-        userAnswers = record.userAnswers;
-        isReviewMode = true;
+            history.splice(index, 1);
 
-        history.pushState({ view: 'quiz', dbId: id, history: true }, '', '#quiz');
-        updateView({ view: 'quiz' });
-        document.getElementById('quiz-fab-area').style.display = 'none'; // 回看不能交卷
-        
-        renderQuizItems();
-    }
+            localStorage.setItem(historyKey, JSON.stringify(history));
+            renderHistoryList(currentDb.id);
+        }
 
-    // --- 模拟考试逻辑 ---
-    let quizTimer = null;
-    let timeLeft = 0;
+        // --- 修复后的 resumeQuiz 函数 ---
+        function resumeQuiz() {
+            const wipData = localStorage.getItem(`bingo_wip_${currentDb.id}`);
+            if (!wipData) {
+                console.error("No WIP data found to resume.");
+                return;
+            }
 
-    function startTimer(duration) {
-        stopTimer(); 
-        timeLeft = duration;
-        updateTimerDisplay();
-        quizTimer = setInterval(() => {
-            timeLeft--;
+            const wipState = JSON.parse(wipData);
+            currentQuiz = wipState.currentQuiz;
+            userAnswers = wipState.userAnswers;
+            quizType = wipState.quizType;
+            isReviewMode = false;
+            lastVisibleQuestionIndex = wipState.lastVisibleQuestionIndex || 0;
+
+            history.pushState({ view: 'quiz', dbId: currentDb.id }, '', '#quiz');
+            updateView({ view: 'quiz' });
+            document.getElementById('quiz-fab-area').style.display = 'flex';
+
+            renderQuizItems();
+            setupQuizScrollListener();
+            window.addEventListener('beforeunload', saveWipQuiz);
+
+            setTimeout(() => {
+                const targetEl = document.getElementById(`q-${lastVisibleQuestionIndex}`);
+                if (targetEl) {
+                    targetEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                    // 增加临时高亮
+                    targetEl.style.transition = 'outline 0.2s ease-in-out';
+                    targetEl.style.outline = '3px solid var(--primary)';
+                    setTimeout(() => {
+                        targetEl.style.outline = 'none';
+                    }, 1500);
+                }
+            }, 100);
+
+            if (quizType === 'mock_exam') {
+                const count = currentQuiz.length;
+                const totalTime = count * 90;
+                // 恢复考试时简单重置计时器（简化处理，不记忆剩余时间）
+                startTimer(totalTime);
+            }
+        }
+
+        // --- 修复后的 loadReview 函数 ---
+        function loadReview(historyIndex) {
+            const id = currentDb.id;
+            const list = JSON.parse(localStorage.getItem(`bingo_hist_${id}`) || '[]');
+            const record = list[historyIndex];
+
+            if (!record) return;
+
+            currentQuiz = record.quizSnapshot;
+            userAnswers = record.userAnswers;
+            isReviewMode = true;
+
+            history.pushState({ view: 'quiz', dbId: id, history: true }, '', '#quiz');
+            updateView({ view: 'quiz' });
+            document.getElementById('quiz-fab-area').style.display = 'none'; // 回看不能交卷
+
+            renderQuizItems();
+        }
+
+        // --- 模拟考试逻辑 ---
+        let quizTimer = null;
+        let timeLeft = 0;
+
+        function startTimer(duration) {
+            stopTimer();
+            timeLeft = duration;
             updateTimerDisplay();
-            if (timeLeft <= 0) {
-                stopTimer();
-                alert('时间到，自动交卷！');
-                submitPaper(true); 
-            }
-        }, 1000);
-    }
-
-    function stopTimer() {
-        clearInterval(quizTimer);
-        quizTimer = null;
-        document.getElementById('quiz-timer').innerText = '';
-    }
-
-    function updateTimerDisplay() {
-        const minutes = Math.floor(timeLeft / 60);
-        const seconds = timeLeft % 60;
-        const timerEl = document.getElementById('quiz-timer');
-        timerEl.innerText = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
-        
-        if (timeLeft <= 30 && timeLeft > 10) {
-            timerEl.style.color = 'var(--primary)';
-        } else if (timeLeft <= 10) {
-            timerEl.style.color = 'var(--danger)';
-        } else {
-            timerEl.style.color = 'var(--primary)';
-        }
-    }
-    
-    function startMockExam() {
-        clearWipQuiz();
-        const count = parseInt(document.getElementById('mock-exam-count').value);
-        const totalTime = count * 90; 
-
-        const selectedCategory = document.getElementById('category-select')?.value;
-        let questionsForQuiz = currentDb.questions;
-
-        if (selectedCategory && selectedCategory !== 'all') {
-            questionsForQuiz = currentDb.questions.filter(q => (q.c || '未分类') === selectedCategory);
+            quizTimer = setInterval(() => {
+                timeLeft--;
+                updateTimerDisplay();
+                if (timeLeft <= 0) {
+                    stopTimer();
+                    alert('时间到，自动交卷！');
+                    submitPaper(true);
+                }
+            }, 1000);
         }
 
-        const shuffled = [...questionsForQuiz].sort(() => 0.5 - Math.random());
-        currentQuiz = shuffled.slice(0, count);
-
-        if (currentQuiz.length === 0) {
-            return alert('这个分类下没有足够的骨头进行模拟！');
+        function stopTimer() {
+            clearInterval(quizTimer);
+            quizTimer = null;
+            document.getElementById('quiz-timer').innerText = '';
         }
 
-        quizType = 'mock_exam';
-        isReviewMode = false;
-        userAnswers = {};
-        lastVisibleQuestionIndex = 0;
+        function updateTimerDisplay() {
+            const minutes = Math.floor(timeLeft / 60);
+            const seconds = timeLeft % 60;
+            const timerEl = document.getElementById('quiz-timer');
+            timerEl.innerText = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
 
-        history.pushState({ view: 'quiz', dbId: currentDb.id }, '', '#quiz');
-        updateView({ view: 'quiz' });
-        document.getElementById('quiz-fab-area').style.display = 'flex';
-        
-        renderQuizItems();
-        saveWipQuiz();
-        setupQuizScrollListener();
-        window.addEventListener('beforeunload', saveWipQuiz);
-
-        startTimer(totalTime);
-    }
-
-    // --- 答题逻辑 ---
-    function startQuiz(type) {
-        const wipData = localStorage.getItem(`bingo_wip_${currentDb.id}`);
-        if (wipData) {
-            if (!confirm('汪！你之前藏的骨头还没啃完呢，现在就要挖个新坑吗？旧坑里的骨头可就没咯！')) {
-                return; 
+            if (timeLeft <= 30 && timeLeft > 10) {
+                timerEl.style.color = 'var(--primary)';
+            } else if (timeLeft <= 10) {
+                timerEl.style.color = 'var(--danger)';
+            } else {
+                timerEl.style.color = 'var(--primary)';
             }
         }
-        clearWipQuiz();
-        quizType = type;
-        isReviewMode = false;
-        userAnswers = {};
-        lastVisibleQuestionIndex = 0;
 
-        const selectedCategory = document.getElementById('category-select')?.value;
-        let questionsForQuiz = currentDb.questions;
+        function startMockExam() {
+            clearWipQuiz();
+            const count = parseInt(document.getElementById('mock-exam-count').value);
+            const totalTime = count * 90;
 
-        if (selectedCategory && selectedCategory !== 'all') {
-            questionsForQuiz = currentDb.questions.filter(q => (q.c || '未分类') === selectedCategory);
-        }
-        
-        if (type === 'random') {
-            const countValue = document.getElementById('random-count').value;
-            const count = countValue === 'all' ? questionsForQuiz.length : parseInt(countValue);
+            const selectedCategory = document.getElementById('category-select')?.value;
+            let questionsForQuiz = currentDb.questions;
+
+            if (selectedCategory && selectedCategory !== 'all') {
+                questionsForQuiz = currentDb.questions.filter(q => (q.c || '未分类') === selectedCategory);
+            }
+
             const shuffled = [...questionsForQuiz].sort(() => 0.5 - Math.random());
             currentQuiz = shuffled.slice(0, count);
-        } else {
-            // 顺序
-            const countValue = document.getElementById('sequence-count').value;
-            const count = countValue === 'all' ? questionsForQuiz.length : parseInt(countValue);
-            const start = (selectedCategory && selectedCategory !== 'all') ? 0 : currentDb.progress;
-            
-            if (countValue === 'all') {
-                currentQuiz = questionsForQuiz.slice(start);
-            } else {
-                currentQuiz = questionsForQuiz.slice(start, start + count);
+
+            if (currentQuiz.length === 0) {
+                return alert('这个分类下没有足够的骨头进行模拟！');
             }
 
-            if (currentQuiz.length === 0) return alert('斌狗！这堆骨头啃完了！');
+            quizType = 'mock_exam';
+            isReviewMode = false;
+            userAnswers = {};
+            lastVisibleQuestionIndex = 0;
+
+            history.pushState({ view: 'quiz', dbId: currentDb.id }, '', '#quiz');
+            updateView({ view: 'quiz' });
+            document.getElementById('quiz-fab-area').style.display = 'flex';
+
+            renderQuizItems();
+            saveWipQuiz();
+            setupQuizScrollListener();
+            window.addEventListener('beforeunload', saveWipQuiz);
+
+            startTimer(totalTime);
         }
 
-        history.pushState({ view: 'quiz', dbId: currentDb.id }, '', '#quiz');
-        updateView({ view: 'quiz' });
-        document.getElementById('quiz-fab-area').style.display = 'flex';
-        
-        renderQuizItems();
-        saveWipQuiz();
-        setupQuizScrollListener();
-        window.addEventListener('beforeunload', saveWipQuiz);
-    }
+        // --- 答题逻辑 ---
+        function startQuiz(type) {
+            const wipData = localStorage.getItem(`bingo_wip_${currentDb.id}`);
+            if (wipData) {
+                if (!confirm('汪！你之前藏的骨头还没啃完呢，现在就要挖个新坑吗？旧坑里的骨头可就没咯！')) {
+                    return;
+                }
+            }
+            clearWipQuiz();
+            quizType = type;
+            isReviewMode = false;
+            userAnswers = {};
+            lastVisibleQuestionIndex = 0;
 
-    function renderQuizItems() {
-        const container = document.getElementById('quiz-container');
-        container.innerHTML = '';
-        const bodyClass = isReviewMode ? 'review-mode' : '';
-        container.className = bodyClass;
+            const selectedCategory = document.getElementById('category-select')?.value;
+            let questionsForQuiz = currentDb.questions;
 
-        document.getElementById('quiz-progress-text').innerText = `本轮 ${currentQuiz.length} 根骨头`;
-
-        currentQuiz.forEach((item, idx) => {
-            const uAns = userAnswers[idx] || '';
-            let cardClass = 'ios-card';
-            let analysisHtml = '';
-            let masteredButtonHtml = '';
-
-            if (quizType === 'wrong_review' && !isReviewMode) {
-                masteredButtonHtml = `<button class="btn-mastered" onclick="masterHardBone(${idx})">我啃会了</button>`;
+            if (selectedCategory && selectedCategory !== 'all') {
+                questionsForQuiz = currentDb.questions.filter(q => (q.c || '未分类') === selectedCategory);
             }
 
-            if (isReviewMode) {
-                const isCorrect = uAns === item.a;
-                cardClass += isCorrect ? ' correct' : ' wrong';
-                analysisHtml = `
+            if (type === 'random') {
+                const countValue = document.getElementById('random-count').value;
+                const count = countValue === 'all' ? questionsForQuiz.length : parseInt(countValue);
+                const shuffled = [...questionsForQuiz].sort(() => 0.5 - Math.random());
+                currentQuiz = shuffled.slice(0, count);
+            } else {
+                currentQuiz = questionsForQuiz.slice(startIndex, startIndex + count);
+            }
+
+            if (currentQuiz.length === 0) {
+                // 智能处理：如果是从最后开始还没题，提示是否重头开始
+                if (startIndex >= totalQuestions) {
+                    if (confirm('这堆骨头已经啃到底了！要从第 1 根重新开始啃吗？')) {
+                        document.getElementById('sequence-start-input').value = 1;
+                        startQuiz('sequence'); // 递归调用一次
+                        return;
+                    }
+                }
+                return alert('这个位置后面没有骨头啦！');
+            }
+
+            history.pushState({ view: 'quiz', dbId: currentDb.id }, '', '#quiz');
+            updateView({ view: 'quiz' });
+            document.getElementById('quiz-fab-area').style.display = 'flex';
+
+            renderQuizItems();
+            saveWipQuiz();
+            setupQuizScrollListener();
+            window.addEventListener('beforeunload', saveWipQuiz);
+        }
+
+        function renderQuizItems() {
+            const container = document.getElementById('quiz-container');
+            container.innerHTML = '';
+            const bodyClass = isReviewMode ? 'review-mode' : '';
+            container.className = bodyClass;
+
+            document.getElementById('quiz-progress-text').innerText = `本轮 ${currentQuiz.length} 根骨头`;
+
+            currentQuiz.forEach((item, idx) => {
+                const uAns = userAnswers[idx] || '';
+                let cardClass = 'ios-card';
+                let analysisHtml = '';
+                let masteredButtonHtml = '';
+
+                if (quizType === 'wrong_review' && !isReviewMode) {
+                    masteredButtonHtml = `<button class="btn-mastered" onclick="masterHardBone(${idx})">我啃会了</button>`;
+                }
+
+                if (isReviewMode) {
+                    const isCorrect = uAns === item.a;
+                    cardClass += isCorrect ? ' correct' : ' wrong';
+                    analysisHtml = `
                     <div style="margin-top:15px; padding:10px; background:var(--bg-input); border-radius:8px; font-size:14px;">
                         <div style="font-weight:bold; margin-bottom:4px;">
                             汪的答案：<span style="color:var(--success)">${item.a}</span>
@@ -1061,27 +1466,27 @@
                         <div style="color:var(--text-sub);">${item.e || '只能意会'}</div>
                     </div>
                 `;
-            }
+                }
 
-            let optionsHtml = '';
-            for (let key in item.o) {
-                const isSelected = uAns.includes(key) ? 'selected' : '';
-                const isRealAnswer = isReviewMode && item.a.includes(key) ? 'correct-answer' : '';
-                
-                optionsHtml += `
+                let optionsHtml = '';
+                for (let key in item.o) {
+                    const isSelected = uAns.includes(key) ? 'selected' : '';
+                    const isRealAnswer = isReviewMode && item.a.includes(key) ? 'correct-answer' : '';
+
+                    optionsHtml += `
                     <div class="option-row ${isSelected} ${isRealAnswer}" onclick="selectOption(${idx}, '${key}', '${item.t}')">
                         <div class="option-circle">${key}</div>
                         <div style="flex:1">${item.o[key]}</div>
                     </div>
                 `;
-            }
+                }
 
-            const html = `
+                const html = `
                 <div class="${cardClass}" id="q-${idx}">
                     <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom:10px;">
                         <span style="font-weight:600; font-size:17px; line-height:1.4; padding-right: 15px;">
                             <span class="bingo-badge" style="margin-left:0; margin-right:5px;">${item.t || '单选'}</span>
-                            ${idx+1}. ${item.q}
+                            ${idx + 1}. ${item.q}
                         </span>
                         ${masteredButtonHtml}
                     </div>
@@ -1089,196 +1494,214 @@
                     ${analysisHtml}
                 </div>
             `;
-            container.insertAdjacentHTML('beforeend', html);
-        });
-    }
+                container.insertAdjacentHTML('beforeend', html);
+            });
+        }
 
-    function masterHardBone(qIdx) {
-        if(!confirm('确定把这根骨头从硬骨头里扔掉吗？以后答错了还是会回来的哦。')) return;
+        function masterHardBone(qIdx) {
+            if (!confirm('确定把这根骨头从硬骨头里扔掉吗？以后答错了还是会回来的哦。')) return;
 
-        const questionToMaster = currentQuiz[qIdx];
-        if (!questionToMaster) return;
+            const questionToMaster = currentQuiz[qIdx];
+            if (!questionToMaster) return;
 
-        const questionText = questionToMaster.q;
-        const historyKey = `bingo_hist_${currentDb.id}`;
-        let history = JSON.parse(localStorage.getItem(historyKey) || '[]');
+            const questionText = questionToMaster.q;
+            const historyKey = `bingo_hist_${currentDb.id}`;
+            let history = JSON.parse(localStorage.getItem(historyKey) || '[]');
 
-        history.forEach(record => {
-            if (!record.quizSnapshot || !record.userAnswers) return;
-            
-            record.quizSnapshot.forEach((question, index) => {
-                if (question.q === questionText) {
-                    if (record.userAnswers[index] !== question.a) {
-                        record.userAnswers[index] = question.a;
+            history.forEach(record => {
+                if (!record.quizSnapshot || !record.userAnswers) return;
+
+                record.quizSnapshot.forEach((question, index) => {
+                    if (question.q === questionText) {
+                        if (record.userAnswers[index] !== question.a) {
+                            record.userAnswers[index] = question.a;
+                        }
                     }
-                }
+                });
             });
-        });
 
-        localStorage.setItem(historyKey, JSON.stringify(history));
+            localStorage.setItem(historyKey, JSON.stringify(history));
 
-        const cardElement = document.getElementById(`q-${qIdx}`);
-        if (cardElement) {
-            cardElement.style.transition = 'opacity 0.3s, transform 0.3s';
-            cardElement.style.opacity = '0';
-            cardElement.style.transform = 'scale(0.95)';
-            setTimeout(() => { cardElement.style.display = 'none'; }, 300);
-        }
-        
-        masteredInSession++;
-        const totalInQuiz = currentQuiz.length;
-        document.getElementById('quiz-progress-text').innerText = `本轮 ${totalInQuiz - masteredInSession} / ${totalInQuiz} 根`;
-
-        alert('这根骨头你已经啃会了！');
-    }
-
-    function selectOption(qIdx, optKey, type) {
-        if (isReviewMode) return; 
-
-        const isMulti = type.includes('多');
-        let current = userAnswers[qIdx] || '';
-
-        if (!isMulti) {
-            current = optKey;
-        } else {
-            if (current.includes(optKey)) {
-                current = current.replace(optKey, '');
-            } else {
-                current += optKey;
+            const cardElement = document.getElementById(`q-${qIdx}`);
+            if (cardElement) {
+                cardElement.style.transition = 'opacity 0.3s, transform 0.3s';
+                cardElement.style.opacity = '0';
+                cardElement.style.transform = 'scale(0.95)';
+                setTimeout(() => { cardElement.style.display = 'none'; }, 300);
             }
-            current = current.split('').sort().join('');
+
+            masteredInSession++;
+            const totalInQuiz = currentQuiz.length;
+            document.getElementById('quiz-progress-text').innerText = `本轮 ${totalInQuiz - masteredInSession} / ${totalInQuiz} 根`;
+
+            alert('这根骨头你已经啃会了！');
         }
 
-        userAnswers[qIdx] = current;
-        saveWipQuiz();
-        
-        const card = document.getElementById(`q-${qIdx}`);
-        const rows = card.querySelectorAll('.option-row');
-        rows.forEach(row => {
-            const k = row.querySelector('.option-circle').innerText;
-            if (isMulti) {
-                if (current.includes(k)) row.classList.add('selected');
-                else row.classList.remove('selected');
+        function selectOption(qIdx, optKey, type) {
+            if (isReviewMode) return;
+
+            const isMulti = type.includes('多');
+            let current = userAnswers[qIdx] || '';
+
+            if (!isMulti) {
+                current = optKey;
             } else {
-                if (k === current) row.classList.add('selected');
-                else row.classList.remove('selected');
+                if (current.includes(optKey)) {
+                    current = current.replace(optKey, '');
+                } else {
+                    current += optKey;
+                }
+                current = current.split('').sort().join('');
             }
-        });
-    }
 
-    // --- 新增: 保存历史记录 (修复缺失函数) ---
-    function saveHistory(score, type) {
-        if (!currentDb) return;
-        const id = currentDb.id;
-        const histKey = `bingo_hist_${id}`;
-        const history = JSON.parse(localStorage.getItem(histKey) || '[]');
-
-        const record = {
-            date: Date.now(),
-            score: score,
-            type: type,
-            quizSnapshot: currentQuiz, // 保存当时的题目快照
-            userAnswers: userAnswers   // 保存用户答案
-        };
-
-        history.push(record);
-        localStorage.setItem(histKey, JSON.stringify(history));
-
-        // 如果是顺序练习，更新进度
-        if (type === 'sequence') {
-            let newProg = (parseInt(localStorage.getItem(`bingo_prog_${id}`)) || 0) + currentQuiz.length;
-            // 防止溢出
-            if (newProg > currentDb.questions.length) newProg = currentDb.questions.length;
-            localStorage.setItem(`bingo_prog_${id}`, newProg);
-            currentDb.progress = newProg;
-        }
-    }
-
-    function submitPaper(autoSubmit = false) {
-        if (!autoSubmit && !confirm('不改了？真的交卷了哦？')) return;
-        
-        stopTimer();
-        removeQuizScrollListener();
-        window.removeEventListener('beforeunload', saveWipQuiz);
-        
-        let correctCount = 0;
-        currentQuiz.forEach((q, i) => {
-            if ((userAnswers[i] || '') === q.a) correctCount++;
-        });
-
-        const score = Math.round((currentQuiz.length > 0 ? (correctCount / currentQuiz.length) : 0) * 100);
-        
-        if (quizType !== 'wrong_review') {
-            saveHistory(score, quizType);
-        }
-
-        lastCompletedQuiz = currentQuiz;
-        lastCompletedAnswers = userAnswers;
-
-        clearWipQuiz();
-        quizType = null;
-        currentQuiz = [];
-        userAnswers = {};
-
-        document.getElementById('result-score').innerText = score;
-        document.getElementById('modal-score').style.display = 'flex';
-    }
-
-    function enterReviewMode() {
-        document.getElementById('modal-score').style.display = 'none';
-        
-        currentQuiz = lastCompletedQuiz;
-        userAnswers = lastCompletedAnswers;
-        
-        isReviewMode = true;
-
-        updateView({ view: 'quiz' });
-        document.getElementById('quiz-fab-area').style.display = 'none';
-        renderQuizItems(); 
-        window.scrollTo(0,0);
-    }
-
-    function exitQuiz() {
-        if (quizType === 'mock_exam' && !isReviewMode) {
-            if (confirm('您正在进行模拟开啃，现在退出将直接交卷，确定吗？')) {
-                submitPaper(true); 
-            } else {
-                return; 
-            }
-        }
-
-        if (!isReviewMode) {
+            userAnswers[qIdx] = current;
             saveWipQuiz();
-        }
-        
-        history.back();
-    }
 
-</script>
-<script src="https://cdn.jsdelivr.net/npm/tinygesture@3.0.0/dist/TinyGesture.min.js"></script>
-<script>
-    // --- 手势处理 ---
-    window.addEventListener('load', () => {
-        try {
-            const gesture = new TinyGesture(document.body);
-            gesture.on('swiperight', (event) => {
-                const dashboardView = document.getElementById('view-dashboard');
-                const quizView = document.getElementById('view-quiz');
-
-                if (dashboardView.style.display === 'block') {
-                    if (event.target.tagName === 'INPUT' || event.target.tagName === 'SELECT' || window.getSelection().toString()) return;
-                    history.back();
-                }
-
-                if (quizView.style.display === 'block') {
-                    if (event.target.tagName === 'INPUT' || event.target.tagName === 'SELECT' || window.getSelection().toString()) return;
-                    history.back();
+            const card = document.getElementById(`q-${qIdx}`);
+            const rows = card.querySelectorAll('.option-row');
+            rows.forEach(row => {
+                const k = row.querySelector('.option-circle').innerText;
+                if (isMulti) {
+                    if (current.includes(k)) row.classList.add('selected');
+                    else row.classList.remove('selected');
+                } else {
+                    if (k === current) row.classList.add('selected');
+                    else row.classList.remove('selected');
                 }
             });
-        } catch (e) {
-            console.log("Gesture library load failed or not compatible", e);
         }
-    });
-</script>
+
+        // --- 新增: 保存历史记录 (修复缺失函数) ---
+        function saveHistory(score, type) {
+            if (!currentDb) return;
+            const id = currentDb.id;
+            const histKey = `bingo_hist_${id}`;
+            const history = JSON.parse(localStorage.getItem(histKey) || '[]');
+
+            const record = {
+                date: Date.now(),
+                score: score,
+                type: type,
+                quizSnapshot: currentQuiz, // 保存当时的题目快照
+                userAnswers: userAnswers   // 保存用户答案
+            };
+
+            history.push(record);
+            localStorage.setItem(histKey, JSON.stringify(history));
+
+            // ...
+            // 如果是顺序练习，更新进度
+            if (type === 'sequence') {
+                const currentProg = parseInt(localStorage.getItem(`bingo_prog_${id}`)) || 0;
+
+                // 计算这批题目的结束位置索引 (基于题目在原始数组中的位置)
+                // 注意：这需要我们知道 currentQuiz 里的题目在原始 questions 里的 index。
+                // 由于你的数据结构没存 ID，我们简化处理：
+                // 假设是按顺序切片的，那么用户的 "起始位置输入框" + "当前题目数量" = 新的潜在进度
+
+                const startInputVal = parseInt(document.getElementById('sequence-start-input').value) || 1;
+                const potentialNewProg = (startInputVal - 1) + currentQuiz.length;
+
+                // 只有当新的进度比旧进度大时，才更新 (避免复习旧题时把进度覆盖回去)
+                if (potentialNewProg > currentProg) {
+                    let newProg = potentialNewProg;
+                    // 防止溢出
+                    if (newProg > currentDb.questions.length) newProg = currentDb.questions.length;
+
+                    localStorage.setItem(`bingo_prog_${id}`, newProg);
+                    currentDb.progress = newProg;
+                }
+            }
+            // ...
+
+        }
+
+        function submitPaper(autoSubmit = false) {
+            if (!autoSubmit && !confirm('不改了？真的交卷了哦？')) return;
+
+            stopTimer();
+            removeQuizScrollListener();
+            window.removeEventListener('beforeunload', saveWipQuiz);
+
+            let correctCount = 0;
+            currentQuiz.forEach((q, i) => {
+                if ((userAnswers[i] || '') === q.a) correctCount++;
+            });
+
+            const score = Math.round((currentQuiz.length > 0 ? (correctCount / currentQuiz.length) : 0) * 100);
+
+            if (quizType !== 'wrong_review') {
+                saveHistory(score, quizType);
+            }
+
+            lastCompletedQuiz = currentQuiz;
+            lastCompletedAnswers = userAnswers;
+
+            clearWipQuiz();
+            quizType = null;
+            currentQuiz = [];
+            userAnswers = {};
+
+            document.getElementById('result-score').innerText = score;
+            document.getElementById('modal-score').style.display = 'flex';
+        }
+
+        function enterReviewMode() {
+            document.getElementById('modal-score').style.display = 'none';
+
+            currentQuiz = lastCompletedQuiz;
+            userAnswers = lastCompletedAnswers;
+
+            isReviewMode = true;
+
+            updateView({ view: 'quiz' });
+            document.getElementById('quiz-fab-area').style.display = 'none';
+            renderQuizItems();
+            window.scrollTo(0, 0);
+        }
+
+        function exitQuiz() {
+            if (quizType === 'mock_exam' && !isReviewMode) {
+                if (confirm('您正在进行模拟开啃，现在退出将直接交卷，确定吗？')) {
+                    submitPaper(true);
+                } else {
+                    return;
+                }
+            }
+
+            if (!isReviewMode) {
+                saveWipQuiz();
+            }
+
+            history.back();
+        }
+
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/tinygesture@3.0.0/dist/TinyGesture.min.js"></script>
+    <script>
+        // --- 手势处理 ---
+        window.addEventListener('load', () => {
+            try {
+                const gesture = new TinyGesture(document.body);
+                gesture.on('swiperight', (event) => {
+                    const dashboardView = document.getElementById('view-dashboard');
+                    const quizView = document.getElementById('view-quiz');
+
+                    if (dashboardView.style.display === 'block') {
+                        if (event.target.tagName === 'INPUT' || event.target.tagName === 'SELECT' || window.getSelection().toString()) return;
+                        history.back();
+                    }
+
+                    if (quizView.style.display === 'block') {
+                        if (event.target.tagName === 'INPUT' || event.target.tagName === 'SELECT' || window.getSelection().toString()) return;
+                        history.back();
+                    }
+                });
+            } catch (e) {
+                console.log("Gesture library load failed or not compatible", e);
+            }
+        });
+    </script>
 </body>
+
 </html>
