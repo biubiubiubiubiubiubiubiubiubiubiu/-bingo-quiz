@@ -1536,7 +1536,7 @@
             document.getElementById('modal-score').style.display = 'none';
             history.back(); // 返回仪表盘
         }
-        
+
         // --- 答题逻辑 ---
         function startQuiz(type) {
             const wipData = localStorage.getItem(`bingo_wip_${currentDb.id}`);
@@ -1809,8 +1809,8 @@
 
             // 记录历史（模拟考试必须记录）
             // 注意：wrong_review 模式通常不记录分数历史，或者你可以自行决定
-            if (quizType !== 'wrong_review') {
-                saveHistory(score, quizType);
+            if (quizType !== 'mock_exam') {
+                clearWipQuiz();
             }
 
             lastCompletedQuiz = currentQuiz;
