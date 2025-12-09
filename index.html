@@ -707,7 +707,7 @@
         <div class="nav-bar">
             <div style="font-size:14px; font-weight:bold; color:var(--text-sub);" id="quiz-progress-text">1/20</div>
             <div style="font-size:16px; font-weight:bold; color:var(--primary);" id="quiz-timer"></div>
-            <button class="btn btn-ghost btn-icon" onclick="history.back()" title="退出">
+            <button class="btn btn-ghost btn-icon" onclick="handleQuizExit()" title="退出">
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                     stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
                     <line x1="18" y1="6" x2="6" y2="18"></line>
@@ -765,7 +765,7 @@
             <div style="font-size:48px; font-weight:800; color:var(--primary);" id="result-score">90</div>
             <p style="color:var(--text-sub);">智力值</p>
             <div style="display:flex; gap:10px; margin-top:20px;">
-                <button class="btn btn-ghost" onclick="history.back()">回狗窝</button>
+                <button class="btn btn-ghost" onclick="finishExamAndExit()">回狗窝</button>
                 <button class="btn btn-primary" onclick="enterReviewMode()">回味一下</button>
             </div>
         </div>
@@ -1127,7 +1127,7 @@
             return parsed;
         }
 
-                // --- 核心修改：支持更新题库并保留进度的导入逻辑 ---
+        // --- 核心修改：支持更新题库并保留进度的导入逻辑 ---
         function confirmImport() {
             const selectedSheets = Array.from(document.querySelectorAll('#sheet-selection-container input[name="sheet"]:checked'))
                 .map(input => input.value);
@@ -1143,7 +1143,7 @@
 
             selectedSheets.forEach(sheetName => {
                 const data = tempImportData[sheetName];
-                
+
                 // 1. 检查是否存在同名题库
                 const existingDb = meta.find(m => m.name === sheetName);
 
@@ -1160,7 +1160,7 @@
                         try {
                             // 覆盖题目数据
                             localStorage.setItem(`bingo_db_${existingDb.id}`, JSON.stringify(data));
-                            
+
                             // 更新元数据中的数量和时间
                             existingDb.count = data.length;
                             existingDb.lastUsed = Date.now();
@@ -1195,7 +1195,7 @@
             saveMeta(meta);
             closeImportModal();
             renderDbList(); // 刷新列表
-            
+
             // 提示结果
             if (updatedCount > 0 || newCount > 0) {
                 alert(`汪！操作完成：\n🛠 更新了 ${updatedCount} 个旧狗窝\n✨ 挖掘了 ${newCount} 个新狗窝`);
@@ -1215,7 +1215,9 @@
 
         // --- 仪表盘逻辑 ---
         function saveWipQuiz() {
-            if (!currentDb || !currentQuiz.length || isReviewMode) return;
+            // 【修改】如果是模拟考试，绝对不保存进度，这意味着刷新或强退后无法“继续”
+            if (!currentDb || !currentQuiz.length || isReviewMode || quizType === 'mock_exam') return;
+
             const wipState = {
                 quizType: quizType,
                 currentQuiz: currentQuiz,
@@ -1223,6 +1225,21 @@
                 lastVisibleQuestionIndex: lastVisibleQuestionIndex
             };
             localStorage.setItem(`bingo_wip_${currentDb.id}`, JSON.stringify(wipState));
+        }
+
+        function handleQuizExit() {
+            // 如果是模拟考试模式，且并不是在回看错题（是在答题中）
+            if (quizType === 'mock_exam' && !isReviewMode) {
+                // 弹出警告
+                if (confirm('⚠️ 正在模拟考试中！\n\n现在退出将强制交卷并生成成绩单，且无法撤销。\n\n确定要交卷吗？')) {
+                    // 参数 true 代表自动交卷，不再次弹窗确认
+                    submitPaper(true);
+                    // 注意：submitPaper 会打开成绩 Modal，用户可以在成绩单上点击“回狗窝”离开
+                }
+            } else {
+                // 普通模式，直接返回
+                history.back();
+            }
         }
 
         function clearWipQuiz() {
@@ -1511,6 +1528,15 @@
             startTimer(totalTime);
         }
 
+        function finishExamAndExit() {
+            // 彻底清理状态
+            quizType = null;
+            currentQuiz = [];
+            userAnswers = {};
+            document.getElementById('modal-score').style.display = 'none';
+            history.back(); // 返回仪表盘
+        }
+        
         // --- 答题逻辑 ---
         function startQuiz(type) {
             const wipData = localStorage.getItem(`bingo_wip_${currentDb.id}`);
@@ -1772,7 +1798,7 @@
 
             stopTimer();
             removeQuizScrollListener();
-            window.removeEventListener('beforeunload', saveWipQuiz);
+            window.removeEventListener('beforeunload', saveWipQuiz); // 移除保存监听
 
             let correctCount = 0;
             currentQuiz.forEach((q, i) => {
@@ -1781,6 +1807,8 @@
 
             const score = Math.round((currentQuiz.length > 0 ? (correctCount / currentQuiz.length) : 0) * 100);
 
+            // 记录历史（模拟考试必须记录）
+            // 注意：wrong_review 模式通常不记录分数历史，或者你可以自行决定
             if (quizType !== 'wrong_review') {
                 saveHistory(score, quizType);
             }
@@ -1788,13 +1816,21 @@
             lastCompletedQuiz = currentQuiz;
             lastCompletedAnswers = userAnswers;
 
+            // 清理现场
             clearWipQuiz();
-            quizType = null;
-            currentQuiz = [];
-            userAnswers = {};
+
+            // 【修改】这里不要把 quizType 清空，因为我们在 Modal 里可能还需要判断是不是 mock_exam
+            // quizType = null; 
+            // currentQuiz = []; // 也不要清空，否则背景会变白
+            // userAnswers = {};
 
             document.getElementById('result-score').innerText = score;
             document.getElementById('modal-score').style.display = 'flex';
+
+            // 【新增】如果是模拟考，隐藏底部的提交按钮，防止用户关掉Modal后在这个页面迷茫
+            if (quizType === 'mock_exam') {
+                document.getElementById('quiz-fab-area').style.display = 'none';
+            }
         }
 
         function enterReviewMode() {
