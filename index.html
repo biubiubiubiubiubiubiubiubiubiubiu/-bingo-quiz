@@ -626,7 +626,7 @@
             <div style="margin-bottom: 10px;">
                 <div style="font-size:12px; color:var(--text-sub); margin-bottom:8px; display:flex; justify-content:space-between; align-items:center;">
                     <span>📍 起始序号</span>
-                    <!-- <span id="max-count-hint" style="background:var(--bg-input); padding:2px 6px; border-radius:4px;">共 0 根</span> -->
+                    <span id="max-count-hint" style="background:var(--bg-input); padding:2px 6px; border-radius:4px;">共 0 根</span>
                 </div>
 
                 <!-- 修复后的布局 -->
@@ -854,7 +854,7 @@
             startInput.value = defaultStart;
             startInput.max = questions.length;
             startInput.min = 1;
-            // maxHint.innerText = `(共 ${questions.length} 根)`;
+            maxHint.innerText = `(共 ${questions.length} 根)`;
             // --- 新增代码 END ---
 
             const categoryContainer = document.getElementById('category-container');
