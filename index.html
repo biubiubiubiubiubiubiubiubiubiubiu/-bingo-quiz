@@ -1493,7 +1493,9 @@
         }
 
         function startMockExam() {
-            clearWipQuiz();
+            // 【重要修复】这里删除了 clearWipQuiz(); 
+            // 这样模拟考试就不会清空之前的“继续进度”
+            
             const count = parseInt(document.getElementById('mock-exam-count').value);
             const totalTime = count * 90;
 
@@ -1809,6 +1811,10 @@
 
             // 记录历史（模拟考试必须记录）
             // 注意：wrong_review 模式通常不记录分数历史，或者你可以自行决定
+            saveHistory(score, quizType);
+
+            // 【重要修复】只有非模拟考试，才清空 WIP
+            // 因为模拟考试本身就不保存 WIP，所以如果这里无脑清空，会把之前的普通练习进度删掉
             if (quizType !== 'mock_exam') {
                 clearWipQuiz();
             }
@@ -1816,14 +1822,8 @@
             lastCompletedQuiz = currentQuiz;
             lastCompletedAnswers = userAnswers;
 
-            // 清理现场
-            clearWipQuiz();
-
-            // 【修改】这里不要把 quizType 清空，因为我们在 Modal 里可能还需要判断是不是 mock_exam
-            // quizType = null; 
-            // currentQuiz = []; // 也不要清空，否则背景会变白
-            // userAnswers = {};
-
+            // 清理现场：不要在这里调用 clearWipQuiz()，因为它已经在上面根据条件判断过了
+            
             document.getElementById('result-score').innerText = score;
             document.getElementById('modal-score').style.display = 'flex';
 
