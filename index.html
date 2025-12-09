@@ -1934,7 +1934,14 @@
 
                     if (quizView.style.display === 'block') {
                         if (event.target.tagName === 'INPUT' || event.target.tagName === 'SELECT' || window.getSelection().toString()) return;
-                        history.back();
+                        
+                        // 如果是模拟考试模式，则触发和退出按钮一样的行为
+                        if (quizType === 'mock_exam' && !isReviewMode) {
+                            handleQuizExit();
+                        } else {
+                            // 否则，正常返回
+                            history.back();
+                        }
                     }
                 });
             } catch (e) {
