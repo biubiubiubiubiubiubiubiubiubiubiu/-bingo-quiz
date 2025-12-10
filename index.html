@@ -600,7 +600,7 @@
         [data-mode="child"] .btn-delete-hist,
         [data-mode="child"] #btn-wrong-answers,
         [data-mode="child"] #btn-resume-quiz,
-        [data-mode="child"] .nav-bar .btn-icon:not(.btn-child-toggle),
+        [data-mode="child"] .nav-bar .btn-icon:not(.btn-child-toggle):not(.btn-quiz-exit),
         [data-mode="child"] #history-list,
         [data-mode="child"] #import-export-area,
         [data-mode="child"] .btn-float {
@@ -890,7 +890,7 @@
         <div class="nav-bar">
             <div style="font-size:14px; font-weight:bold; color:var(--text-sub);" id="quiz-progress-text">1/20</div>
             <div style="font-size:16px; font-weight:bold; color:var(--primary);" id="quiz-timer"></div>
-            <button class="btn btn-ghost btn-icon" onclick="handleQuizExit()" title="退出">
+            <button class="btn btn-ghost btn-icon btn-quiz-exit" onclick="handleQuizExit()" title="退出">
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                     stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
                     <line x1="18" y1="6" x2="6" y2="18"></line>
@@ -1139,6 +1139,8 @@
                 deferredInstallPrompt = null;
                 if (installBtn) installBtn.style.display = 'none';
             });
+
+            initChildMode(); 
         };
 
         // --- 主题切换 ---
@@ -2284,12 +2286,7 @@
             if (document.getElementById('view-dashboard').style.display === 'block' && currentDb) setupDashboard(currentDb.id);
         }
 
-        // 在 window.onload 里调用
-        window.onload = function () {
-            // ... 原有的代码 ...
-            initChildMode(); // <--- 添加这一行
-            // ...
-        };
+
     </script>
     <!-- 儿童模式反馈遮罩 -->
     <div id="child-feedback" class="child-feedback-modal" onclick="nextChildQuestion()">
