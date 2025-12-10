@@ -600,8 +600,7 @@
         [data-mode="child"] .btn-delete-hist,
         [data-mode="child"] #btn-wrong-answers,
         [data-mode="child"] #btn-resume-quiz,
-        [data-mode="child"] .nav-bar .btn-icon:not(.btn-child-toggle):not(.btn-quiz-exit),
-        [data-mode="child"] #history-list,
+        [data-mode="child"] .nav-bar .btn-icon:not(.btn-child-toggle):not(.btn-quiz-exit):not(.btn-back-home):not(.btn-theme-toggle),
         [data-mode="child"] #import-export-area,
         [data-mode="child"] .btn-float {
             display: none !important;
@@ -734,7 +733,7 @@
                     style="color: #FF9F1C;">
                     <span id="child-icon">👶</span>
                 </button>
-                <button class="btn btn-ghost btn-icon" onclick="toggleTheme()" title="切换主题">
+                <button class="btn btn-ghost btn-icon btn-theme-toggle" onclick="toggleTheme()" title="切换主题">
                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                         stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
                         <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
@@ -773,7 +772,7 @@
     <!-- VIEW 2: 单个题库仪表盘 -->
     <div id="view-dashboard" class="container" style="padding: 0 20px; display:none;">
         <div class="nav-bar" style="padding-left:0; padding-right:0;">
-            <button class="btn btn-ghost btn-icon" onclick="history.back()" title="返回">
+            <button class="btn btn-ghost btn-icon btn-back-home" onclick="history.back()" title="返回">
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                     stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
                     <polyline points="15 18 9 12 15 6"></polyline>
@@ -781,7 +780,11 @@
             </button>
             <div style="font-weight:bold; font-size:16px; max-width: 150px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;"
                 id="dash-title">狗窝详情</div>
-            <button class="btn btn-ghost btn-icon btn-delete" onclick="deleteCurrentDb()" title="删除题库">
+            <div style="display:flex; gap:10px;">
+                <button class="btn btn-ghost btn-icon btn-theme-toggle" onclick="toggleTheme()" title="切换主题">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>
+                </button>
+                <button class="btn btn-ghost btn-icon btn-delete" onclick="deleteCurrentDb()" title="删除题库">
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                     stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
                     <polyline points="3 6 5 6 21 6"></polyline>
@@ -790,6 +793,7 @@
                     <line x1="14" y1="11" x2="14" y2="17"></line>
                 </svg>
             </button>
+            </div>
         </div>
 
         <div class="ios-card">
@@ -890,6 +894,9 @@
         <div class="nav-bar">
             <div style="font-size:14px; font-weight:bold; color:var(--text-sub);" id="quiz-progress-text">1/20</div>
             <div style="font-size:16px; font-weight:bold; color:var(--primary);" id="quiz-timer"></div>
+            <button class="btn btn-ghost btn-icon btn-theme-toggle" onclick="toggleTheme()" title="切换主题">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>
+            </button>
             <button class="btn btn-ghost btn-icon btn-quiz-exit" onclick="handleQuizExit()" title="退出">
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                     stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
@@ -1730,7 +1737,6 @@
 
             history.pushState({ view: 'quiz', dbId: currentDb.id }, '', '#quiz');
             updateView({ view: 'quiz' });
-            history.pushState({ view: 'quiz', dbId: currentDb.id }, '', '#quiz');
             document.getElementById('quiz-fab-area').style.display = 'flex';
 
             renderQuizItems();
@@ -2040,6 +2046,8 @@
             feedback.querySelector('.child-star').innerText = randomStar;
             feedback.querySelector('h2').innerText = titles[Math.floor(Math.random() * titles.length)];
             feedback.style.display = 'flex';
+
+            setTimeout(nextChildQuestion, 2000); // 2秒后自动进入下一题
         }
 
         // 儿童模式专用：下一题
