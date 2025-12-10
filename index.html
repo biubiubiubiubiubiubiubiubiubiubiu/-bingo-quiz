@@ -860,7 +860,32 @@
             }
         }
 
+        // --- Navigation & History (核心修改版) ---
         window.onpopstate = function (event) {
+            // 【核心拦截逻辑】
+            // 如果当前处于“模拟考试”且“非回看”状态
+            if (quizType === 'mock_exam' && !isReviewMode) {
+                // 弹出系统级确认框（这会暂停 JS 执行）
+                const confirmExit = confirm('⚠️ 正在模拟考试中！\n\n系统检测到返回操作（或侧滑）。\n现在退出将强制交卷。\n\n确定要交卷吗？');
+                
+                if (confirmExit) {
+                    // 用户点“确定”：虽然浏览器URL已经变了，但我们手动执行交卷流程
+                    // true 代表自动交卷，不再重复弹窗
+                    submitPaper(true);
+                    
+                    // 注意：此时 URL 可能已经变回了 dashboard，但界面被 submitPaper 留在了 quiz
+                    // 这对于 SPA 是允许的，等用户在成绩单点击“回狗窝”时会修正
+                    return; 
+                } else {
+                    // 用户点“取消”（我想留下）：
+                    // 关键操作！因为刚才的侧滑已经让浏览器后退了一步
+                    // 我们必须立刻把这个状态“推”回去，恢复原来的 URL 和状态
+                    history.pushState({ view: 'quiz', dbId: currentDb.id }, '', '#quiz');
+                    return; // 阻止 updateView 执行，界面保持不变
+                }
+            }
+
+            // --- 普通模式逻辑 (未变) ---
             if (event.state) {
                 updateView(event.state);
             } else {
@@ -1561,12 +1586,13 @@
 
             history.pushState({ view: 'quiz', dbId: currentDb.id }, '', '#quiz');
             updateView({ view: 'quiz' });
+            history.pushState({ view: 'quiz', dbId: currentDb.id }, '', '#quiz');
             document.getElementById('quiz-fab-area').style.display = 'flex';
 
             renderQuizItems();
-            saveWipQuiz();
+            // saveWipQuiz();
             setupQuizScrollListener();
-            window.addEventListener('beforeunload', saveWipQuiz);
+            // window.addEventListener('beforeunload', saveWipQuiz);
 
             startTimer(totalTime);
         }
@@ -1920,6 +1946,18 @@
     </script>
     <script src="https://cdn.jsdelivr.net/npm/tinygesture@3.0.0/dist/TinyGesture.min.js"></script>
     <script>
+                // --- 全局防手滑刷新/关闭 ---
+        window.addEventListener('beforeunload', function (e) {
+            // 只有在模拟考试且未交卷时才拦截
+            if (quizType === 'mock_exam' && !isReviewMode) {
+                // 标准做法，虽然现代浏览器可能不会显示自定义文本，但会弹出默认警告
+                e.preventDefault();
+                e.returnValue = '正在考试中，确定要离开吗？';
+                return '正在考试中，确定要离开吗？';
+            }
+            // 普通练习时，我们有 saveWipQuiz 自动保存，所以不需要拦截，让它直接关
+        });
+
         // --- 手势处理 (优化版) ---
         window.addEventListener('load', () => {
             try {
