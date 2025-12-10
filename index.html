@@ -690,6 +690,11 @@
             color: var(--danger);
         }
 
+        [data-mode="child"] .option-row.child-correct {
+            background: var(--success-light);
+            border-color: var(--success);
+        }
+
         /* 语音按钮 */
         .btn-tts {
             display: none;
@@ -782,17 +787,20 @@
                 id="dash-title">狗窝详情</div>
             <div style="display:flex; gap:10px;">
                 <button class="btn btn-ghost btn-icon btn-theme-toggle" onclick="toggleTheme()" title="切换主题">
-                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                        stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+                    </svg>
                 </button>
                 <button class="btn btn-ghost btn-icon btn-delete" onclick="deleteCurrentDb()" title="删除题库">
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                    stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                    <polyline points="3 6 5 6 21 6"></polyline>
-                    <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
-                    <line x1="10" y1="11" x2="10" y2="17"></line>
-                    <line x1="14" y1="11" x2="14" y2="17"></line>
-                </svg>
-            </button>
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                        stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                        <polyline points="3 6 5 6 21 6"></polyline>
+                        <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                        <line x1="10" y1="11" x2="10" y2="17"></line>
+                        <line x1="14" y1="11" x2="14" y2="17"></line>
+                    </svg>
+                </button>
             </div>
         </div>
 
@@ -895,7 +903,10 @@
             <div style="font-size:14px; font-weight:bold; color:var(--text-sub);" id="quiz-progress-text">1/20</div>
             <div style="font-size:16px; font-weight:bold; color:var(--primary);" id="quiz-timer"></div>
             <button class="btn btn-ghost btn-icon btn-theme-toggle" onclick="toggleTheme()" title="切换主题">
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                    stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+                </svg>
             </button>
             <button class="btn btn-ghost btn-icon btn-quiz-exit" onclick="handleQuizExit()" title="退出">
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
@@ -1147,7 +1158,7 @@
                 if (installBtn) installBtn.style.display = 'none';
             });
 
-            initChildMode(); 
+            initChildMode();
         };
 
         // --- 主题切换 ---
@@ -1968,38 +1979,36 @@
                 const correctAns = currentQuestion.a;
                 const row = event.currentTarget; // 获取点击的行
 
-                // 简单的防重复点击
-                if (row.classList.contains('locked')) return;
+                // 如果整个问题已正确回答并锁定，则阻止任何操作
+                if (row.closest('.ios-card').classList.contains('question-locked')) return;
 
-                if (optKey === correctAns || (type.includes('多') && correctAns.includes(optKey))) {
-                    // 答对了！
-                    // 1. 播放音效 (这里用简单的振动代替，如果你有mp3可以play())
-                    if (navigator.vibrate) navigator.vibrate(50);
+                // 判断点击的选项是否是正确答案的一部分
+                if (correctAns.includes(optKey)) {
+                    // 点击了正确选项
+                    row.classList.add('child-correct');
+                    if (navigator.vibrate) navigator.vibrate(30);
 
-                    // 2. 视觉反馈
-                    row.style.background = 'var(--success)';
-                    row.style.color = 'white';
-                    row.querySelector('.option-circle').style.borderColor = 'white';
-
-                    // 3. 弹出夸奖遮罩
-                    setTimeout(() => {
-                        showChildFeedback();
-                    }, 300);
-
-                    // 记录答案（为了保持兼容性，虽然儿童模式通常不交卷）
-                    userAnswers[qIdx] = correctAns;
+                    // 检查是否所有正确选项都已被选中
+                    const parentCard = row.closest('.ios-card');
+                    const correctOptionsInDom = parentCard.querySelectorAll('.child-correct');
+                    
+                    const isMulti = currentQuestion.t.includes('多');
+                    
+                    // 如果是单选题，或多选题的所有正确答案都已选定
+                    if (!isMulti || correctOptionsInDom.length === correctAns.length) {
+                        // 锁定问题，防止用户在答对后继续点击
+                        parentCard.classList.add('question-locked');
+                        userAnswers[qIdx] = correctAns;
+                        setTimeout(showChildFeedback, 400); // 延迟以显示最终选择
+                    }
 
                 } else {
-                    // 答错了！
-                    if (navigator.vibrate) navigator.vibrate([100, 50, 100]);
-
-                    // 摇晃动画
+                    // 点击了错误选项
                     row.classList.add('shake-it');
+                    if (navigator.vibrate) navigator.vibrate([100, 50, 100]);
                     setTimeout(() => {
                         row.classList.remove('shake-it');
                     }, 400);
-
-                    // 也可以选择让语音说“不对哦”
                 }
                 return; // 阻止执行后面的普通模式逻辑
             }
@@ -2191,10 +2200,10 @@
         }
 
     </script>
-<script type="module">
-    import TinyGesture from 'https://cdn.jsdelivr.net/npm/tinygesture@3.0.0/dist/TinyGesture.min.js';
-    window.TinyGesture = TinyGesture;
-</script>
+    <script type="module">
+        import TinyGesture from 'https://cdn.jsdelivr.net/npm/tinygesture@3.0.0/dist/TinyGesture.min.js';
+        window.TinyGesture = TinyGesture;
+    </script>
 
     <script>
         // --- 全局防手滑刷新/关闭 ---
