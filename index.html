@@ -2181,7 +2181,11 @@
         }
 
     </script>
-    <script src="https://cdn.jsdelivr.net/npm/tinygesture@3.0.0/dist/TinyGesture.min.js"></script>
+<script type="module">
+    import TinyGesture from 'https://cdn.jsdelivr.net/npm/tinygesture@3.0.0/dist/TinyGesture.min.js';
+    window.TinyGesture = TinyGesture;
+</script>
+
     <script>
         // --- 全局防手滑刷新/关闭 ---
         window.addEventListener('beforeunload', function (e) {
