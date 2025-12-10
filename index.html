@@ -582,60 +582,93 @@
             /* 卡通字体 */
         }
 
-        [data-mode="child"][data-theme="girl"] {
-            --primary: #FF9F1C;
-            /* 活力橙 */
-            --primary-light: #FFF0D4;
-            --success: #2EC4B6;
-            /* 糖果绿 */
-            --danger: #FF3366;
-            /* 糖果红 */
-            --bg-body: #FFFCF2;
-            /* 奶油白 */
-            --bg-card: #FFFFFF;
-            --bg-input: #F0F4F8;
-            --text-main: #2B2D42;
-            --text-sub: #8D99AE;
-            --text-inverse: #FFFFFF;
-        }
+                [data-mode="child"][data-theme="girl"] {
 
-        [data-mode="child"][data-theme="boy"] {
-            --primary: #5B85AA;
-            /* 忧郁蓝 */
-            --primary-light: rgba(91, 133, 170, 0.15);
-            --success: #7E9F8A;
-            /* 灰绿 */
-            --danger: #D9866E;
-            /* 脏橘 */
-            --bg-body: #2D3741;
-            /* 深海蓝 */
-            --bg-card: #384450;
-            --bg-input: #495867;
-            --text-main: #BCC8D5;
-            /* 柔和白 */
-            --text-sub: #808C99;
-            --text-inverse: #FFFFFF;
-        }
+                    --primary: #FF70A6;    /* 泡泡糖粉 */
 
-        /* 儿童模式下隐藏复杂的按钮和统计 */
-        [data-mode="child"] .btn-delete,
-        [data-mode="child"] .btn-delete-hist,
-        [data-mode="child"] #btn-wrong-answers,
+                    --primary-light: #FFE0ED;
 
-        [data-mode="child"] .nav-bar .btn-icon:not(.btn-child-toggle):not(.btn-quiz-exit):not(.btn-back-home):not(.btn-theme-toggle),
-        [data-mode="child"] #import-export-area,
-        [data-mode="child"] .btn-float {
-            display: none !important;
-        }
+                    --success: #70C1B3;    /* 薄荷绿 */
 
-        /* 儿童模式特有的大按钮 */
-        [data-mode="child"] .option-row {
-            padding: 20px;
-            margin-bottom: 15px;
-            background: white;
-            border: 3px solid #F0F4F8;
-            transition: transform 0.1s;
-        }
+                    --danger: #FF477E;     /* 西瓜红 */
+
+                    --bg-body: #FFF9F0;     /* 奶油白 */
+
+                    --bg-card: #FFFFFF;
+
+                    --bg-input: #F2F5F7;
+
+                    --text-main: #333333;
+
+                    --text-sub: #8D99AE;
+
+                    --text-inverse: #FFFFFF;
+
+                }
+
+        
+
+                [data-mode="child"][data-theme="boy"] {
+
+                    --primary: #00A6FB;    /* 未来蓝 */
+
+                    --primary-light: rgba(0, 166, 251, 0.15);
+
+                    --success: #A2E833;    /* 荧光绿 */
+
+                    --danger: #FF4F00;     /* 激光橙 */
+
+                    --bg-body: #1A1B2F;     /* 深空紫 */
+
+                    --bg-card: #2A2D40;
+
+                    --bg-input: #393E52;
+
+                    --text-main: #EFEFEF;   /* 高亮白 */
+
+                    --text-sub: #9FA4B3;     /* 星云灰 */
+
+                    --text-inverse: #FFFFFF;
+
+                }
+
+        
+
+                /* 儿童模式下隐藏复杂的按钮和统计 */
+
+                [data-mode="child"] .btn-delete,
+
+                [data-mode="child"] .btn-delete-hist,
+
+                [data-mode="child"] #btn-wrong-answers,
+
+                [data-mode="child"] .nav-bar .btn-icon:not(.btn-child-toggle):not(.btn-quiz-exit):not(.btn-back-home):not(.btn-theme-toggle),
+
+                [data-mode="child"] #import-export-area,
+
+                [data-mode="child"] .btn-float {
+
+                    display: none !important;
+
+                }
+
+        
+
+                /* 儿童模式特有的大按钮 */
+
+                [data-mode="child"] .option-row {
+
+                    padding: 20px;
+
+                    margin-bottom: 15px;
+
+                    background: var(--bg-card);
+
+                    border: 3px solid var(--bg-input);
+
+                    transition: transform 0.1s;
+
+                }
 
         [data-mode="child"] .option-row:active {
             transform: scale(0.95);
