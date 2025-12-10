@@ -556,6 +556,7 @@
                 opacity: 0;
                 transform: translateY(-5px);
             }
+
             to {
                 opacity: 1;
                 transform: translateY(0);
@@ -1535,7 +1536,7 @@
         function startMockExam() {
             // 【重要修复】这里删除了 clearWipQuiz(); 
             // 这样模拟考试就不会清空之前的“继续进度”
-            
+
             const count = parseInt(document.getElementById('mock-exam-count').value);
             const totalTime = count * 90;
 
@@ -1673,7 +1674,7 @@
                 if (quizType === 'wrong_review' && !isReviewMode) {
                     masteredButtonHtml = `<button class="btn-mastered" onclick="masterHardBone(${idx})">我啃会了</button>`;
                 }
-                
+
                 const answerContent = `
                     <div style="font-weight:bold; margin-bottom:4px;">
                         汪的答案：<span style="color:var(--success)">${item.a}</span>
@@ -1876,7 +1877,7 @@
             lastCompletedAnswers = userAnswers;
 
             // 清理现场：不要在这里调用 clearWipQuiz()，因为它已经在上面根据条件判断过了
-            
+
             document.getElementById('result-score').innerText = score;
             document.getElementById('modal-score').style.display = 'flex';
 
@@ -1919,27 +1920,43 @@
     </script>
     <script src="https://cdn.jsdelivr.net/npm/tinygesture@3.0.0/dist/TinyGesture.min.js"></script>
     <script>
-        // --- 手势处理 ---
+        // --- 手势处理 (优化版) ---
         window.addEventListener('load', () => {
             try {
+                // 初始化手势库
                 const gesture = new TinyGesture(document.body);
+
+                // 监听右滑事件 (Swipe Right)
                 gesture.on('swiperight', (event) => {
                     const dashboardView = document.getElementById('view-dashboard');
                     const quizView = document.getElementById('view-quiz');
 
+                    // 1. 如果在仪表盘界面，右滑 = 返回首页
                     if (dashboardView.style.display === 'block') {
-                        if (event.target.tagName === 'INPUT' || event.target.tagName === 'SELECT' || window.getSelection().toString()) return;
+                        // 防止在输入框或选择文字时误触
+                        if (event.target.tagName === 'INPUT' ||
+                            event.target.tagName === 'SELECT' ||
+                            window.getSelection().toString()) return;
+
                         history.back();
                     }
 
+                    // 2. 如果在答题界面，右滑 = 退出/交卷
                     if (quizView.style.display === 'block') {
-                        if (event.target.tagName === 'INPUT' || event.target.tagName === 'SELECT' || window.getSelection().toString()) return;
-                        
-                        // 如果是模拟考试模式，则触发和退出按钮一样的行为
+                        // 防止在输入框或选择文字时误触
+                        if (event.target.tagName === 'INPUT' ||
+                            event.target.tagName === 'SELECT' ||
+                            window.getSelection().toString()) return;
+
+                        // 核心逻辑修改：
+                        // 如果是【模拟考试】且【非回看模式】，调用 handleQuizExit() 来触发弹窗逻辑
                         if (quizType === 'mock_exam' && !isReviewMode) {
                             handleQuizExit();
                         } else {
-                            // 否则，正常返回
+                            // 其他情况（普通练习、回看模式），直接保存进度并返回
+                            if (!isReviewMode) {
+                                saveWipQuiz(); // 确保普通练习手势退出也能保存进度
+                            }
                             history.back();
                         }
                     }
@@ -1949,6 +1966,7 @@
             }
         });
     </script>
+
 </body>
 
 </html>
