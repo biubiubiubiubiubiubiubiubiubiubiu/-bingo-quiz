@@ -576,6 +576,13 @@
 
         /* --- 儿童模式样式 --- */
         [data-mode="child"] {
+            --radius-l: 30px;
+            /* 更圆润 */
+            font-family: "YouYuan", "Chalkboard SE", "Comic Sans MS", sans-serif;
+            /* 卡通字体 */
+        }
+
+        [data-mode="child"][data-theme="girl"] {
             --primary: #FF9F1C;
             /* 活力橙 */
             --primary-light: #FFF0D4;
@@ -589,10 +596,25 @@
             --bg-input: #F0F4F8;
             --text-main: #2B2D42;
             --text-sub: #8D99AE;
-            --radius-l: 30px;
-            /* 更圆润 */
-            font-family: "YouYuan", "Chalkboard SE", "Comic Sans MS", sans-serif;
-            /* 卡通字体 */
+            --text-inverse: #FFFFFF;
+        }
+
+        [data-mode="child"][data-theme="boy"] {
+            --primary: #5B85AA;
+            /* 忧郁蓝 */
+            --primary-light: rgba(91, 133, 170, 0.15);
+            --success: #7E9F8A;
+            /* 灰绿 */
+            --danger: #D9866E;
+            /* 脏橘 */
+            --bg-body: #2D3741;
+            /* 深海蓝 */
+            --bg-card: #384450;
+            --bg-input: #495867;
+            --text-main: #BCC8D5;
+            /* 柔和白 */
+            --text-sub: #808C99;
+            --text-inverse: #FFFFFF;
         }
 
         /* 儿童模式下隐藏复杂的按钮和统计 */
@@ -1168,9 +1190,19 @@
         }
         function toggleTheme() {
             const html = document.documentElement;
-            const isDark = html.getAttribute('data-theme') === 'everforest';
-            html.setAttribute('data-theme', isDark ? 'light' : 'everforest');
-            localStorage.setItem('app_theme', isDark ? 'light' : 'everforest');
+            if (isChildMode) {
+                const currentTheme = html.getAttribute('data-theme');
+                // 在儿童模式下，我们只在 'girl' 和 'boy' 之间切换
+                const newTheme = (currentTheme === 'boy') ? 'girl' : 'boy';
+                html.setAttribute('data-theme', newTheme);
+                localStorage.setItem('app_kid_theme', newTheme);
+            } else {
+                // 普通模式的逻辑保持不变
+                const isDark = html.getAttribute('data-theme') === 'everforest';
+                const newTheme = isDark ? 'light' : 'everforest';
+                html.setAttribute('data-theme', newTheme);
+                localStorage.setItem('app_theme', isDark ? 'light' : 'everforest');
+            }
         }
 
         // --- 滚动位置追踪 ---
@@ -2288,13 +2320,14 @@
                 html.setAttribute('data-mode', 'child');
                 localStorage.setItem('app_mode', 'child');
                 icon.innerText = '👨‍👩‍👧'; // 变成“退出儿童模式”的图标
-                // 儿童模式下强制浅色主题，避免看着压抑
-                html.setAttribute('data-theme', 'light');
+                // 儿童模式下，加载其专属主题
+                const kidTheme = localStorage.getItem('app_kid_theme') || 'girl';
+                html.setAttribute('data-theme', kidTheme);
             } else {
                 html.removeAttribute('data-mode');
                 localStorage.setItem('app_mode', 'normal');
                 icon.innerText = '👶';
-                // 恢复原来的主题
+                // 退出儿童模式，恢复原来的主题
                 initTheme();
             }
 
