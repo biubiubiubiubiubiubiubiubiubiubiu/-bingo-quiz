@@ -573,6 +573,143 @@
                 max-width: 400px;
             }
         }
+
+        /* --- 儿童模式样式 --- */
+        [data-mode="child"] {
+            --primary: #FF9F1C;
+            /* 活力橙 */
+            --primary-light: #FFF0D4;
+            --success: #2EC4B6;
+            /* 糖果绿 */
+            --danger: #FF3366;
+            /* 糖果红 */
+            --bg-body: #FFFCF2;
+            /* 奶油白 */
+            --bg-card: #FFFFFF;
+            --bg-input: #F0F4F8;
+            --text-main: #2B2D42;
+            --text-sub: #8D99AE;
+            --radius-l: 30px;
+            /* 更圆润 */
+            font-family: "YouYuan", "Chalkboard SE", "Comic Sans MS", sans-serif;
+            /* 卡通字体 */
+        }
+
+        /* 儿童模式下隐藏复杂的按钮和统计 */
+        [data-mode="child"] .btn-delete,
+        [data-mode="child"] .btn-delete-hist,
+        [data-mode="child"] #btn-wrong-answers,
+        [data-mode="child"] #btn-resume-quiz,
+        [data-mode="child"] .nav-bar .btn-icon:not(.btn-child-toggle),
+        [data-mode="child"] #history-list,
+        [data-mode="child"] #import-export-area,
+        [data-mode="child"] .btn-float {
+            display: none !important;
+        }
+
+        /* 儿童模式特有的大按钮 */
+        [data-mode="child"] .option-row {
+            padding: 20px;
+            margin-bottom: 15px;
+            background: white;
+            border: 3px solid #F0F4F8;
+            transition: transform 0.1s;
+        }
+
+        [data-mode="child"] .option-row:active {
+            transform: scale(0.95);
+        }
+
+        [data-mode="child"] .option-circle {
+            width: 40px;
+            height: 40px;
+            font-size: 20px;
+            border-width: 3px;
+        }
+
+        /* 答对动画 */
+        @keyframes bounceIn {
+            0% {
+                transform: scale(0.3);
+                opacity: 0;
+            }
+
+            50% {
+                transform: scale(1.05);
+            }
+
+            70% {
+                transform: scale(0.9);
+            }
+
+            100% {
+                transform: scale(1);
+                opacity: 1;
+            }
+        }
+
+        .child-feedback-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(255, 255, 255, 0.9);
+            z-index: 999;
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            animation: fadeIn 0.3s;
+        }
+
+        .child-star {
+            font-size: 100px;
+            animation: bounceIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        /* 摇晃动画（答错） */
+        @keyframes shake {
+
+            0%,
+            100% {
+                transform: translateX(0);
+            }
+
+            25% {
+                transform: translateX(-10px);
+            }
+
+            75% {
+                transform: translateX(10px);
+            }
+        }
+
+        .shake-it {
+            animation: shake 0.4s;
+            border-color: var(--danger) !important;
+            color: var(--danger);
+        }
+
+        /* 语音按钮 */
+        .btn-tts {
+            display: none;
+            /* 默认隐藏 */
+            background: #E0F7FA;
+            color: #00BCD4;
+            border: none;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            align-items: center;
+            justify-content: center;
+            margin-left: 10px;
+            flex-shrink: 0;
+        }
+
+        [data-mode="child"] .btn-tts {
+            display: flex;
+        }
     </style>
 </head>
 
@@ -592,6 +729,11 @@
                 <div style="font-size:13px; color:var(--text-sub);">离线可用 · 无限狗窝 · 随时复盘</div>
             </div>
             <div style="display:flex; gap:10px;">
+                <!-- 在 view-home 的 nav-bar div里 -->
+                <button class="btn btn-ghost btn-icon btn-child-toggle" onclick="toggleChildMode()" title="切换儿童模式"
+                    style="color: #FF9F1C;">
+                    <span id="child-icon">👶</span>
+                </button>
                 <button class="btn btn-ghost btn-icon" onclick="toggleTheme()" title="切换主题">
                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                         stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
@@ -867,15 +1009,15 @@
             if (quizType === 'mock_exam' && !isReviewMode) {
                 // 弹出系统级确认框（这会暂停 JS 执行）
                 const confirmExit = confirm('⚠️ 正在模拟考试中！\n\n系统检测到返回操作（或侧滑）。\n现在退出将强制交卷。\n\n确定要交卷吗？');
-                
+
                 if (confirmExit) {
                     // 用户点“确定”：虽然浏览器URL已经变了，但我们手动执行交卷流程
                     // true 代表自动交卷，不再重复弹窗
                     submitPaper(true);
-                    
+
                     // 注意：此时 URL 可能已经变回了 dashboard，但界面被 submitPaper 留在了 quiz
                     // 这对于 SPA 是允许的，等用户在成绩单点击“回狗窝”时会修正
-                    return; 
+                    return;
                 } else {
                     // 用户点“取消”（我想留下）：
                     // 关键操作！因为刚才的侧滑已经让浏览器后退了一步
@@ -1732,6 +1874,12 @@
                 `;
                 }
 
+                let ttsHtml = `
+    <button class="btn-tts" onclick="speakText('${item.q.replace(/'/g, "\\'")}')">
+        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon><path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"></path></svg>
+    </button>
+`;
+
                 const html = `
                 <div class="${cardClass}" id="q-${idx}">
                     <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom:10px;">
@@ -1739,6 +1887,7 @@
                             <span class="bingo-badge" style="margin-left:0; margin-right:5px;">${item.t || '单选'}</span>
                             ${idx + 1}. ${item.q}
                         </span>
+                        ${ttsHtml}
                         ${masteredButtonHtml}
                     </div>
                     <div>${optionsHtml}</div>
@@ -1749,6 +1898,19 @@
                 container.insertAdjacentHTML('beforeend', html);
             });
         }
+
+        function speakText(text) {
+            if ('speechSynthesis' in window) {
+                window.speechSynthesis.cancel(); // 停止之前的朗读
+                const utterance = new SpeechSynthesisUtterance(text);
+                utterance.lang = 'zh-CN'; // 设置为中文
+                utterance.rate = 0.9; // 语速稍慢一点
+                window.speechSynthesis.speak(utterance);
+            } else {
+                alert('抱歉，您的浏览器不支持朗读功能。');
+            }
+        }
+
 
         function masterHardBone(qIdx) {
             if (!confirm('确定把这根骨头从硬骨头里扔掉吗？以后答错了还是会回来的哦。')) return;
@@ -1792,6 +1954,49 @@
         function selectOption(qIdx, optKey, type) {
             if (isReviewMode) return;
 
+            // --- 儿童模式逻辑 START ---
+            if (isChildMode) {
+                const currentQuestion = currentQuiz[qIdx];
+                const correctAns = currentQuestion.a;
+                const row = event.currentTarget; // 获取点击的行
+
+                // 简单的防重复点击
+                if (row.classList.contains('locked')) return;
+
+                if (optKey === correctAns || (type.includes('多') && correctAns.includes(optKey))) {
+                    // 答对了！
+                    // 1. 播放音效 (这里用简单的振动代替，如果你有mp3可以play())
+                    if (navigator.vibrate) navigator.vibrate(50);
+
+                    // 2. 视觉反馈
+                    row.style.background = 'var(--success)';
+                    row.style.color = 'white';
+                    row.querySelector('.option-circle').style.borderColor = 'white';
+
+                    // 3. 弹出夸奖遮罩
+                    setTimeout(() => {
+                        showChildFeedback();
+                    }, 300);
+
+                    // 记录答案（为了保持兼容性，虽然儿童模式通常不交卷）
+                    userAnswers[qIdx] = correctAns;
+
+                } else {
+                    // 答错了！
+                    if (navigator.vibrate) navigator.vibrate([100, 50, 100]);
+
+                    // 摇晃动画
+                    row.classList.add('shake-it');
+                    setTimeout(() => {
+                        row.classList.remove('shake-it');
+                    }, 400);
+
+                    // 也可以选择让语音说“不对哦”
+                }
+                return; // 阻止执行后面的普通模式逻辑
+            }
+            // --- 儿童模式逻辑 END ---
+
             const isMulti = type.includes('多');
             let current = userAnswers[qIdx] || '';
 
@@ -1821,6 +2026,38 @@
                     else row.classList.remove('selected');
                 }
             });
+        }
+
+        // 儿童模式专用：显示反馈
+        function showChildFeedback() {
+            const feedback = document.getElementById('child-feedback');
+            const stars = ['⭐', '🌟', '🌈', '🍭', '🐶', '💯'];
+            const randomStar = stars[Math.floor(Math.random() * stars.length)];
+            const titles = ['太棒了！', 'Bingo！', '真聪明！', '答对了！', '哇塞！'];
+
+            feedback.querySelector('.child-star').innerText = randomStar;
+            feedback.querySelector('h2').innerText = titles[Math.floor(Math.random() * titles.length)];
+            feedback.style.display = 'flex';
+        }
+
+        // 儿童模式专用：下一题
+        function nextChildQuestion() {
+            document.getElementById('child-feedback').style.display = 'none';
+
+            // 滚动到下一题
+            const nextIdx = lastVisibleQuestionIndex + 1;
+            if (nextIdx < currentQuiz.length) {
+                const nextEl = document.getElementById(`q-${nextIdx}`);
+                if (nextEl) {
+                    nextEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    lastVisibleQuestionIndex = nextIdx;
+                }
+            } else {
+                // 全做完了
+                alert('哇！所有的骨头都啃完了！你真是个小天才！');
+                // 可选择重置或返回
+                history.back();
+            }
         }
 
         function toggleAnalysis(qIdx) {
@@ -1946,7 +2183,7 @@
     </script>
     <script src="https://cdn.jsdelivr.net/npm/tinygesture@3.0.0/dist/TinyGesture.min.js"></script>
     <script>
-                // --- 全局防手滑刷新/关闭 ---
+        // --- 全局防手滑刷新/关闭 ---
         window.addEventListener('beforeunload', function (e) {
             // 只有在模拟考试且未交卷时才拦截
             if (quizType === 'mock_exam' && !isReviewMode) {
@@ -2003,7 +2240,59 @@
                 console.log("Gesture library load failed or not compatible", e);
             }
         });
+        let isChildMode = false;
+
+        // 初始化时检查
+        function initChildMode() {
+            const mode = localStorage.getItem('app_mode');
+            if (mode === 'child') {
+                enableChildMode(true);
+            }
+        }
+
+        // 切换开关
+        function toggleChildMode() {
+            isChildMode = !isChildMode;
+            enableChildMode(isChildMode);
+        }
+
+        function enableChildMode(enable) {
+            isChildMode = enable;
+            const html = document.documentElement;
+            const icon = document.getElementById('child-icon');
+
+            if (enable) {
+                html.setAttribute('data-mode', 'child');
+                localStorage.setItem('app_mode', 'child');
+                icon.innerText = '👨‍👩‍👧'; // 变成“退出儿童模式”的图标
+                // 儿童模式下强制浅色主题，避免看着压抑
+                html.setAttribute('data-theme', 'light');
+            } else {
+                html.removeAttribute('data-mode');
+                localStorage.setItem('app_mode', 'normal');
+                icon.innerText = '👶';
+                // 恢复原来的主题
+                initTheme();
+            }
+
+            // 如果当前在列表页或仪表盘，刷新一下界面以隐藏/显示按钮
+            if (document.getElementById('view-home').style.display === 'block') renderDbList();
+            if (document.getElementById('view-dashboard').style.display === 'block' && currentDb) setupDashboard(currentDb.id);
+        }
+
+        // 在 window.onload 里调用
+        window.onload = function () {
+            // ... 原有的代码 ...
+            initChildMode(); // <--- 添加这一行
+            // ...
+        };
     </script>
+    <!-- 儿童模式反馈遮罩 -->
+    <div id="child-feedback" class="child-feedback-modal" onclick="nextChildQuestion()">
+        <div class="child-star">⭐</div>
+        <h2 style="color:var(--primary); margin-top:20px; font-size: 30px;">太棒啦！</h2>
+        <p style="color:var(--text-sub);">点击屏幕继续</p>
+    </div>
 
 </body>
 
