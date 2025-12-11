@@ -2075,7 +2075,7 @@
                     if (!isMulti || correctOptionsInDom.length === correctAns.length) {
                         // 锁定问题，防止用户在答对后继续点击
                         parentCard.classList.add('question-locked');
-                        userAnswers[qIdx] = correctAns;
+                        userAnswers[qIdx] = correctAns; // 保存答案
                         setTimeout(showChildFeedback, 400); // 延迟以显示最终选择
                     }
 
