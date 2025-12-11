@@ -590,93 +590,103 @@
             /* 卡通字体 */
         }
 
-                [data-mode="child"][data-theme="girl"] {
+        [data-mode="child"][data-theme="girl"] {
 
-                    --primary: #FF70A6;    /* 泡泡糖粉 */
+            --primary: #FF70A6;
+            /* 泡泡糖粉 */
 
-                    --primary-light: #FFE0ED;
+            --primary-light: #FFE0ED;
 
-                    --success: #70C1B3;    /* 薄荷绿 */
+            --success: #70C1B3;
+            /* 薄荷绿 */
 
-                    --danger: #FF477E;     /* 西瓜红 */
+            --danger: #FF477E;
+            /* 西瓜红 */
 
-                    --bg-body: #FFF9F0;     /* 奶油白 */
+            --bg-body: #FFF9F0;
+            /* 奶油白 */
 
-                    --bg-card: #FFFFFF;
+            --bg-card: #FFFFFF;
 
-                    --bg-input: #F2F5F7;
+            --bg-input: #F2F5F7;
 
-                    --text-main: #333333;
+            --text-main: #333333;
 
-                    --text-sub: #8D99AE;
+            --text-sub: #8D99AE;
 
-                    --text-inverse: #FFFFFF;
+            --text-inverse: #FFFFFF;
 
-                }
+        }
 
-        
 
-                [data-mode="child"][data-theme="boy"] {
 
-                    --primary: #00A6FB;    /* 未来蓝 */
+        [data-mode="child"][data-theme="boy"] {
 
-                    --primary-light: rgba(0, 166, 251, 0.15);
+            --primary: #00A6FB;
+            /* 未来蓝 */
 
-                    --success: #A2E833;    /* 荧光绿 */
+            --primary-light: rgba(0, 166, 251, 0.15);
 
-                    --danger: #FF4F00;     /* 激光橙 */
+            --success: #A2E833;
+            /* 荧光绿 */
 
-                    --bg-body: #1A1B2F;     /* 深空紫 */
+            --danger: #FF4F00;
+            /* 激光橙 */
 
-                    --bg-card: #2A2D40;
+            --bg-body: #1A1B2F;
+            /* 深空紫 */
 
-                    --bg-input: #393E52;
+            --bg-card: #2A2D40;
 
-                    --text-main: #EFEFEF;   /* 高亮白 */
+            --bg-input: #393E52;
 
-                    --text-sub: #9FA4B3;     /* 星云灰 */
+            --text-main: #EFEFEF;
+            /* 高亮白 */
 
-                    --text-inverse: #FFFFFF;
+            --text-sub: #9FA4B3;
+            /* 星云灰 */
 
-                }
+            --text-inverse: #FFFFFF;
 
-        
+        }
 
-                /* 儿童模式下隐藏复杂的按钮和统计 */
 
-                [data-mode="child"] .btn-delete,
 
-                [data-mode="child"] .btn-delete-hist,
+        /* 儿童模式下隐藏复杂的按钮和统计 */
 
-        
+        [data-mode="child"] .btn-delete,
 
-                [data-mode="child"] .nav-bar .btn-icon:not(.btn-child-toggle):not(.btn-quiz-exit):not(.btn-back-home):not(.btn-theme-toggle),
+        [data-mode="child"] .btn-delete-hist,
 
-                [data-mode="child"] #import-export-area,
 
-                [data-mode="child"] .btn-float {
 
-                    display: none !important;
+        [data-mode="child"] .nav-bar .btn-icon:not(.btn-child-toggle):not(.btn-quiz-exit):not(.btn-back-home):not(.btn-theme-toggle),
 
-                }
+        [data-mode="child"] #import-export-area,
 
-        
+        [data-mode="child"] .btn-float {
 
-                /* 儿童模式特有的大按钮 */
+            display: none !important;
 
-                [data-mode="child"] .option-row {
+        }
 
-                    padding: 20px;
 
-                    margin-bottom: 15px;
 
-                    background: var(--bg-card);
+        /* 儿童模式特有的大按钮 */
 
-                    border: 3px solid var(--bg-input);
+        [data-mode="child"] .option-row {
 
-                    transition: transform 0.1s;
+            padding: 20px;
 
-                }
+            margin-bottom: 15px;
+
+            background: var(--bg-card);
+
+            border: 3px solid var(--bg-input);
+
+            transition: transform 0.1s;
+
+        }
 
         [data-mode="child"] .option-row:active {
             transform: scale(0.95);
@@ -1931,6 +1941,14 @@
             currentQuiz.forEach((item, idx) => {
                 const uAns = userAnswers[idx] || '';
                 let cardClass = 'ios-card';
+                // --- 【关键新增】儿童模式回显逻辑 START ---
+                // 如果是儿童模式，且这道题已经有答案了（说明做过了）
+                // 给卡片加上锁定样式，防止重复做
+                if (isChildMode && uAns && uAns === item.a) {
+                    cardClass += ' question-locked';
+                }
+                // --- 【关键新增】儿童模式回显逻辑 END ---
+
                 let analysisHtml = '';
                 let masteredButtonHtml = '';
                 let peekButtonHtml = '';
@@ -1961,6 +1979,14 @@
                 for (let key in item.o) {
                     const isSelected = uAns.includes(key) ? 'selected' : '';
                     const isRealAnswer = isReviewMode && item.a.includes(key) ? 'correct-answer' : '';
+                    // --- 【关键新增】儿童模式选项样式恢复 START ---
+                    // 如果在儿童模式下已经答对了，给正确选项加上 child-correct 类
+                    // 这样看起来就是绿色的
+                    let childCorrectClass = '';
+                    if (isChildMode && uAns && item.a.includes(key)) {
+                        childCorrectClass = ' child-correct';
+                    }
+                    // --- 【关键新增】儿童模式选项样式恢复 END ---
 
                     optionsHtml += `
                     <div class="option-row ${isSelected} ${isRealAnswer}" onclick="selectOption(${idx}, '${key}', '${item.t}')">
@@ -2050,7 +2076,7 @@
         function selectOption(qIdx, optKey, type) {
             if (isReviewMode) return;
 
-            // --- 儿童模式逻辑 START ---
+            // --- 儿童模式逻辑 START (已修改支持保存进度) ---
             if (isChildMode) {
                 const currentQuestion = currentQuiz[qIdx];
                 const correctAns = currentQuestion.a;
@@ -2068,27 +2094,30 @@
                     // 检查是否所有正确选项都已被选中
                     const parentCard = row.closest('.ios-card');
                     const correctOptionsInDom = parentCard.querySelectorAll('.child-correct');
-                    
+
                     const isMulti = currentQuestion.t.includes('多');
-                    
+
                     // 如果是单选题，或多选题的所有正确答案都已选定
                     if (!isMulti || correctOptionsInDom.length === correctAns.length) {
-                        // 锁定问题，防止用户在答对后继续点击
+                        // 锁定问题
                         parentCard.classList.add('question-locked');
                         userAnswers[qIdx] = correctAns; // 保存答案
 
-                        // BUGFIX: 在儿童模式下保存进度
+                        // 1. 更新总进度 (Sequence模式)
                         if (quizType === 'sequence') {
                             const startInputVal = parseInt(document.getElementById('sequence-start-input').value) || 1;
-                            // 实际进度 = （起始位置-1）+（当前题目在Quiz中的索引+1）
                             const newProg = (startInputVal - 1) + (qIdx + 1);
                             if (newProg > currentDb.progress) {
                                 localStorage.setItem(`bingo_prog_${currentDb.id}`, newProg);
                                 currentDb.progress = newProg;
                             }
                         }
-                        
-                        setTimeout(showChildFeedback, 400); // 延迟以显示最终选择
+
+                        // 2. 【关键新增】立即保存当前的做题现场 (WIP)
+                        // 这样退出后，"继续上次进度" 才能生效
+                        saveWipQuiz();
+
+                        setTimeout(showChildFeedback, 400);
                     }
 
                 } else {
@@ -2148,7 +2177,7 @@
             setTimeout(nextChildQuestion, 2000); // 2秒后自动进入下一题
         }
 
-        // 儿童模式专用：下一题
+        // 儿童模式专用：下一题 (已修改支持定位保存)
         function nextChildQuestion() {
             document.getElementById('child-feedback').style.display = 'none';
 
@@ -2159,11 +2188,16 @@
                 if (nextEl) {
                     nextEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
                     lastVisibleQuestionIndex = nextIdx;
+
+                    // 【关键新增】滚动完成后，保存这个位置
+                    // 这样下次进来就会直接跳到这道题，而不是第一题
+                    saveWipQuiz();
                 }
             } else {
                 // 全做完了
+                // 此时清除进度，因为已经全部完成
+                clearWipQuiz();
                 alert('哇！所有的骨头都啃完了！你真是个小天才！');
-                // 可选择重置或返回
                 history.back();
             }
         }
