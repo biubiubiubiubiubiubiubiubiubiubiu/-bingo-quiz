@@ -909,31 +909,45 @@
             <div style="margin-bottom: 10px;">
                 <div
                     style="font-size:12px; color:var(--text-sub); margin-bottom:8px; display:flex; justify-content:space-between; align-items:center;">
-                    <span>📍 起始序号</span>
+                    <span>📍 起始序号 (进度: <span id="current-prog-display">0</span>)</span>
                     <span id="max-count-hint" style="background:var(--bg-input); padding:2px 6px; border-radius:4px;">共
                         0 根</span>
                 </div>
 
                 <!-- 修复后的布局 -->
                 <div style="display:flex; gap:12px; align-items: stretch; height: 52px;">
-                    <!-- 输入框：去除了 Spinner -->
-                    <div style="flex-shrink: 0; width: 80px;">
-                        <input type="number" id="sequence-start-input" class="input-ghost" onclick="this.select()">
+                    <!-- 新增：重置进度按钮 -->
+                    <button class="btn btn-ghost" onclick="resetProgress()" title="重置进度到1"
+                        style="width: 52px; padding: 0; color: var(--danger); flex-shrink: 0;">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
+                            stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 12" />
+                            <path d="M3 5v7h7" />
+                        </svg>
+                    </button>
+
+                    <!-- 输入框 -->
+                    <div style="flex-grow: 1;">
+                        <input type="number" id="sequence-start-input" class="input-ghost" onclick="this.select()"
+                            onchange="manualUpdateProgress()">
                     </div>
 
                     <!-- 按钮 -->
-                    <button class="btn btn-primary" style="flex-grow: 1;" onclick="startQuiz('sequence')">按顺序啃</button>
+                    <button class="btn btn-primary" style="width: 80px; flex-shrink: 0;"
+                        onclick="startQuiz('sequence')">开啃</button>
 
-                    <!-- 下拉框：加宽宽度，修复箭头 -->
-                    <div style="flex-shrink: 0; width: 100px;">
+                    <!-- 下拉框 -->
+                    <div style="flex-shrink: 0; width: 90px;">
                         <select id="sequence-count" class="btn btn-ghost">
                             <option value="10">10根</option>
                             <option value="20">20根</option>
                             <option value="50" selected>50根</option>
-                            <option value="100">100根</option>
                             <option value="all">梭哈</option>
                         </select>
                     </div>
+                </div>
+                <div style="font-size:12px; color:var(--text-sub); margin-top:5px; text-align:center;">
+                    * 输入数字后直接开啃，系统会自动记录新进度
                 </div>
             </div>
 
@@ -1156,20 +1170,27 @@
 
             document.getElementById('dash-title').innerText = meta.name;
             document.getElementById('dash-count').innerText = questions.length;
+            // 顶部大进度条
             document.getElementById('dash-progress').innerText = `${progress} / ${questions.length}`;
+            
+            // --- 进度显示优化 ---
+            // 小标题上的进度显示
+            const progDisplay = document.getElementById('current-prog-display');
+            if(progDisplay) progDisplay.innerText = progress;
 
-            // --- 新增代码 START ---
             // 设置顺序练习的输入框逻辑
             const startInput = document.getElementById('sequence-start-input');
             const maxHint = document.getElementById('max-count-hint');
 
-            // 默认从当前进度+1开始（如果是0就是1，如果是10就是11）
-            // 如果进度等于总数，为了方便复习，可以重置为1，或者保持在最后
+            // 默认从当前进度+1开始
             let defaultStart = progress >= questions.length ? 1 : progress + 1;
 
             startInput.value = defaultStart;
             startInput.max = questions.length;
             startInput.min = 1;
+            // 占位符提示
+            startInput.placeholder = `上次啃到 ${progress}`; 
+            
             maxHint.innerText = `(共 ${questions.length} 根)`;
             // --- 新增代码 END ---
 
@@ -1195,6 +1216,31 @@
             }
 
             renderHistoryList(id);
+        }
+
+        // 重置进度到 0
+        function resetProgress() {
+            if (!currentDb) return;
+            if (!confirm('确定要重置“按顺序啃”的进度吗？\n下次将从第 1 根骨头重新开始。')) return;
+
+            // 重置存储
+            localStorage.setItem(`bingo_prog_${currentDb.id}`, 0);
+            currentDb.progress = 0;
+
+            // 同时清除“继续上次”的暂存，因为我们要重新开始了
+            clearWipQuiz();
+            const resumeBtn = document.getElementById('btn-resume-quiz');
+            if (resumeBtn) resumeBtn.style.display = 'none';
+
+            // 更新 UI
+            setupDashboard(currentDb.id);
+            alert('汪！进度已重置，从头开始吧！');
+        }
+
+        // 手动修改输入框时触发（可选，目前通过 startQuiz 自动处理更自然，这里留空或用于高级逻辑）
+        function manualUpdateProgress() {
+            // 这里可以不做操作，因为用户可能只是想临时回看前面的题
+            // 只有当点击“开啃”时，我们才决定是否更新进度
         }
 
         // --- 初始化 ---
@@ -2110,19 +2156,25 @@
                         parentCard.classList.add('question-locked');
                         userAnswers[qIdx] = correctAns; // 保存答案
 
-                        // 1. 更新总进度 (Sequence模式)
-                        // Removed: User requested not to track total progress in child mode.
-                        // if (quizType === 'sequence') {
-                        //     const startInputVal = parseInt(document.getElementById('sequence-start-input').value) || 1;
-                        //     const newProg = (startInputVal - 1) + (qIdx + 1);
-                        //     if (newProg > currentDb.progress) {
-                        //         localStorage.setItem(`bingo_prog_${currentDb.id}`, newProg);
-                        //         currentDb.progress = newProg;
-                        //     }
-                        // }
+                        // --- 修改开始：启用儿童模式进度更新 ---
+                        // 只有在“按顺序啃”模式下，才更新全局进度
+                        if (quizType === 'sequence') {
+                            // 计算当前这道题在总题库里的真实序号
+                            // 逻辑：输入框的起始值 + 当前题目的索引
+                            const startInputVal = parseInt(document.getElementById('sequence-start-input').value) || 1;
+                            // 当前这道题是本次练习的第 qIdx 题（从0开始），所以真实序号是 startInputVal + qIdx
+                            const currentRealIndex = startInputVal + qIdx;
+                            
+                            // 读取旧进度
+                            const oldProg = parseInt(localStorage.getItem(`bingo_prog_${currentDb.id}`)) || 0;
 
-                        // 2. 【关键新增】立即保存当前的做题现场 (WIP)
-                        // 这样退出后，"继续上次进度" 才能生效
+                            // 只有当 当前进度 > 旧进度 时才更新（防止复习时把进度倒退）
+                            if (currentRealIndex > oldProg) {
+                                localStorage.setItem(`bingo_prog_${currentDb.id}`, currentRealIndex);
+                                currentDb.progress = currentRealIndex; // 更新内存中的对象
+                            }
+                        }
+                        // --- 修改结束 ---
                         saveWipQuiz();
 
                         setTimeout(showChildFeedback, 400);
