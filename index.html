@@ -2076,6 +2076,18 @@
                         // 锁定问题，防止用户在答对后继续点击
                         parentCard.classList.add('question-locked');
                         userAnswers[qIdx] = correctAns; // 保存答案
+
+                        // BUGFIX: 在儿童模式下保存进度
+                        if (quizType === 'sequence') {
+                            const startInputVal = parseInt(document.getElementById('sequence-start-input').value) || 1;
+                            // 实际进度 = （起始位置-1）+（当前题目在Quiz中的索引+1）
+                            const newProg = (startInputVal - 1) + (qIdx + 1);
+                            if (newProg > currentDb.progress) {
+                                localStorage.setItem(`bingo_prog_${currentDb.id}`, newProg);
+                                currentDb.progress = newProg;
+                            }
+                        }
+                        
                         setTimeout(showChildFeedback, 400); // 延迟以显示最终选择
                     }
 
