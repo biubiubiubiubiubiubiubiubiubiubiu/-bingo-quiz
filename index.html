@@ -1941,22 +1941,23 @@
             currentQuiz.forEach((item, idx) => {
                 const uAns = userAnswers[idx] || '';
                 let cardClass = 'ios-card';
-                // --- 【关键新增】儿童模式回显逻辑 START ---
-                // 如果是儿童模式，且这道题已经有答案了（说明做过了）
-                // 给卡片加上锁定样式，防止重复做
+
+                // 1. 卡片锁定逻辑：如果是儿童模式且已答对，锁定卡片防止修改
+                // 如果你不希望锁定，可以删除下面这个 if 语句块
                 if (isChildMode && uAns && uAns === item.a) {
                     cardClass += ' question-locked';
                 }
-                // --- 【关键新增】儿童模式回显逻辑 END ---
 
                 let analysisHtml = '';
                 let masteredButtonHtml = '';
                 let peekButtonHtml = '';
 
-                if (quizType === 'wrong_review' && !isReviewMode) {
+                // 普通模式下的“我啃会了”按钮
+                if (quizType === 'wrong_review' && !isReviewMode && !isChildMode) {
                     masteredButtonHtml = `<button class="btn-mastered" onclick="masterHardBone(${idx})">我啃会了</button>`;
                 }
 
+                // 答案解析区域构建
                 const answerContent = `
                     <div style="font-weight:bold; margin-bottom:4px;">
                         汪的答案：<span style="color:var(--success)">${item.a}</span>
@@ -1969,27 +1970,33 @@
                     const isCorrect = uAns === item.a;
                     cardClass += isCorrect ? ' correct' : ' wrong';
                     analysisHtml = `<div style="margin-top:15px; padding:10px; background:var(--bg-input); border-radius:8px; font-size:14px;">${answerContent}</div>`;
-                } else if (quizType !== 'mock_exam') {
+                } else if (quizType !== 'mock_exam' && !isChildMode) {
+                    // 儿童模式不显示“偷偷看一眼”
                     peekButtonHtml = `<div style="text-align:right; margin-top:10px;"><button class="btn-peek" onclick="toggleAnalysis(${idx})">👀 偷偷看一眼</button></div>`;
                     analysisHtml = `<div class="analysis-box" id="analysis-${idx}" style="display:none;">${answerContent}</div>`;
                 }
 
-
                 let optionsHtml = '';
                 for (let key in item.o) {
-                    const isSelected = uAns.includes(key) ? 'selected' : '';
-                    const isRealAnswer = isReviewMode && item.a.includes(key) ? 'correct-answer' : '';
-                    // --- 【关键新增】儿童模式选项样式恢复 START ---
-                    // 如果在儿童模式下已经答对了，给正确选项加上 child-correct 类
-                    // 这样看起来就是绿色的
+                    // --- 【核心修复点 START】 ---
+
+                    // 1. isSelected (蓝色背景): 只有在【非儿童模式】或者是【回看模式】下才加
+                    // 这样儿童模式重新进入时，就不会出现奇怪的蓝色背景了
+                    const isSelected = (!isChildMode && uAns.includes(key)) ? 'selected' : '';
+
+                    // 2. childCorrectClass (绿色边框): 儿童模式下，如果是正确答案且用户选了，就加这个
                     let childCorrectClass = '';
                     if (isChildMode && uAns && item.a.includes(key)) {
                         childCorrectClass = ' child-correct';
                     }
-                    // --- 【关键新增】儿童模式选项样式恢复 END ---
+
+                    // 3. 回看模式下的正确答案高亮
+                    const isRealAnswer = isReviewMode && item.a.includes(key) ? 'correct-answer' : '';
+
+                    // --- 【核心修复点 END】 ---
 
                     optionsHtml += `
-                    <div class="option-row ${isSelected} ${isRealAnswer}" onclick="selectOption(${idx}, '${key}', '${item.t}')">
+                    <div class="option-row ${isSelected} ${isRealAnswer} ${childCorrectClass}" onclick="selectOption(${idx}, '${key}', '${item.t}')">
                         <div class="option-circle">${key}</div>
                         <div style="flex:1">${item.o[key]}</div>
                     </div>
@@ -1997,10 +2004,10 @@
                 }
 
                 let ttsHtml = `
-    <button class="btn-tts" onclick="speakText('${item.q.replace(/'/g, "\\'")}')">
-        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon><path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"></path></svg>
-    </button>
-`;
+                    <button class="btn-tts" onclick="speakText('${item.q.replace(/'/g, "\\'")}')">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon><path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"></path></svg>
+                    </button>
+                `;
 
                 const html = `
                 <div class="${cardClass}" id="q-${idx}">
