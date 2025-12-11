@@ -2111,14 +2111,15 @@
                         userAnswers[qIdx] = correctAns; // 保存答案
 
                         // 1. 更新总进度 (Sequence模式)
-                        if (quizType === 'sequence') {
-                            const startInputVal = parseInt(document.getElementById('sequence-start-input').value) || 1;
-                            const newProg = (startInputVal - 1) + (qIdx + 1);
-                            if (newProg > currentDb.progress) {
-                                localStorage.setItem(`bingo_prog_${currentDb.id}`, newProg);
-                                currentDb.progress = newProg;
-                            }
-                        }
+                        // Removed: User requested not to track total progress in child mode.
+                        // if (quizType === 'sequence') {
+                        //     const startInputVal = parseInt(document.getElementById('sequence-start-input').value) || 1;
+                        //     const newProg = (startInputVal - 1) + (qIdx + 1);
+                        //     if (newProg > currentDb.progress) {
+                        //         localStorage.setItem(`bingo_prog_${currentDb.id}`, newProg);
+                        //         currentDb.progress = newProg;
+                        //     }
+                        // }
 
                         // 2. 【关键新增】立即保存当前的做题现场 (WIP)
                         // 这样退出后，"继续上次进度" 才能生效
