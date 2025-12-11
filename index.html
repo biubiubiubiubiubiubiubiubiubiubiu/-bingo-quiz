@@ -2016,25 +2016,11 @@
 
         
 
-                        // "我啃会了" button for wrong answer mode
-
                         if (quizType === 'wrong_review' && !isReviewMode) {
 
                             masteredButtonHtml = `<button class="btn-mastered" onclick="markAsMastered(${idx})">我啃会了</button>`;
 
                         }
-
-                        
-
-                        // "偷偷看一眼" button for child mode (but not in mock exams)
-
-                        if (isChildMode && quizType !== 'mock_exam' && !isReviewMode) {
-
-                            peekButtonHtml = `<div style="text-align:right; margin-top:10px;"><button class="btn-peek" onclick="peekAnswer(${idx})">👀 偷偷看一眼</button></div>`;
-
-                        }
-
-        
 
         
 
@@ -2062,7 +2048,9 @@
 
                             analysisHtml = `<div style="margin-top:15px; padding:10px; background:var(--bg-input); border-radius:8px; font-size:14px;">${answerContent}</div>`;
 
-                        } else {
+                        } else if (quizType !== 'mock_exam') {
+
+                            peekButtonHtml = `<div style="text-align:right; margin-top:10px;"><button class="btn-peek" onclick="toggleAnalysis(${idx})">👀 偷偷看一眼</button></div>`;
 
                             analysisHtml = `<div class="analysis-box" id="analysis-${idx}" style="display:none;">${answerContent}</div>`;
 
@@ -2184,21 +2172,13 @@
 
         
 
-                function peekAnswer(qIdx) {
+                function toggleAnalysis(qIdx) {
 
                     const analysisEl = document.getElementById(`analysis-${qIdx}`);
 
                     if (analysisEl) {
 
-                        analysisEl.style.display = 'block';
-
-                    }
-
-                    const peekButton = event.target;
-
-                    if(peekButton){
-
-                        peekButton.style.display = 'none';
+                        analysisEl.style.display = analysisEl.style.display === 'block' ? 'none' : 'block';
 
                     }
 
