@@ -1083,6 +1083,7 @@
         let masteredInSession = 0; // 用于“啃硬骨头”模式的计数
         let deferredInstallPrompt = null;
         let quizType = 'random';
+        let childFeedbackTimeout = null; // 新增：用于儿童模式反馈的计时器
 
         // --- Navigation & History ---
         function updateView(state) {
@@ -2353,12 +2354,17 @@
             feedback.querySelector('h2').innerText = titles[Math.floor(Math.random() * titles.length)];
             feedback.style.display = 'flex';
 
-            setTimeout(nextChildQuestion, 2000); // 2秒后自动进入下一题
+            if (childFeedbackTimeout) clearTimeout(childFeedbackTimeout); // 清除旧的
+            childFeedbackTimeout = setTimeout(nextChildQuestion, 2000); // 2秒后自动进入下一题
         }
 
         // 儿童模式专用：下一题 (已修改支持定位保存)
         function nextChildQuestion() {
-            document.getElementById('child-feedback').style.display = 'none';
+            const feedback = document.getElementById('child-feedback');
+            if (feedback.style.display === 'none') return; // 如果已经隐藏，则不执行
+
+            if (childFeedbackTimeout) clearTimeout(childFeedbackTimeout); // 清除计时器
+            feedback.style.display = 'none';
 
             // 滚动到下一题
             const nextIdx = lastVisibleQuestionIndex + 1;
