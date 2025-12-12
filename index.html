@@ -2294,25 +2294,6 @@
                         parentCard.classList.add('question-locked');
                         userAnswers[qIdx] = correctAns; // 保存答案
 
-                        // --- 修改开始：启用儿童模式进度更新 ---
-                        // 只有在“按顺序啃”模式下，才更新全局进度
-                        if (quizType === 'sequence') {
-                            // 计算当前这道题在总题库里的真实序号
-                            // 逻辑：输入框的起始值 + 当前题目的索引
-                            const startInputVal = parseInt(document.getElementById('sequence-start-input').value) || 1;
-                            // 当前这道题是本次练习的第 qIdx 题（从0开始），所以真实序号是 startInputVal + qIdx
-                            const currentRealIndex = startInputVal + qIdx;
-                            
-                            // 读取旧进度
-                            const oldProg = parseInt(localStorage.getItem(`bingo_prog_${currentDb.id}`)) || 0;
-
-                            // 只有当 当前进度 > 旧进度 时才更新（防止复习时把进度倒退）
-                            if (currentRealIndex > oldProg) {
-                                localStorage.setItem(`bingo_prog_${currentDb.id}`, currentRealIndex);
-                                currentDb.progress = currentRealIndex; // 更新内存中的对象
-                            }
-                        }
-                        // --- 修改结束 ---
                         saveWipQuiz();
 
                         setTimeout(showChildFeedback, 400);
