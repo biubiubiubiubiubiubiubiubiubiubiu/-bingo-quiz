@@ -465,6 +465,10 @@
 
 
                 function speakText(text) {
+                    if (typeof window.speakText === 'function') {
+                        window.speakText(text);
+                        return;
+                    }
 
                     if ('speechSynthesis' in window) {
 

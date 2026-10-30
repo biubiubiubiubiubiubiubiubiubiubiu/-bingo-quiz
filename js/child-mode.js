@@ -1,20 +1,13 @@
 let isChildMode = false;
 let childStreak = 0; // 儿童模式连胜计数
 
-// --- 全局朗读容错机制 ---
-if (typeof window.speakText !== 'function') {
-    window.speakText = function(text) {
-        if ('speechSynthesis' in window) {
-            window.speechSynthesis.cancel();
-            const utterance = new SpeechSynthesisUtterance(text);
-            utterance.lang = 'zh-CN';
-            utterance.rate = 0.92;
-            window.speechSynthesis.speak(utterance);
-        }
-    };
+// --- 全局声音总控与音量管理 (SOUND MASTER CONTROLLER) ---
+function togglePetSound(e) {
+    if (e && typeof e.stopPropagation === 'function') e.stopPropagation();
+    PetSound.toggleSound();
 }
 
-// --- 纯前端 Web Audio 零外链音效合成器 (100% 离线支持) ---
+// --- 纯前端 Web Audio 仿生物理声学合成器 (100% 离线支持) ---
 const PetSound = {
     ctx: null,
     getCtx() {
@@ -31,8 +24,24 @@ const PetSound = {
             return null;
         }
     },
-    // Q 弹水泡破灭音 (戳戳/吐泡)
+    isEnabled() {
+        return localStorage.getItem('bingo_child_sound') !== 'false';
+    },
+    toggleSound() {
+        const next = !this.isEnabled();
+        localStorage.setItem('bingo_child_sound', next ? 'true' : 'false');
+        if (next) {
+            this.bubble();
+        }
+        if (typeof updatePetWidgets === 'function') {
+            updatePetWidgets();
+        }
+        return next;
+    },
+
+    // 1. Q 弹水泡破灭音 (吐泡/短促互动)
     bubble() {
+        if (!this.isEnabled()) return;
         const ctx = this.getCtx();
         if (!ctx) return;
         try {
@@ -41,38 +50,66 @@ const PetSound = {
             const gain = ctx.createGain();
             osc.type = 'sine';
             osc.frequency.setValueAtTime(420, now);
-            osc.frequency.exponentialRampToValueAtTime(1200, now + 0.12);
-            gain.gain.setValueAtTime(0.22, now);
-            gain.gain.exponentialRampToValueAtTime(0.01, now + 0.12);
+            osc.frequency.exponentialRampToValueAtTime(1200, now + 0.11);
+            gain.gain.setValueAtTime(0.20, now);
+            gain.gain.exponentialRampToValueAtTime(0.005, now + 0.11);
             osc.connect(gain);
             gain.connect(ctx.destination);
             osc.start(now);
-            osc.stop(now + 0.12);
+            osc.stop(now + 0.11);
         } catch (e) {}
     },
-    // 进食吧唧咀嚼声 (喂食)
-    eat() {
+
+    // 2. 连珠水泡升腾音 (小泡鱼欢快吐泡)
+    multiBubble() {
+        if (!this.isEnabled()) return;
         const ctx = this.getCtx();
         if (!ctx) return;
         try {
             const now = ctx.currentTime;
-            [0, 0.08, 0.16].forEach((delay, i) => {
+            [0, 0.08, 0.16].forEach((delay, idx) => {
+                const osc = ctx.createOscillator();
+                const gain = ctx.createGain();
+                osc.type = 'sine';
+                const startF = 460 + idx * 110;
+                osc.frequency.setValueAtTime(startF, now + delay);
+                osc.frequency.exponentialRampToValueAtTime(startF * 2.3, now + delay + 0.08);
+                gain.gain.setValueAtTime(0.14, now + delay);
+                gain.gain.exponentialRampToValueAtTime(0.005, now + delay + 0.08);
+                osc.connect(gain);
+                gain.connect(ctx.destination);
+                osc.start(now + delay);
+                osc.stop(now + delay + 0.085);
+            });
+        } catch (e) {}
+    },
+
+    // 3. 进食吧唧咀嚼声 (喂食饱餐)
+    eat() {
+        if (!this.isEnabled()) return;
+        const ctx = this.getCtx();
+        if (!ctx) return;
+        try {
+            const now = ctx.currentTime;
+            [0, 0.075, 0.15].forEach((delay, i) => {
                 const osc = ctx.createOscillator();
                 const gain = ctx.createGain();
                 osc.type = 'triangle';
-                osc.frequency.setValueAtTime(280 + i * 90, now + delay);
-                osc.frequency.exponentialRampToValueAtTime(170, now + delay + 0.06);
-                gain.gain.setValueAtTime(0.26, now + delay);
+                osc.frequency.setValueAtTime(320 + i * 85, now + delay);
+                osc.frequency.exponentialRampToValueAtTime(160, now + delay + 0.06);
+                gain.gain.setValueAtTime(0.24, now + delay);
                 gain.gain.exponentialRampToValueAtTime(0.01, now + delay + 0.06);
                 osc.connect(gain);
                 gain.connect(ctx.destination);
                 osc.start(now + delay);
-                osc.stop(now + delay + 0.06);
+                osc.stop(now + delay + 0.065);
             });
         } catch (e) {}
     },
-    // 变身盛典激昂和弦琶音
+
+    // 4. 变身盛典激昂大和弦琶音
     evolution() {
+        if (!this.isEnabled()) return;
         const ctx = this.getCtx();
         if (!ctx) return;
         try {
@@ -84,7 +121,7 @@ const PetSound = {
                 osc.type = 'triangle';
                 osc.frequency.setValueAtTime(freq, now + idx * 0.1);
                 gain.gain.setValueAtTime(0, now + idx * 0.1);
-                gain.gain.linearRampToValueAtTime(0.25, now + idx * 0.1 + 0.02);
+                gain.gain.linearRampToValueAtTime(0.26, now + idx * 0.1 + 0.02);
                 gain.gain.exponentialRampToValueAtTime(0.01, now + idx * 0.1 + 0.35);
                 osc.connect(gain);
                 gain.connect(ctx.destination);
@@ -108,8 +145,10 @@ const PetSound = {
             }, notes.length * 100);
         } catch (e) {}
     },
-    // 答对连胜鼓舞音
+
+    // 5. 答对连胜鼓舞音 (大三和弦轻快弹拨)
     cheer() {
+        if (!this.isEnabled()) return;
         const ctx = this.getCtx();
         if (!ctx) return;
         try {
@@ -128,8 +167,53 @@ const PetSound = {
             });
         } catch (e) {}
     },
-    // 机灵蟹大螯双剪音 (咔嚓！咔嚓！)
+
+    // 6. 机灵蟹：海底沙滩细碎小步足音 (沙沙微击)
+    crabScuttle() {
+        if (!this.isEnabled()) return;
+        const ctx = this.getCtx();
+        if (!ctx) return;
+        try {
+            const now = ctx.currentTime;
+            [0, 0.07].forEach((delay) => {
+                const osc = ctx.createOscillator();
+                const gain = ctx.createGain();
+                osc.type = 'triangle';
+                osc.frequency.setValueAtTime(850 + Math.random() * 200, now + delay);
+                osc.frequency.exponentialRampToValueAtTime(320, now + delay + 0.025);
+                gain.gain.setValueAtTime(0.08, now + delay);
+                gain.gain.exponentialRampToValueAtTime(0.002, now + delay + 0.025);
+                osc.connect(gain);
+                gain.connect(ctx.destination);
+                osc.start(now + delay);
+                osc.stop(now + delay + 0.03);
+            });
+        } catch (e) {}
+    },
+
+    // 7. 机灵蟹：沿侧边玻璃壁攀爬足音 (清脆微谐波敲击)
+    crabClimb() {
+        if (!this.isEnabled()) return;
+        const ctx = this.getCtx();
+        if (!ctx) return;
+        try {
+            const now = ctx.currentTime;
+            const osc = ctx.createOscillator();
+            const gain = ctx.createGain();
+            osc.type = 'sine';
+            osc.frequency.setValueAtTime(1760 + (Math.random() - 0.5) * 120, now);
+            gain.gain.setValueAtTime(0.09, now);
+            gain.gain.exponentialRampToValueAtTime(0.001, now + 0.045);
+            osc.connect(gain);
+            gain.connect(ctx.destination);
+            osc.start(now);
+            osc.stop(now + 0.05);
+        } catch (e) {}
+    },
+
+    // 8. 机灵蟹：大螯双剪音 (咔嚓！咔嚓！)
     crabSnip() {
+        if (!this.isEnabled()) return;
         const ctx = this.getCtx();
         if (!ctx) return;
         try {
@@ -140,7 +224,7 @@ const PetSound = {
                 osc.type = 'square';
                 osc.frequency.setValueAtTime(1400, now + delay);
                 osc.frequency.exponentialRampToValueAtTime(320, now + delay + 0.035);
-                gain.gain.setValueAtTime(0.22, now + delay);
+                gain.gain.setValueAtTime(0.20, now + delay);
                 gain.gain.exponentialRampToValueAtTime(0.01, now + delay + 0.035);
                 osc.connect(gain);
                 gain.connect(ctx.destination);
@@ -149,8 +233,75 @@ const PetSound = {
             });
         } catch (e) {}
     },
-    // 跳跳虾弓腰弹射音 (反冲弹簧破水)
+
+    // 9. 机灵蟹：高空落回沙滩软落地撞击音 (沉闷沙滩噗通)
+    crabThud() {
+        if (!this.isEnabled()) return;
+        const ctx = this.getCtx();
+        if (!ctx) return;
+        try {
+            const now = ctx.currentTime;
+            const osc = ctx.createOscillator();
+            const gain = ctx.createGain();
+            osc.type = 'sine';
+            osc.frequency.setValueAtTime(130, now);
+            osc.frequency.exponentialRampToValueAtTime(45, now + 0.16);
+            gain.gain.setValueAtTime(0.26, now);
+            gain.gain.exponentialRampToValueAtTime(0.005, now + 0.16);
+            osc.connect(gain);
+            gain.connect(ctx.destination);
+            osc.start(now);
+            osc.stop(now + 0.17);
+        } catch (e) {}
+    },
+
+    // 10. 小泡鱼：自然划水流线游弋音 (柔顺微波)
+    fishGlide() {
+        if (!this.isEnabled()) return;
+        const ctx = this.getCtx();
+        if (!ctx) return;
+        try {
+            const now = ctx.currentTime;
+            const osc = ctx.createOscillator();
+            const gain = ctx.createGain();
+            osc.type = 'sine';
+            osc.frequency.setValueAtTime(260, now);
+            osc.frequency.exponentialRampToValueAtTime(480, now + 0.12);
+            osc.frequency.exponentialRampToValueAtTime(240, now + 0.22);
+            gain.gain.setValueAtTime(0.09, now);
+            gain.gain.exponentialRampToValueAtTime(0.002, now + 0.22);
+            osc.connect(gain);
+            gain.connect(ctx.destination);
+            osc.start(now);
+            osc.stop(now + 0.23);
+        } catch (e) {}
+    },
+
+    // 11. 小泡鱼：急速摆尾破水逃逸音
+    fishDart() {
+        if (!this.isEnabled()) return;
+        const ctx = this.getCtx();
+        if (!ctx) return;
+        try {
+            const now = ctx.currentTime;
+            const osc = ctx.createOscillator();
+            const gain = ctx.createGain();
+            osc.type = 'sine';
+            osc.frequency.setValueAtTime(320, now);
+            osc.frequency.exponentialRampToValueAtTime(820, now + 0.08);
+            osc.frequency.exponentialRampToValueAtTime(300, now + 0.17);
+            gain.gain.setValueAtTime(0.18, now);
+            gain.gain.exponentialRampToValueAtTime(0.005, now + 0.17);
+            osc.connect(gain);
+            gain.connect(ctx.destination);
+            osc.start(now);
+            osc.stop(now + 0.18);
+        } catch (e) {}
+    },
+
+    // 12. 跳跳虾：弓背爆发弹跳反冲音
     shrimpSnap() {
+        if (!this.isEnabled()) return;
         const ctx = this.getCtx();
         if (!ctx) return;
         try {
@@ -158,19 +309,42 @@ const PetSound = {
             const osc = ctx.createOscillator();
             const gain = ctx.createGain();
             osc.type = 'sawtooth';
-            osc.frequency.setValueAtTime(260, now);
-            osc.frequency.exponentialRampToValueAtTime(1600, now + 0.05);
-            osc.frequency.exponentialRampToValueAtTime(420, now + 0.14);
-            gain.gain.setValueAtTime(0.26, now);
-            gain.gain.exponentialRampToValueAtTime(0.01, now + 0.14);
+            osc.frequency.setValueAtTime(280, now);
+            osc.frequency.exponentialRampToValueAtTime(1700, now + 0.05);
+            osc.frequency.exponentialRampToValueAtTime(400, now + 0.13);
+            gain.gain.setValueAtTime(0.22, now);
+            gain.gain.exponentialRampToValueAtTime(0.005, now + 0.13);
             osc.connect(gain);
             gain.connect(ctx.destination);
             osc.start(now);
-            osc.stop(now + 0.15);
+            osc.stop(now + 0.14);
         } catch (e) {}
     },
-    // 皮皮章漏斗水流喷射/喷墨音 (扑哧——)
+
+    // 13. 跳跳虾：如羽毛般慢速飘落水流声
+    shrimpFloat() {
+        if (!this.isEnabled()) return;
+        const ctx = this.getCtx();
+        if (!ctx) return;
+        try {
+            const now = ctx.currentTime;
+            const osc = ctx.createOscillator();
+            const gain = ctx.createGain();
+            osc.type = 'sine';
+            osc.frequency.setValueAtTime(840, now);
+            osc.frequency.exponentialRampToValueAtTime(620, now + 0.22);
+            gain.gain.setValueAtTime(0.07, now);
+            gain.gain.exponentialRampToValueAtTime(0.002, now + 0.22);
+            osc.connect(gain);
+            gain.connect(ctx.destination);
+            osc.start(now);
+            osc.stop(now + 0.23);
+        } catch (e) {}
+    },
+
+    // 14. 皮皮章：漏斗强力喷流音
     octopusJet() {
+        if (!this.isEnabled()) return;
         const ctx = this.getCtx();
         if (!ctx) return;
         try {
@@ -178,18 +352,41 @@ const PetSound = {
             const osc = ctx.createOscillator();
             const gain = ctx.createGain();
             osc.type = 'sine';
-            osc.frequency.setValueAtTime(320, now);
-            osc.frequency.exponentialRampToValueAtTime(90, now + 0.22);
-            gain.gain.setValueAtTime(0.3, now);
-            gain.gain.exponentialRampToValueAtTime(0.005, now + 0.22);
+            osc.frequency.setValueAtTime(340, now);
+            osc.frequency.exponentialRampToValueAtTime(85, now + 0.20);
+            gain.gain.setValueAtTime(0.25, now);
+            gain.gain.exponentialRampToValueAtTime(0.005, now + 0.20);
             osc.connect(gain);
             gain.connect(ctx.destination);
             osc.start(now);
-            osc.stop(now + 0.22);
+            osc.stop(now + 0.21);
         } catch (e) {}
     },
-    // 小泡鱼摆尾滑水音 (水波划过)
-    fishDart() {
+
+    // 15. 皮皮章：黑紫墨雾炸裂散开音
+    inkDiffuse() {
+        if (!this.isEnabled()) return;
+        const ctx = this.getCtx();
+        if (!ctx) return;
+        try {
+            const now = ctx.currentTime;
+            const osc = ctx.createOscillator();
+            const gain = ctx.createGain();
+            osc.type = 'triangle';
+            osc.frequency.setValueAtTime(180, now);
+            osc.frequency.exponentialRampToValueAtTime(55, now + 0.32);
+            gain.gain.setValueAtTime(0.20, now);
+            gain.gain.exponentialRampToValueAtTime(0.002, now + 0.32);
+            osc.connect(gain);
+            gain.connect(ctx.destination);
+            osc.start(now);
+            osc.stop(now + 0.33);
+        } catch (e) {}
+    },
+
+    // 16. 皮皮章：吸盘从玻璃壁脱离的空腔轻响 (啵~)
+    suctionPop() {
+        if (!this.isEnabled()) return;
         const ctx = this.getCtx();
         if (!ctx) return;
         try {
@@ -197,17 +394,256 @@ const PetSound = {
             const osc = ctx.createOscillator();
             const gain = ctx.createGain();
             osc.type = 'sine';
-            osc.frequency.setValueAtTime(320, now);
-            osc.frequency.exponentialRampToValueAtTime(750, now + 0.08);
-            osc.frequency.exponentialRampToValueAtTime(300, now + 0.18);
-            gain.gain.setValueAtTime(0.2, now);
-            gain.gain.exponentialRampToValueAtTime(0.01, now + 0.18);
+            osc.frequency.setValueAtTime(640, now);
+            osc.frequency.exponentialRampToValueAtTime(170, now + 0.055);
+            gain.gain.setValueAtTime(0.18, now);
+            gain.gain.exponentialRampToValueAtTime(0.005, now + 0.055);
             osc.connect(gain);
             gain.connect(ctx.destination);
             osc.start(now);
-            osc.stop(now + 0.18);
+            osc.stop(now + 0.06);
+        } catch (e) {}
+    },
+
+    // 17. 睡着打盹小呼噜呼吸音
+    petSnore() {
+        if (!this.isEnabled()) return;
+        const ctx = this.getCtx();
+        if (!ctx) return;
+        try {
+            const now = ctx.currentTime;
+            const osc = ctx.createOscillator();
+            const gain = ctx.createGain();
+            osc.type = 'sine';
+            osc.frequency.setValueAtTime(155, now);
+            osc.frequency.linearRampToValueAtTime(220, now + 0.35);
+            osc.frequency.linearRampToValueAtTime(145, now + 0.7);
+            gain.gain.setValueAtTime(0.02, now);
+            gain.gain.linearRampToValueAtTime(0.10, now + 0.35);
+            gain.gain.exponentialRampToValueAtTime(0.005, now + 0.7);
+            osc.connect(gain);
+            gain.connect(ctx.destination);
+            osc.start(now);
+            osc.stop(now + 0.72);
+            // 呼噜呼噜后冒一颗小泡泡
+            setTimeout(() => this.bubble(), 750);
+        } catch (e) {}
+    },
+
+    // 18. 醒来伸懒腰轻快和弦音
+    petWake() {
+        if (!this.isEnabled()) return;
+        const ctx = this.getCtx();
+        if (!ctx) return;
+        try {
+            const now = ctx.currentTime;
+            [523.25, 659.25, 783.99].forEach((freq, idx) => {
+                const osc = ctx.createOscillator();
+                const gain = ctx.createGain();
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(freq, now + idx * 0.07);
+                gain.gain.setValueAtTime(0.14, now + idx * 0.07);
+                gain.gain.exponentialRampToValueAtTime(0.005, now + idx * 0.07 + 0.16);
+                osc.connect(gain);
+                gain.connect(ctx.destination);
+                osc.start(now + idx * 0.07);
+                osc.stop(now + idx * 0.07 + 0.17);
+            });
+        } catch (e) {}
+    },
+
+    // 19. 靠近受惊快速闪避水声
+    petFlee() {
+        if (!this.isEnabled()) return;
+        const ctx = this.getCtx();
+        if (!ctx) return;
+        try {
+            const now = ctx.currentTime;
+            const osc = ctx.createOscillator();
+            const gain = ctx.createGain();
+            osc.type = 'sine';
+            osc.frequency.setValueAtTime(350, now);
+            osc.frequency.exponentialRampToValueAtTime(1150, now + 0.085);
+            gain.gain.setValueAtTime(0.16, now);
+            gain.gain.exponentialRampToValueAtTime(0.005, now + 0.085);
+            osc.connect(gain);
+            gain.connect(ctx.destination);
+            osc.start(now);
+            osc.stop(now + 0.09);
+        } catch (e) {}
+    },
+
+    // 20. 萌宠开口对话提示音 (按生物属性专属水滴音阶)
+    voiceChime(petType = 'fish') {
+        if (!this.isEnabled()) return;
+        const ctx = this.getCtx();
+        if (!ctx) return;
+        try {
+            const now = ctx.currentTime;
+            let freqs = [659.25, 880.00]; // 默认鱼：水滴双音
+            let waveType = 'sine';
+            if (petType === 'crab') {
+                freqs = [987.77, 1318.51];
+                waveType = 'triangle';
+            } else if (petType === 'shrimp') {
+                freqs = [783.99, 1174.66];
+                waveType = 'sawtooth';
+            } else if (petType === 'octopus') {
+                freqs = [440.00, 587.33];
+                waveType = 'sine';
+            }
+
+            freqs.forEach((f, idx) => {
+                const osc = ctx.createOscillator();
+                const gain = ctx.createGain();
+                osc.type = waveType;
+                osc.frequency.setValueAtTime(f, now + idx * 0.06);
+                gain.gain.setValueAtTime(0.14, now + idx * 0.06);
+                gain.gain.exponentialRampToValueAtTime(0.005, now + idx * 0.06 + 0.12);
+                osc.connect(gain);
+                gain.connect(ctx.destination);
+                osc.start(now + idx * 0.06);
+                osc.stop(now + idx * 0.06 + 0.13);
+            });
         } catch (e) {}
     }
+};
+
+// --- 拟真萌宠语音系统 (PET VOICE SYSTEM: DUAL ENGINE) ---
+const PetVoice = {
+    speaking: false,
+    currentUtterance: null,
+
+    // 获取最佳中文童声/亲和女声
+    getBestChineseVoice() {
+        if (!('speechSynthesis' in window)) return null;
+        const voices = window.speechSynthesis.getVoices();
+        if (!voices || voices.length === 0) return null;
+
+        // 优先级：微软晓晓(童声/元气)、云希(童声)、晓伊、谷歌普通话、苹果婷婷
+        const preferred = [
+            'Xiaoxiao',
+            'Yunxi',
+            'Xiaoyi',
+            'Google 普通话',
+            'Ting-Ting',
+            'Yaoyao',
+            'Kangkang',
+            'Chinese',
+            'zh-CN',
+            'zh'
+        ];
+
+        for (const name of preferred) {
+            const found = voices.find(v => (v.lang.startsWith('zh') || v.lang.includes('CN')) && v.name.includes(name));
+            if (found) return found;
+        }
+
+        return voices.find(v => v.lang === 'zh-CN' || v.lang.startsWith('zh')) || voices[0];
+    },
+
+    // 任天堂“动森式”程序化拟声语 (Animalese Procedural Babble: 0KB 纯前端音阶生成)
+    playAnimalese(text, petType = 'fish') {
+        if (!PetSound.isEnabled()) return;
+        const ctx = PetSound.getCtx();
+        if (!ctx || !text) return;
+
+        let baseFreq = 520;
+        let waveType = 'sine';
+        if (petType === 'fish') { baseFreq = 540; waveType = 'sine'; }
+        else if (petType === 'crab') { baseFreq = 420; waveType = 'triangle'; }
+        else if (petType === 'shrimp') { baseFreq = 620; waveType = 'sawtooth'; }
+        else if (petType === 'octopus') { baseFreq = 380; waveType = 'sine'; }
+
+        const now = ctx.currentTime;
+        const len = Math.min(10, Math.max(3, text.length));
+        const stepTime = 0.065;
+        const scaleOffsets = [0, 2, 4, 7, 9, 12, 14, 16];
+
+        for (let i = 0; i < len; i++) {
+            const code = text.charCodeAt(i % text.length);
+            const semitone = scaleOffsets[code % scaleOffsets.length];
+            const freq = baseFreq * Math.pow(2, semitone / 12);
+
+            const osc = ctx.createOscillator();
+            const gain = ctx.createGain();
+            osc.type = waveType;
+            const t = now + i * stepTime;
+
+            osc.frequency.setValueAtTime(freq, t);
+            gain.gain.setValueAtTime(0, t);
+            gain.gain.linearRampToValueAtTime(0.15, t + 0.012);
+            gain.gain.exponentialRampToValueAtTime(0.005, t + stepTime - 0.005);
+
+            osc.connect(gain);
+            gain.connect(ctx.destination);
+            osc.start(t);
+            osc.stop(t + stepTime);
+        }
+    },
+
+    // 核心统一发声入口
+    speak(text, petType = 'fish', options = {}) {
+        if (!PetSound.isEnabled() || !text) return;
+
+        // 1. 播放专属生物开口水滴提示音
+        PetSound.voiceChime(petType);
+
+        // 2. 调校版萌童声发音
+        if ('speechSynthesis' in window) {
+            window.speechSynthesis.cancel();
+
+            const utterance = new SpeechSynthesisUtterance(text);
+            utterance.lang = 'zh-CN';
+            // 稚嫩童声参数调校：音调 pitch 提升至 1.40，语速 1.05 轻快活泼
+            utterance.pitch = (options.pitch !== undefined) ? options.pitch : 1.40;
+            utterance.rate = (options.rate !== undefined) ? options.rate : 1.05;
+            utterance.volume = (options.volume !== undefined) ? options.volume : 0.95;
+
+            const bestVoice = this.getBestChineseVoice();
+            if (bestVoice) {
+                utterance.voice = bestVoice;
+            }
+
+            this.currentUtterance = utterance;
+            this.speaking = true;
+
+            utterance.onend = () => {
+                this.speaking = false;
+                this.currentUtterance = null;
+            };
+
+            utterance.onerror = () => {
+                this.speaking = false;
+                this.currentUtterance = null;
+                // TTS 发声异常时平滑回退至动森拟声
+                this.playAnimalese(text, petType);
+            };
+
+            // 留出 100ms 间隔使开口音先清晰入耳
+            setTimeout(() => {
+                window.speechSynthesis.speak(utterance);
+            }, 100);
+        } else {
+            this.playAnimalese(text, petType);
+        }
+    }
+};
+
+// 预热浏览器语音列表
+if ('speechSynthesis' in window) {
+    window.speechSynthesis.onvoiceschanged = () => {
+        PetVoice.getBestChineseVoice();
+    };
+}
+
+// 全局统一定义 speakText，兼容旧调用
+window.speakText = function(text, petType) {
+    if (!petType && typeof getPetData === 'function') {
+        const pet = getPetData();
+        petType = (pet && pet.type) || 'fish';
+    }
+    PetVoice.speak(text, petType || 'fish');
 };
 
 // --- 海鲜宠物设定库 (五阶觉醒变身体系) ---
@@ -603,7 +1039,8 @@ class RoamingPetEngine {
                             this.body.classList.add('pet-bounce');
                             setTimeout(() => { if (this.body) this.body.classList.remove('pet-bounce'); }, 400);
                         }
-                        PetSound.crabSnip();
+                        PetSound.crabThud();
+                        setTimeout(() => PetSound.crabSnip(), 120);
                     }, 720);
                 }
             }
@@ -645,6 +1082,7 @@ class RoamingPetEngine {
     fleeFromPointer(px, py) {
         if (this.isFleeing) return;
         this.isFleeing = true;
+        PetSound.petFlee();
         const w = window.innerWidth;
         const h = window.innerHeight;
 
@@ -775,6 +1213,11 @@ class RoamingPetEngine {
                 if (this.body) {
                     this.body.classList.add(isWall ? 'crab-climbing' : 'crab-stepping');
                 }
+                if (isWall) {
+                    PetSound.crabClimb();
+                } else {
+                    PetSound.crabScuttle();
+                }
                 this.x = targetX;
                 this.y = targetY;
                 this.applyPosition();
@@ -792,6 +1235,7 @@ class RoamingPetEngine {
                     void this.body.offsetWidth;
                     this.body.classList.add('shrimp-snap');
                 }
+                PetSound.shrimpSnap();
                 this.x = targetX;
                 this.y = targetY;
                 this.applyPosition();
@@ -809,6 +1253,7 @@ class RoamingPetEngine {
                     void this.body.offsetWidth;
                     this.body.classList.add('octopus-dash');
                 }
+                PetSound.octopusJet();
                 this.x = targetX;
                 this.y = targetY;
                 this.applyPosition();
@@ -823,6 +1268,7 @@ class RoamingPetEngine {
                 // fish
                 if (this.container) this.container.classList.add('motion-fish-swim');
                 if (this.body) this.body.classList.add('fish-cruising');
+                PetSound.fishGlide();
                 this.x = targetX;
                 this.y = targetY;
                 this.applyPosition();
@@ -854,6 +1300,7 @@ class RoamingPetEngine {
 
                     if (this.container) this.container.classList.add('motion-crab-climb');
                     if (this.body) this.body.classList.add('crab-climbing');
+                    PetSound.crabClimb();
 
                     this.x = wallX;
                     this.y = climbY;
@@ -870,6 +1317,7 @@ class RoamingPetEngine {
                     const descendY = h - (78 + Math.random() * 12);
                     if (this.container) this.container.classList.add('motion-crab-climb');
                     if (this.body) this.body.classList.add('crab-climbing');
+                    PetSound.crabClimb();
 
                     this.y = descendY;
                     this.applyPosition();
@@ -905,6 +1353,7 @@ class RoamingPetEngine {
                     if (this.container) {
                         this.container.classList.add('motion-crab-step');
                     }
+                    PetSound.crabScuttle();
 
                     this.x = targetX;
                     this.y = targetY;
@@ -916,6 +1365,7 @@ class RoamingPetEngine {
                             this.body.classList.remove('crab-stepping');
                             if (Math.random() < 0.25) {
                                 this.body.classList.add('crab-pinch');
+                                PetSound.crabSnip();
                                 setTimeout(() => { if (this.body) this.body.classList.remove('crab-pinch'); }, 450);
                             }
                         }
@@ -948,6 +1398,7 @@ class RoamingPetEngine {
                 if (this.container) {
                     this.container.classList.add('motion-shrimp-pop');
                 }
+                PetSound.shrimpSnap();
 
                 this.x = leapX;
                 this.y = leapY;
@@ -959,6 +1410,7 @@ class RoamingPetEngine {
                         this.container.classList.remove('motion-shrimp-pop');
                         this.container.classList.add('motion-shrimp-float');
                     }
+                    PetSound.shrimpFloat();
                     this.y = Math.min(maxY, this.y + 35 + Math.random() * 40);
                     this.applyPosition();
 
@@ -985,6 +1437,7 @@ class RoamingPetEngine {
                 if (this.container) {
                     this.container.classList.add('motion-octopus-jet');
                 }
+                PetSound.octopusJet();
 
                 this.x = (this.x + targetX) / 2;
                 this.y = (this.y + targetY) / 2;
@@ -994,6 +1447,9 @@ class RoamingPetEngine {
                     if (this.container) {
                         this.container.classList.remove('motion-octopus-jet');
                         this.container.classList.add('motion-octopus-glide');
+                    }
+                    if (targetX < 40 || targetX > w - 100) {
+                        PetSound.suctionPop();
                     }
                     this.x = targetX;
                     this.y = targetY;
@@ -1025,6 +1481,7 @@ class RoamingPetEngine {
                 if (this.container) {
                     this.container.classList.add('motion-fish-swim');
                 }
+                PetSound.fishGlide();
 
                 this.x = targetX;
                 this.y = targetY;
@@ -1053,6 +1510,12 @@ class RoamingPetEngine {
 
             // 小泡鱼吐连珠升腾泡 (2个依次升起)，其他海鲜吐单泡
             const bubbleCount = pet.type === 'fish' ? 2 : 1;
+            if (pet.type === 'fish') {
+                PetSound.multiBubble();
+            } else if (Math.random() < 0.35) {
+                PetSound.bubble();
+            }
+
             for (let i = 0; i < bubbleCount; i++) {
                 setTimeout(() => {
                     if (!this.container) return;
@@ -1120,6 +1583,7 @@ class RoamingPetEngine {
         } else if (pet.type === 'octopus') {
             // 皮皮章：喷射黑紫色墨汁烟雾逃生！
             PetSound.octopusJet();
+            PetSound.inkDiffuse();
             if (this.body) {
                 this.body.classList.remove('octopus-dash', 'pet-somersault', 'pet-bounce');
                 void this.body.offsetWidth;
@@ -1144,6 +1608,7 @@ class RoamingPetEngine {
         } else {
             // 小泡鱼：摆尾急速游窜 + 连珠水泡
             PetSound.fishDart();
+            PetSound.multiBubble();
             if (this.body) {
                 this.body.classList.remove('fish-dash', 'pet-somersault', 'pet-bounce');
                 void this.body.offsetWidth;
@@ -1185,9 +1650,7 @@ class RoamingPetEngine {
         const quote = quotesPool[Math.floor(Math.random() * quotesPool.length)];
 
         this.say(quote);
-        if (typeof window.speakText === 'function') {
-            window.speakText(quote);
-        }
+        PetVoice.speak(quote, pet.type);
     }
 
     // 显示气泡台词
@@ -1206,6 +1669,8 @@ class RoamingPetEngine {
     // 答对冲刺进食动画
     feedRush(foodIcon) {
         this.wakeUp();
+        PetSound.eat();
+        const pet = getPetData();
         const foodEl = document.getElementById('roaming-pet-food-flying');
         if (foodEl) {
             foodEl.innerText = foodIcon || '🍪';
@@ -1239,6 +1704,7 @@ class RoamingPetEngine {
         }
 
         this.say(`+10 EXP！真香呀！😋`);
+        PetVoice.speak('+10 EXP！真香呀！', pet.type);
     }
 
     // 怠速打盹检测 (45秒未操作入眠)
@@ -1255,6 +1721,7 @@ class RoamingPetEngine {
         this.isSleeping = true;
         if (this.sleepEl) this.sleepEl.style.display = 'block';
         if (this.body) this.body.style.filter = 'brightness(0.9)';
+        PetSound.petSnore();
     }
 
     wakeUp() {
@@ -1262,7 +1729,7 @@ class RoamingPetEngine {
             this.isSleeping = false;
             if (this.sleepEl) this.sleepEl.style.display = 'none';
             if (this.body) this.body.style.filter = 'none';
-            PetSound.bubble();
+            PetSound.petWake();
             this.stepAutonomousRoutine();
         }
         this.resetSleepTimer();
@@ -1391,7 +1858,12 @@ function updatePetWidgets() {
                 </div>
                 <div class="pet-exp-bar"><div class="pet-exp-fill" style="width:${Math.min(100, Math.round(((pet.exp - lvlInfo.minExp) / (lvlInfo.nextExp - lvlInfo.minExp)) * 100))}%;"></div></div>
             </div>
-            <button class="btn btn-ghost btn-aquarium-entry" onclick="openPetModal()">水族馆 🐠</button>
+            <div style="display:flex; align-items:center; gap:6px; flex-shrink:0;">
+                <button class="btn btn-ghost btn-sound-toggle" onclick="togglePetSound(event)" title="声音开关" style="width:34px; height:34px; padding:0; border-radius:50%; font-size:15px; display:inline-flex; align-items:center; justify-content:center; border:1.5px solid rgba(255,112,166,0.4); cursor:pointer;">
+                    ${PetSound.isEnabled() ? '🔊' : '🔇'}
+                </button>
+                <button class="btn btn-ghost btn-aquarium-entry" onclick="openPetModal()">水族馆 🐠</button>
+            </div>
         `;
         homeBadge.style.display = 'flex';
     }
@@ -1402,6 +1874,7 @@ function updatePetWidgets() {
         quizWidget.innerHTML = `
             <div class="pet-quiz-avatar" onclick="speakPetQuote()" title="轻触听我说说话！">${activeForm.avatar}</div>
             <div class="pet-quiz-name">${activeForm.title} (Lv.${lvlInfo.level})</div>
+            <button class="btn btn-ghost" onclick="togglePetSound(event)" title="声音开关" style="font-size:13px; padding:2px 4px; border:none; background:transparent; cursor:pointer; opacity:0.8;">${PetSound.isEnabled() ? '🔊' : '🔇'}</button>
         `;
         quizWidget.style.display = 'flex';
     }
