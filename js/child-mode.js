@@ -613,12 +613,79 @@ class RoamingPetEngine {
 
         this.body.addEventListener('pointerdown', onPointerDown);
 
+        // 答题界面近距离智能仿生避让 (Proximity Dodge)
+        const onPassivePointerMove = (e) => {
+            if (!isChildMode || this.isDragging || !this.isQuizViewActive()) return;
+            const px = e.clientX || (e.touches && e.touches[0].clientX);
+            const py = e.clientY || (e.touches && e.touches[0].clientY);
+            if (px === undefined || py === undefined) return;
+            const petCenterX = this.x + 34;
+            const petCenterY = this.y + 34;
+            if (Math.hypot(px - petCenterX, py - petCenterY) < 70) {
+                this.fleeFromPointer(px, py);
+            }
+        };
+
+        window.addEventListener('pointermove', onPassivePointerMove, { passive: true });
+        window.addEventListener('touchmove', onPassivePointerMove, { passive: true });
+
         // 视口调整防出界
         window.addEventListener('resize', () => {
             this.x = Math.max(10, Math.min(window.innerWidth - 76, this.x));
             this.y = Math.max(60, Math.min(window.innerHeight - 80, this.y));
             this.applyPosition();
         });
+    }
+
+    isQuizViewActive() {
+        const quizView = document.getElementById('view-quiz');
+        return !!(quizView && quizView.style.display !== 'none');
+    }
+
+    fleeFromPointer(px, py) {
+        if (this.isFleeing) return;
+        this.isFleeing = true;
+        const w = window.innerWidth;
+        const h = window.innerHeight;
+
+        const distLeft = this.x;
+        const distRight = w - 75 - this.x;
+        const distTop = this.y - 70;
+        const distBottom = h - 75 - this.y;
+
+        const minDist = Math.min(distLeft, distRight, distTop, distBottom);
+        let targetX = this.x;
+        let targetY = this.y;
+
+        if (minDist === distLeft) {
+            targetX = 15;
+        } else if (minDist === distRight) {
+            targetX = w - 75;
+        } else if (minDist === distTop) {
+            targetY = 70;
+        } else {
+            targetY = h - 75;
+        }
+
+        if (this.body) {
+            this.body.classList.toggle('flip-left', targetX < this.x);
+            this.body.classList.remove('pet-bounce');
+            void this.body.offsetWidth;
+            this.body.classList.add('pet-bounce');
+            setTimeout(() => { if (this.body) this.body.classList.remove('pet-bounce'); }, 400);
+        }
+
+        if (this.container) {
+            this.container.style.transition = 'left 0.4s ease-out, top 0.4s ease-out';
+        }
+        this.x = targetX;
+        this.y = targetY;
+        this.applyPosition();
+
+        setTimeout(() => {
+            if (this.container) this.container.style.transition = '';
+            this.isFleeing = false;
+        }, 1100);
     }
 
     applyPosition() {
@@ -662,130 +729,85 @@ class RoamingPetEngine {
         const w = window.innerWidth;
         const h = window.innerHeight;
         const pet = getPetData();
+        const inQuiz = this.isQuizViewActive();
+
+        if (this.container) {
+            this.container.classList.toggle('in-quiz-mode', inQuiz);
+        }
+
         let nextDelay = 3000;
 
-        if (pet.type === 'crab') {
-            // 🦀 1. 机灵蟹：海底沙滩连续走走停停短距小碎步 (Short-step Scuttle & Forage)
-            const minX = 20;
-            const maxX = w - 85;
-            // 维持或切换行进方向
-            if (!this.crabDirection) this.crabDirection = (Math.random() > 0.5 ? 1 : -1);
-            let stepDist = (35 + Math.random() * 45) * this.crabDirection;
-            let targetX = this.x + stepDist;
+        if (inQuiz) {
+            // === 答题界面：外围安全环带巡游模式 (Perimeter Safety Ring Cruise) ===
+            // 绝不侵入做题核心区与选项按钮，在四周环带自然游曳
+            const zones = (pet.type === 'crab') 
+                ? ['bottom', 'left', 'right'] // 螃蟹不爬在顶部答题栏，沿底边或贴左右边框
+                : ['top', 'bottom', 'left', 'right'];
+            const chosenZone = zones[Math.floor(Math.random() * zones.length)];
 
-            // 遇到屏幕边缘自动折返
-            if (targetX < minX) {
-                targetX = minX + 10;
-                this.crabDirection = 1;
-            } else if (targetX > maxX) {
-                targetX = maxX - 10;
-                this.crabDirection = -1;
+            let targetX = this.x;
+            let targetY = this.y;
+
+            if (chosenZone === 'top') {
+                targetX = 20 + Math.random() * (w - 105);
+                targetY = 70 + Math.random() * 25;
+            } else if (chosenZone === 'bottom') {
+                targetX = 20 + Math.random() * (w - 105);
+                targetY = h - (75 + Math.random() * 15);
+            } else if (chosenZone === 'left') {
+                targetX = 15;
+                targetY = 85 + Math.random() * (h - 180);
             } else {
-                // 30% 概率随机转向
-                if (Math.random() < 0.3) this.crabDirection = -this.crabDirection;
+                targetX = w - 75;
+                targetY = 85 + Math.random() * (h - 180);
             }
 
-            const targetY = h - (78 + Math.random() * 12); // 保持在屏幕底端沙滩层
-
+            const isLeft = targetX < this.x;
             if (this.body) {
-                this.body.classList.toggle('flip-left', targetX < this.x);
-                this.body.classList.add('crab-stepping');
+                this.body.classList.toggle('flip-left', isLeft);
             }
 
-            if (this.container) {
-                this.container.classList.add('motion-crab-step');
-            }
-
-            this.x = targetX;
-            this.y = targetY;
-            this.applyPosition();
-
-            // 小碎步横移 0.85s 后停步探视
-            setTimeout(() => {
-                if (this.container) this.container.classList.remove('motion-crab-step');
-                if (this.body) {
-                    this.body.classList.remove('crab-stepping');
-                    // 25% 几率在停步时大螯轻微夹动一下（模拟沙滩觅食）
-                    if (Math.random() < 0.25) {
-                        this.body.classList.add('crab-pinch');
-                        setTimeout(() => { if (this.body) this.body.classList.remove('crab-pinch'); }, 450);
-                    }
-                }
-            }, 850);
-
-            // 节律：小碎步0.85s + 原地停驻0.8~1.3s = 1.6~2.1s 极生动连续巡走
-            nextDelay = 1650 + Math.random() * 550;
-
-        } else if (pet.type === 'shrimp') {
-            // 🦐 2. 跳跳虾：悬浮划水 + 尾节爆发反冲小跳跃 (Paddle hover & Tail-flick Leap)
-            const minX = 25;
-            const maxX = w - 85;
-            const direction = (this.x > w - 110) ? -1 : (this.x < 50 ? 1 : (Math.random() > 0.5 ? 1 : -1));
-            const leapX = Math.max(minX, Math.min(maxX, this.x + direction * (35 + Math.random() * 45)));
-            const leapY = Math.max(130, this.y - (30 + Math.random() * 40));
-
-            if (this.body) {
-                this.body.classList.toggle('flip-left', leapX < this.x);
-                this.body.classList.remove('shrimp-snap');
-                void this.body.offsetWidth;
-                this.body.classList.add('shrimp-snap');
-                setTimeout(() => { if (this.body) this.body.classList.remove('shrimp-snap'); }, 600);
-            }
-
-            if (this.container) {
-                this.container.classList.add('motion-shrimp-pop');
-            }
-
-            this.x = leapX;
-            this.y = leapY;
-            this.applyPosition();
-
-            // 0.38s后进入抛物线轻盈下沉
-            setTimeout(() => {
+            if (pet.type === 'crab') {
+                const isWall = (chosenZone === 'left' || chosenZone === 'right');
                 if (this.container) {
-                    this.container.classList.remove('motion-shrimp-pop');
-                    this.container.classList.add('motion-shrimp-float');
+                    this.container.classList.add(isWall ? 'motion-crab-climb' : 'motion-crab-step');
                 }
-                this.y = Math.min(h - 90, this.y + 28 + Math.random() * 24);
+                if (this.body) {
+                    this.body.classList.add(isWall ? 'crab-climbing' : 'crab-stepping');
+                }
+                this.x = targetX;
+                this.y = targetY;
                 this.applyPosition();
 
                 setTimeout(() => {
-                    if (this.container) this.container.classList.remove('motion-shrimp-float');
-                }, 1700);
-            }, 380);
+                    if (this.container) this.container.classList.remove('motion-crab-climb', 'motion-crab-step');
+                    if (this.body) this.body.classList.remove('crab-climbing', 'crab-stepping');
+                }, isWall ? 1500 : 900);
+                nextDelay = 2200 + Math.random() * 800;
 
-            // 节律：弹跳 + 飘落 + 短暂停顿 = 2.8~3.5s
-            nextDelay = 2800 + Math.random() * 700;
+            } else if (pet.type === 'shrimp') {
+                if (this.container) this.container.classList.add('motion-shrimp-pop');
+                if (this.body) {
+                    this.body.classList.remove('shrimp-snap');
+                    void this.body.offsetWidth;
+                    this.body.classList.add('shrimp-snap');
+                }
+                this.x = targetX;
+                this.y = targetY;
+                this.applyPosition();
 
-        } else if (pet.type === 'octopus') {
-            // 🐙 3. 皮皮章：漏斗喷流微冲 + 触手舒展巡游 (Pulse Jet & Tentacle Bloom)
-            const minX = 20;
-            const maxX = w - 85;
-            const targetX = minX + Math.random() * (maxX - minX);
-            const targetY = Math.max(130, Math.min(h - 90, h * 0.45 + Math.random() * (h * 0.42)));
+                setTimeout(() => {
+                    if (this.container) this.container.classList.remove('motion-shrimp-pop');
+                    if (this.body) this.body.classList.remove('shrimp-snap');
+                }, 400);
+                nextDelay = 3200 + Math.random() * 800;
 
-            if (this.body) {
-                this.body.classList.toggle('flip-left', targetX < this.x);
-                this.body.classList.remove('octopus-dash');
-                void this.body.offsetWidth;
-                this.body.classList.add('octopus-dash');
-                setTimeout(() => { if (this.body) this.body.classList.remove('octopus-dash'); }, 600);
-            }
-
-            if (this.container) {
-                this.container.classList.add('motion-octopus-jet');
-            }
-
-            // 阶段一：喷流瞬冲半程
-            this.x = (this.x + targetX) / 2;
-            this.y = (this.y + targetY) / 2;
-            this.applyPosition();
-
-            // 阶段二：触手大舒展，惯性慢滑行
-            setTimeout(() => {
-                if (this.container) {
-                    this.container.classList.remove('motion-octopus-jet');
-                    this.container.classList.add('motion-octopus-glide');
+            } else if (pet.type === 'octopus') {
+                if (this.container) this.container.classList.add('motion-octopus-glide');
+                if (this.body) {
+                    this.body.classList.remove('octopus-dash');
+                    void this.body.offsetWidth;
+                    this.body.classList.add('octopus-dash');
                 }
                 this.x = targetX;
                 this.y = targetY;
@@ -793,51 +815,230 @@ class RoamingPetEngine {
 
                 setTimeout(() => {
                     if (this.container) this.container.classList.remove('motion-octopus-glide');
+                    if (this.body) this.body.classList.remove('octopus-dash');
                 }, 2100);
-            }, 420);
+                nextDelay = 3500 + Math.random() * 800;
 
-            // 节律：喷冲 + 滑行 + 触手波浪 = 3.4~4.2s
-            nextDelay = 3400 + Math.random() * 800;
+            } else {
+                // fish
+                if (this.container) this.container.classList.add('motion-fish-swim');
+                if (this.body) this.body.classList.add('fish-cruising');
+                this.x = targetX;
+                this.y = targetY;
+                this.applyPosition();
+
+                setTimeout(() => {
+                    if (this.container) this.container.classList.remove('motion-fish-swim');
+                    if (this.body) this.body.classList.remove('fish-cruising');
+                }, 2400);
+                nextDelay = 2800 + Math.random() * 600;
+            }
 
         } else {
-            // 🐟 4. 小泡鱼：连贯水流游弋与动态鱼身俯仰 (Continuous Streamlined Swim)
-            const minX = 20;
+            // === 首页/仪表盘：真实全屏生态拟真活动 (Full-screen Authentic Habitat) ===
+            const minX = 18;
             const maxX = w - 85;
-            const minY = Math.max(120, h * 0.42);
-            const maxY = h - 90;
+            const minY = 68;
+            const maxY = h - 80;
 
-            const targetX = minX + Math.random() * (maxX - minX);
-            const targetY = minY + Math.random() * (maxY - minY);
+            if (pet.type === 'crab') {
+                // 🦀 1. 机灵蟹：海底沙滩横行小碎步 + 侧壁垂直攀爬 (Floor Scuttle & Side-Wall Climb)
+                const isNearLeftWall = this.x <= 35;
+                const isNearRightWall = this.x >= w - 90;
+                const isNearFloor = this.y >= h - 110;
 
-            const isMovingLeft = targetX < this.x;
-            if (this.body) {
-                this.body.classList.toggle('flip-left', isMovingLeft);
-                this.body.classList.add('fish-cruising');
-                // 动态俯仰角 (Pitch)
-                const dy = targetY - this.y;
-                const pitchDeg = Math.max(-14, Math.min(14, Math.round(dy / 8)));
-                if (this.avatarEl) {
-                    this.avatarEl.style.transform = (isMovingLeft ? 'scaleX(-1) ' : '') + `rotate(${pitchDeg}deg)`;
+                // 遇到侧壁且在底端时，有 55% 几率沿玻璃侧壁垂直向上攀爬！
+                if ((isNearLeftWall || isNearRightWall) && isNearFloor && Math.random() < 0.55) {
+                    const climbY = minY + Math.random() * (h * 0.45);
+                    const wallX = isNearLeftWall ? 16 : (w - 76);
+
+                    if (this.container) this.container.classList.add('motion-crab-climb');
+                    if (this.body) this.body.classList.add('crab-climbing');
+
+                    this.x = wallX;
+                    this.y = climbY;
+                    this.applyPosition();
+
+                    setTimeout(() => {
+                        if (this.container) this.container.classList.remove('motion-crab-climb');
+                        if (this.body) this.body.classList.remove('crab-climbing');
+                    }, 1500);
+                    nextDelay = 2400 + Math.random() * 600;
+
+                } else if (!isNearFloor && (isNearLeftWall || isNearRightWall)) {
+                    // 若在高处壁面，顺着墙壁爬下海底沙滩
+                    const descendY = h - (78 + Math.random() * 12);
+                    if (this.container) this.container.classList.add('motion-crab-climb');
+                    if (this.body) this.body.classList.add('crab-climbing');
+
+                    this.y = descendY;
+                    this.applyPosition();
+
+                    setTimeout(() => {
+                        if (this.container) this.container.classList.remove('motion-crab-climb');
+                        if (this.body) this.body.classList.remove('crab-climbing');
+                    }, 1500);
+                    nextDelay = 2200 + Math.random() * 600;
+
+                } else {
+                    // 底栖沙滩层正常横行小碎步
+                    if (!this.crabDirection) this.crabDirection = (Math.random() > 0.5 ? 1 : -1);
+                    let stepDist = (38 + Math.random() * 48) * this.crabDirection;
+                    let targetX = this.x + stepDist;
+
+                    if (targetX < minX) {
+                        targetX = 18;
+                        this.crabDirection = 1;
+                    } else if (targetX > maxX) {
+                        targetX = maxX;
+                        this.crabDirection = -1;
+                    } else if (Math.random() < 0.3) {
+                        this.crabDirection = -this.crabDirection;
+                    }
+
+                    const targetY = h - (78 + Math.random() * 12);
+
+                    if (this.body) {
+                        this.body.classList.toggle('flip-left', targetX < this.x);
+                        this.body.classList.add('crab-stepping');
+                    }
+                    if (this.container) {
+                        this.container.classList.add('motion-crab-step');
+                    }
+
+                    this.x = targetX;
+                    this.y = targetY;
+                    this.applyPosition();
+
+                    setTimeout(() => {
+                        if (this.container) this.container.classList.remove('motion-crab-step');
+                        if (this.body) {
+                            this.body.classList.remove('crab-stepping');
+                            if (Math.random() < 0.25) {
+                                this.body.classList.add('crab-pinch');
+                                setTimeout(() => { if (this.body) this.body.classList.remove('crab-pinch'); }, 450);
+                            }
+                        }
+                    }, 850);
+
+                    nextDelay = 1650 + Math.random() * 550;
                 }
-            }
 
-            if (this.container) {
-                this.container.classList.add('motion-fish-swim');
-            }
-
-            this.x = targetX;
-            this.y = targetY;
-            this.applyPosition();
-
-            setTimeout(() => {
-                if (this.container) this.container.classList.remove('motion-fish-swim');
-                if (this.avatarEl) {
-                    this.avatarEl.style.transform = isMovingLeft ? 'scaleX(-1)' : 'none';
+            } else if (pet.type === 'shrimp') {
+                // 🦐 2. 跳跳虾：全水层冲顶爆发弹射 + 慢速羽毛飘沉 (Full-column Surface Pop & Feather Drift)
+                const direction = (this.x > w - 100) ? -1 : (this.x < 45 ? 1 : (Math.random() > 0.5 ? 1 : -1));
+                const leapX = Math.max(minX, Math.min(maxX, this.x + direction * (40 + Math.random() * 55)));
+                
+                // 若在中下层，有概率冲顶弹跃至上水层
+                let leapY;
+                if (this.y > h * 0.45 && Math.random() < 0.55) {
+                    leapY = minY + Math.random() * (h * 0.28);
+                } else {
+                    leapY = Math.max(minY, this.y - (35 + Math.random() * 45));
                 }
-            }, 2500);
 
-            // 节律：游动2.5s微停0.4s无缝衔接下一段游弋
-            nextDelay = 2700 + Math.random() * 600;
+                if (this.body) {
+                    this.body.classList.toggle('flip-left', leapX < this.x);
+                    this.body.classList.remove('shrimp-snap');
+                    void this.body.offsetWidth;
+                    this.body.classList.add('shrimp-snap');
+                    setTimeout(() => { if (this.body) this.body.classList.remove('shrimp-snap'); }, 600);
+                }
+
+                if (this.container) {
+                    this.container.classList.add('motion-shrimp-pop');
+                }
+
+                this.x = leapX;
+                this.y = leapY;
+                this.applyPosition();
+
+                // 0.38s 后如羽毛般慢速随水流飘沉
+                setTimeout(() => {
+                    if (this.container) {
+                        this.container.classList.remove('motion-shrimp-pop');
+                        this.container.classList.add('motion-shrimp-float');
+                    }
+                    this.y = Math.min(maxY, this.y + 35 + Math.random() * 40);
+                    this.applyPosition();
+
+                    setTimeout(() => {
+                        if (this.container) this.container.classList.remove('motion-shrimp-float');
+                    }, 1700);
+                }, 380);
+
+                nextDelay = 2900 + Math.random() * 700;
+
+            } else if (pet.type === 'octopus') {
+                // 🐙 3. 皮皮章：全屏斜向漏斗喷流 + 触手舒展滑翔 (Full-screen Pulse Jet & Glide)
+                const targetX = minX + Math.random() * (maxX - minX);
+                const targetY = minY + Math.random() * (maxY - minY);
+
+                if (this.body) {
+                    this.body.classList.toggle('flip-left', targetX < this.x);
+                    this.body.classList.remove('octopus-dash');
+                    void this.body.offsetWidth;
+                    this.body.classList.add('octopus-dash');
+                    setTimeout(() => { if (this.body) this.body.classList.remove('octopus-dash'); }, 600);
+                }
+
+                if (this.container) {
+                    this.container.classList.add('motion-octopus-jet');
+                }
+
+                this.x = (this.x + targetX) / 2;
+                this.y = (this.y + targetY) / 2;
+                this.applyPosition();
+
+                setTimeout(() => {
+                    if (this.container) {
+                        this.container.classList.remove('motion-octopus-jet');
+                        this.container.classList.add('motion-octopus-glide');
+                    }
+                    this.x = targetX;
+                    this.y = targetY;
+                    this.applyPosition();
+
+                    setTimeout(() => {
+                        if (this.container) this.container.classList.remove('motion-octopus-glide');
+                    }, 2100);
+                }, 420);
+
+                nextDelay = 3400 + Math.random() * 800;
+
+            } else {
+                // 🐟 4. 小泡鱼：全屏流线正弦游弋与动态俯仰 (Full-screen Streamlined Cruising)
+                const targetX = minX + Math.random() * (maxX - minX);
+                const targetY = minY + Math.random() * (maxY - minY);
+
+                const isMovingLeft = targetX < this.x;
+                if (this.body) {
+                    this.body.classList.toggle('flip-left', isMovingLeft);
+                    this.body.classList.add('fish-cruising');
+                    const dy = targetY - this.y;
+                    const pitchDeg = Math.max(-16, Math.min(16, Math.round(dy / 7)));
+                    if (this.avatarEl) {
+                        this.avatarEl.style.transform = (isMovingLeft ? 'scaleX(-1) ' : '') + `rotate(${pitchDeg}deg)`;
+                    }
+                }
+
+                if (this.container) {
+                    this.container.classList.add('motion-fish-swim');
+                }
+
+                this.x = targetX;
+                this.y = targetY;
+                this.applyPosition();
+
+                setTimeout(() => {
+                    if (this.container) this.container.classList.remove('motion-fish-swim');
+                    if (this.avatarEl) {
+                        this.avatarEl.style.transform = isMovingLeft ? 'scaleX(-1)' : 'none';
+                    }
+                }, 2500);
+
+                nextDelay = 2700 + Math.random() * 600;
+            }
         }
 
         this.wanderTimer = setTimeout(() => this.stepAutonomousRoutine(), nextDelay);
@@ -1323,56 +1524,63 @@ function closePetModal() {
 
 function renderAquariumModal() {
     const currentPet = getPetData();
-    const petDef = SEAFOOD_PETS[aquariumSelectedFamily] || SEAFOOD_PETS.fish;
+    const activeType = currentPet.type || 'fish';
+    aquariumSelectedFamily = activeType;
+    const petDef = SEAFOOD_PETS[activeType] || SEAFOOD_PETS.fish;
     const lvlInfo = getPetLevelInfo(currentPet.exp || 0);
 
-    // 1. 渲染四大物种选项卡
-    const tabsContainer = document.getElementById('aquarium-tabs');
-    if (tabsContainer) {
-        tabsContainer.innerHTML = '';
+    // 1. 顶部 4 大海鲜物种卡片 (一键切换伴学伙伴)
+    const gridContainer = document.getElementById('pet-selector-grid');
+    if (gridContainer) {
+        gridContainer.innerHTML = '';
         Object.values(SEAFOOD_PETS).forEach(p => {
-            const tab = document.createElement('div');
-            tab.className = `aquarium-tab ${p.id === aquariumSelectedFamily ? 'active' : ''}`;
-            tab.onclick = () => {
-                aquariumSelectedFamily = p.id;
-                renderAquariumModal();
-            };
-            tab.innerHTML = `<span>${p.avatar}</span> <div>${p.name}</div>`;
-            tabsContainer.appendChild(tab);
+            const isActive = (activeType === p.id);
+            const card = document.createElement('div');
+            card.className = `pet-selector-card ${isActive ? 'active' : ''}`;
+            card.onclick = () => switchCompanionPet(p.id);
+            card.innerHTML = `
+                <div class="pet-card-icon">${p.avatar}</div>
+                <div class="pet-card-name">${p.name}</div>
+                <div class="pet-card-status">${isActive ? '伴学中 ⭐' : '选我 🐾'}</div>
+            `;
+            gridContainer.appendChild(card);
         });
     }
 
-    // 2. 渲染头部信息卡
+    // 兼容老版本 tabs (如有)
+    const tabsContainer = document.getElementById('aquarium-tabs');
+    if (tabsContainer) {
+        tabsContainer.innerHTML = '';
+    }
+
+    // 2. 渲染头部物种简介卡
     const headerEl = document.getElementById('aquarium-header-card');
     if (headerEl) {
-        const isCurrentActive = currentPet.type === aquariumSelectedFamily;
         headerEl.innerHTML = `
             <div style="font-size:38px;">${petDef.avatar}</div>
             <div style="flex-grow:1; text-align:left;">
-                <div style="font-weight:bold; font-size:16px;">
-                    ${petDef.name} <span style="font-size:12px; color:var(--text-sub);">(${petDef.speciesName})</span>
+                <div style="font-weight:bold; font-size:15px; color:var(--text-main);">
+                    ${petDef.name} <span style="font-size:12px; color:var(--text-sub); font-weight:normal;">(${petDef.speciesName})</span>
                 </div>
                 <div style="font-size:12px; color:var(--text-sub); margin-top:2px;">
-                    喜好：${petDef.foodIcon} ${petDef.favoriteFood} · ${isCurrentActive ? '<span style="color:#FF70A6; font-weight:bold;">当前伴学中 ⭐</span>' : '点击底部可选为伴学'}
+                    喜好：${petDef.foodIcon} ${petDef.favoriteFood} · 当前成长：Lv.${lvlInfo.level} (${lvlInfo.stageName})
                 </div>
             </div>
         `;
     }
 
-    // 3. 渲染五阶变身进化图鉴树
+    // 3. 渲染五阶变身进化图鉴树 (用户经验全物种通用解锁)
     const treeContainer = document.getElementById('aquarium-evolution-tree');
     if (treeContainer) {
         treeContainer.innerHTML = '';
-        // 当前宠物的最高已解锁阶数
-        const isSelectedPetCurrent = currentPet.type === aquariumSelectedFamily;
-        const currentExp = isSelectedPetCurrent ? (currentPet.exp || 0) : 0;
-        const familyLvlInfo = getPetLevelInfo(currentExp);
-        const maxUnlockedStage = isSelectedPetCurrent ? familyLvlInfo.stageIndex : 0;
-        const equippedStage = isSelectedPetCurrent ? (currentPet.equippedStage !== null ? currentPet.equippedStage : maxUnlockedStage) : 0;
+        const maxUnlockedStage = lvlInfo.stageIndex;
+        const equippedStage = (currentPet.equippedStage !== null && currentPet.equippedStage !== undefined)
+            ? currentPet.equippedStage
+            : maxUnlockedStage;
 
         petDef.forms.forEach((form, idx) => {
-            const isUnlocked = isSelectedPetCurrent && (idx <= maxUnlockedStage);
-            const isEquipped = isSelectedPetCurrent && (idx === equippedStage);
+            const isUnlocked = idx <= maxUnlockedStage;
+            const isEquipped = (idx === equippedStage);
 
             const card = document.createElement('div');
             card.className = `evo-stage-card ${isUnlocked ? 'unlocked' : 'locked'} ${isEquipped ? 'equipped' : ''}`;
@@ -1395,7 +1603,7 @@ function renderAquariumModal() {
                         ${form.title}
                         <span style="font-size:11px; font-weight:normal; color:var(--text-sub);">(第${form.stage}阶)</span>
                     </div>
-                    <div class="evo-stage-desc">${isUnlocked ? form.desc : '神秘形态，提升答题等级即可觉醒！'}</div>
+                    <div class="evo-stage-desc">${isUnlocked ? form.desc : '提升答题等级即可觉醒此形态！'}</div>
                 </div>
                 <div class="evo-stage-action">
                     ${actionHtml}
@@ -1405,11 +1613,36 @@ function renderAquariumModal() {
         });
     }
 
-    // 4. 底部确定按钮文本
+    // 4. 底部确定按钮文本 (若有旧按钮则兼容)
     const chooseBtn = document.getElementById('btn-aquarium-choose-pet');
     if (chooseBtn) {
-        chooseBtn.innerText = currentPet.type === aquariumSelectedFamily ? '保持当前伴学伙伴 ✨' : `选 ${petDef.name} 为陪伴萌宠 🐾`;
+        chooseBtn.innerText = '完成 🐾';
     }
+}
+
+// 一键切换伴学宠物
+function switchCompanionPet(petId) {
+    if (!SEAFOOD_PETS[petId]) return;
+    const pet = getPetData();
+    if (pet.type !== petId) {
+        pet.type = petId;
+        pet.customName = SEAFOOD_PETS[petId].name;
+        pet.equippedStage = null; // 重置为当前最高解锁形态
+        savePetData(pet);
+        PetSound.cheer();
+
+        if (window.roamingPet) {
+            window.roamingPet.render();
+            window.roamingPet.startWanderLoop();
+        }
+        updatePetWidgets();
+
+        if (typeof window.speakText === 'function') {
+            window.speakText(`太棒啦！从现在开始，${SEAFOOD_PETS[petId].name}就是你的伴学好搭档啦！`);
+        }
+    }
+    aquariumSelectedFamily = petId;
+    renderAquariumModal();
 }
 
 // 随心切换穿戴形态
@@ -1435,27 +1668,10 @@ function equipPetForm(stageIndex) {
     }
 }
 
-// 确定选为陪伴萌宠
+// 确定选为陪伴萌宠 (兼顾老调用)
 function applyAquariumSelection() {
-    const pet = getPetData();
-    if (pet.type !== aquariumSelectedFamily) {
-        pet.type = aquariumSelectedFamily;
-        pet.customName = SEAFOOD_PETS[aquariumSelectedFamily].name;
-        pet.equippedStage = null; // 重置为最新解锁
-        savePetData(pet);
-        PetSound.cheer();
-    }
-    if (window.roamingPet) {
-        window.roamingPet.render();
-        window.roamingPet.startWanderLoop();
-    }
-    updatePetWidgets();
+    switchCompanionPet(aquariumSelectedFamily);
     closePetModal();
-
-    const def = SEAFOOD_PETS[pet.type];
-    if (typeof window.speakText === 'function') {
-        window.speakText(`太棒啦！从现在开始，${def.name}就是你的好搭档啦！`);
-    }
 }
 
 // 兼容老版本 selectPet

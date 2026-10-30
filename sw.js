@@ -1,4 +1,4 @@
-const CACHE_NAME = 'bingo-quiz-v13';
+const CACHE_NAME = 'bingo-quiz-v14';
 const ASSETS = [
     './',
     './index.html',

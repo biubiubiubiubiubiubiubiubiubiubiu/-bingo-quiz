@@ -394,28 +394,30 @@
 
     <!-- Modal: 海底水族馆 & 变身展厅 -->
     <div class="modal-mask" id="modal-pet-selection" style="display:none;">
-        <div class="modal-box pet-aquarium-modal" style="max-width:480px; max-height:88vh; display:flex; flex-direction:column; padding:18px;">
+        <div class="modal-box pet-aquarium-modal" style="max-width:500px; max-height:88vh; display:flex; flex-direction:column; padding:18px;">
             <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
-                <h3 style="margin:0; font-size:18px;">🐠 海底水族馆 · 变身展厅</h3>
+                <h3 style="margin:0; font-size:18px;">🐠 海底水族馆 · 伙伴与变身</h3>
                 <button class="btn btn-ghost btn-icon" onclick="closePetModal()" style="font-size:16px;">✕</button>
             </div>
             
-            <!-- 家族切换选项卡 -->
-            <div class="aquarium-tabs" id="aquarium-tabs"></div>
-            
-            <!-- 当前选中物种头部信息卡 -->
-            <div class="aquarium-header-card" id="aquarium-header-card"></div>
-            
-            <!-- 5阶进化形态树 (可滚动区域) -->
-            <div style="font-weight:bold; font-size:14px; margin:14px 0 8px 0; text-align:left; display:flex; justify-content:space-between; align-items:center;">
-                <span>✨ 五阶变身进化图鉴</span>
-                <span style="font-size:12px; color:var(--text-sub); font-weight:normal;">点击已解锁形态即可切换装扮</span>
+            <!-- 顶部 4 大海鲜萌宠卡片 (点击即刻切换伴学伙伴) -->
+            <div style="font-weight:bold; font-size:13px; color:var(--text-sub); margin-bottom:8px; text-align:left;">
+                🐾 点击卡片直接选为伴学伙伴
+            </div>
+            <div class="pet-selector-grid" id="pet-selector-grid"></div>
+
+            <!-- 中部：当前选定萌宠的专属物种简介 -->
+            <div class="aquarium-header-card" id="aquarium-header-card" style="margin-top:10px;"></div>
+
+            <!-- 下部：该萌宠的 5 阶进化图鉴树 (可滚动) -->
+            <div style="font-weight:bold; font-size:13px; color:var(--text-sub); margin:12px 0 6px 0; text-align:left; display:flex; justify-content:space-between; align-items:center;">
+                <span>✨ 变身形态图鉴</span>
+                <span style="font-size:11px; color:var(--text-sub); font-weight:normal;">点击已解锁形态即可切换装扮</span>
             </div>
             <div class="evolution-tree-grid" id="aquarium-evolution-tree" style="flex:1; overflow-y:auto; padding-right:4px;"></div>
             
-            <div style="margin-top:16px; display:flex; gap:10px;">
-                <button class="btn btn-primary" id="btn-aquarium-choose-pet" style="flex:1;" onclick="applyAquariumSelection()">选为陪伴萌宠 🐾</button>
-                <button class="btn btn-ghost" style="width:80px;" onclick="closePetModal()">关闭</button>
+            <div style="margin-top:12px;">
+                <button class="btn btn-primary" style="width:100%; border-radius:18px; height:42px; font-size:14px;" onclick="closePetModal()">完成 🐾</button>
             </div>
         </div>
     </div>
