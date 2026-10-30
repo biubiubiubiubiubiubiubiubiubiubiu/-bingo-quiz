@@ -639,6 +639,7 @@
                     // 点击了错误选项
                     row.classList.add('shake-it');
                     if (navigator.vibrate) navigator.vibrate([100, 50, 100]);
+                    if (typeof recordQuizWrong === 'function') { recordQuizWrong(); }
                     setTimeout(() => {
                         row.classList.remove('shake-it');
                     }, 400);

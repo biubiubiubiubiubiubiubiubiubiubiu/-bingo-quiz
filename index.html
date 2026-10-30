@@ -352,14 +352,70 @@
 
 
 
-    <!-- Modal: 海底水族馆 (儿童模式海鲜选宠) -->
-    <div class="modal-mask" id="modal-pet-selection">
-        <div class="modal-box" style="text-align:center; max-width:440px;">
-            <h3 style="margin-top:0;">🐠 海底水族馆</h3>
-            <p style="font-size:13px; color:var(--text-sub); margin-bottom:15px;">选择一只可爱的海鲜小伙伴陪你一起刷题吧！</p>
-            <div id="pet-selection-cards" class="pet-cards-grid"></div>
-            <div style="margin-top:20px;">
-                <button class="btn btn-ghost" onclick="closePetModal()">关闭</button>
+    <!-- 自由漫游伴学精灵容器 -->
+    <div id="roaming-pet-companion" class="roaming-pet-container" style="display:none;">
+        <div class="roaming-pet-speech" id="roaming-pet-speech" style="display:none;">
+            <span id="roaming-pet-speech-text">小主人冲鸭！</span>
+        </div>
+        <div class="roaming-pet-heart" id="roaming-pet-heart" style="display:none;">💖</div>
+        <div class="roaming-pet-food-flying" id="roaming-pet-food-flying" style="display:none;">🍪</div>
+        <div class="roaming-pet-body" id="roaming-pet-body" title="轻触互动，按住可拖拽，双击停靠">
+            <div class="roaming-pet-aura" id="roaming-pet-aura"></div>
+            <div class="roaming-pet-avatar" id="roaming-pet-avatar">🐟</div>
+            <div class="roaming-pet-sleep-badge" id="roaming-pet-sleep-badge" style="display:none;">💤</div>
+            <div class="roaming-pet-tag" id="roaming-pet-tag">Lv.1</div>
+        </div>
+        <button class="roaming-pet-dock-btn" id="roaming-pet-dock-btn" onclick="togglePetDock(event)" title="驻留/漫游切换">⚓</button>
+    </div>
+
+    <!-- Modal: 宠物升级全屏变身盛典 -->
+    <div class="modal-mask evolution-mask" id="modal-pet-evolution" style="display:none;">
+        <div class="evolution-backdrop-glow"></div>
+        <div class="evolution-container">
+            <div class="evolution-burst-rays"></div>
+            <div class="evolution-stage-scene">
+                <div class="evolution-pre-avatar" id="evo-pre-avatar">🐟</div>
+                <div class="evolution-energy-ring" id="evo-energy-ring"></div>
+                <div class="evolution-new-avatar-container" id="evo-avatar-container">
+                    <div class="evolution-halo" id="evo-halo"></div>
+                    <div class="evolution-new-avatar" id="evo-new-avatar">🐉</div>
+                </div>
+            </div>
+            <div class="evolution-title-banner" id="evo-banner">🎉 哇！觉醒变身啦！ 🎉</div>
+            <div class="evolution-name" id="evo-form-title">【九霄海龙神】</div>
+            <div class="evolution-desc" id="evo-desc">真龙觉醒！呼风唤雨，执掌深海万千智慧。</div>
+            <div class="evolution-quote" id="evo-quote">“雷霆万钧！神龙现世，没有什么难题能阻挡我们！”</div>
+            <div class="evolution-actions">
+                <button class="btn btn-primary btn-evolution-confirm" onclick="confirmEvolution()">太酷啦！变身出击 🚀</button>
+            </div>
+        </div>
+        <div id="evolution-confetti-container" class="evolution-confetti-container"></div>
+    </div>
+
+    <!-- Modal: 海底水族馆 & 变身展厅 -->
+    <div class="modal-mask" id="modal-pet-selection" style="display:none;">
+        <div class="modal-box pet-aquarium-modal" style="max-width:480px; max-height:88vh; display:flex; flex-direction:column; padding:18px;">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
+                <h3 style="margin:0; font-size:18px;">🐠 海底水族馆 · 变身展厅</h3>
+                <button class="btn btn-ghost btn-icon" onclick="closePetModal()" style="font-size:16px;">✕</button>
+            </div>
+            
+            <!-- 家族切换选项卡 -->
+            <div class="aquarium-tabs" id="aquarium-tabs"></div>
+            
+            <!-- 当前选中物种头部信息卡 -->
+            <div class="aquarium-header-card" id="aquarium-header-card"></div>
+            
+            <!-- 5阶进化形态树 (可滚动区域) -->
+            <div style="font-weight:bold; font-size:14px; margin:14px 0 8px 0; text-align:left; display:flex; justify-content:space-between; align-items:center;">
+                <span>✨ 五阶变身进化图鉴</span>
+                <span style="font-size:12px; color:var(--text-sub); font-weight:normal;">点击已解锁形态即可切换装扮</span>
+            </div>
+            <div class="evolution-tree-grid" id="aquarium-evolution-tree" style="flex:1; overflow-y:auto; padding-right:4px;"></div>
+            
+            <div style="margin-top:16px; display:flex; gap:10px;">
+                <button class="btn btn-primary" id="btn-aquarium-choose-pet" style="flex:1;" onclick="applyAquariumSelection()">选为陪伴萌宠 🐾</button>
+                <button class="btn btn-ghost" style="width:80px;" onclick="closePetModal()">关闭</button>
             </div>
         </div>
     </div>
