@@ -504,16 +504,16 @@ body {
 }
 
 /* M3 Filled Tonal Button */
-.btn-ghost,
+.btn-ghost:not(select),
 .m3-btn--tonal {
-    background: var(--md-sys-color-secondary-container);
+    background-color: var(--md-sys-color-secondary-container);
     color: var(--md-sys-color-on-secondary-container);
     border: 1px solid transparent;
 }
 
-.btn-ghost:hover,
+.btn-ghost:not(select):hover,
 .m3-btn--tonal:hover {
-    background: var(--md-sys-color-surface-container-highest);
+    background-color: var(--md-sys-color-surface-container-highest);
     filter: brightness(1.04);
 }
 
@@ -571,36 +571,37 @@ body {
 /* M3 Floating Action Button (FAB) */
 .btn-float,
 .m3-fab {
-    position: fixed;
-    bottom: calc(24px + env(safe-area-inset-bottom));
-    right: 24px;
-    width: 56px;
-    height: 56px;
-    border-radius: var(--md-sys-shape-corner-l); /* M3 standard 16dp rounded corner */
-    background: var(--md-sys-color-primary-container);
-    color: var(--md-sys-color-on-primary-container);
-    border: 1px solid var(--md-sys-color-outline-variant);
+    position: fixed !important;
+    bottom: calc(24px + env(safe-area-inset-bottom)) !important;
+    right: 24px !important;
+    right: max(24px, calc((100vw - 840px) / 2 + 16px)) !important;
+    width: 56px !important;
+    height: 56px !important;
+    border-radius: var(--md-sys-shape-corner-l) !important;
+    background: var(--md-sys-color-primary-container) !important;
+    color: var(--md-sys-color-on-primary-container) !important;
+    border: 1px solid var(--md-sys-color-outline-variant) !important;
     font-size: 28px;
-    box-shadow: var(--md-sys-elevation-level3);
-    z-index: 100;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-    transition: transform 0.2s var(--md-sys-motion-standard), box-shadow 0.2s var(--md-sys-motion-standard), background 0.2s ease;
+    box-shadow: var(--md-sys-elevation-level3) !important;
+    z-index: 100 !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    cursor: pointer !important;
+    transition: transform 0.2s var(--md-sys-motion-standard), box-shadow 0.2s var(--md-sys-motion-standard), background 0.2s ease !important;
 }
 
 .btn-float:hover,
 .m3-fab:hover {
-    transform: scale(1.05);
-    box-shadow: var(--md-sys-elevation-level4);
-    background: var(--md-sys-color-primary);
-    color: var(--md-sys-color-on-primary);
+    transform: scale(1.05) !important;
+    box-shadow: var(--md-sys-elevation-level4) !important;
+    background: var(--md-sys-color-primary) !important;
+    color: var(--md-sys-color-on-primary) !important;
 }
 
 .btn-float:active,
 .m3-fab:active {
-    transform: scale(0.95);
+    transform: scale(0.95) !important;
 }
 
 /* ==========================================================================
@@ -638,8 +639,9 @@ body {
 }
 
 /* M3 Outlined Select */
+select.m3-select,
 select.btn-ghost,
-.m3-select {
+select {
     appearance: none;
     -webkit-appearance: none;
     -moz-appearance: none;
@@ -656,26 +658,38 @@ select.btn-ghost,
     width: 100%;
     cursor: pointer;
     transition: border-color 0.2s ease, background-color 0.2s ease;
-    background-image: url('data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2220%22%20height%3D%2220%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22%236F7975%22%20stroke-width%3D%222.5%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpolyline%20points%3D%226%209%2012%2015%2018%209%22%3E%3C%2Fpolyline%3E%3C%2Fsvg%3E');
-    background-repeat: no-repeat;
-    background-position: right 14px center;
-    background-size: 16px;
+    background-image: url('data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2220%22%20height%3D%2220%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22%236F7975%22%20stroke-width%3D%222.5%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpolyline%20points%3D%226%209%2012%2015%2018%209%22%3E%3C%2Fpolyline%3E%3C%2Fsvg%3E') !important;
+    background-repeat: no-repeat !important;
+    background-position: right 14px center !important;
+    background-size: 16px 16px !important;
 }
 
+select.m3-select:hover,
 select.btn-ghost:hover,
-.m3-select:hover {
-    background-color: var(--md-sys-color-surface-container-high);
+select:hover {
+    background-color: var(--md-sys-color-surface-container-high) !important;
+    background-repeat: no-repeat !important;
+    background-position: right 14px center !important;
+    background-size: 16px 16px !important;
 }
 
+select.m3-select:focus,
 select.btn-ghost:focus,
-.m3-select:focus {
-    border-color: var(--md-sys-color-primary);
-    box-shadow: 0 0 0 3px var(--md-sys-color-primary-container);
+select:focus {
+    border-color: var(--md-sys-color-primary) !important;
+    box-shadow: 0 0 0 3px var(--md-sys-color-primary-container) !important;
+    background-repeat: no-repeat !important;
+    background-position: right 14px center !important;
+    background-size: 16px 16px !important;
 }
 
+[data-theme="everforest"] select.m3-select,
 [data-theme="everforest"] select.btn-ghost,
-[data-theme="everforest"] .m3-select {
-    background-image: url('data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2220%22%20height%3D%2220%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22%2389938E%22%20stroke-width%3D%222.5%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpolyline%20points%3D%226%209%2012%2015%2018%209%22%3E%3C%2Fpolyline%3E%3C%2Fsvg%3E');
+[data-theme="everforest"] select {
+    background-image: url('data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2220%22%20height%3D%2220%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22%2389938E%22%20stroke-width%3D%222.5%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpolyline%20points%3D%226%209%2012%2015%2018%209%22%3E%3C%2Fpolyline%3E%3C%2Fsvg%3E') !important;
+    background-repeat: no-repeat !important;
+    background-position: right 14px center !important;
+    background-size: 16px 16px !important;
 }
 
 /* M3 Segmented Button Group */
@@ -1101,8 +1115,11 @@ select.btn-ghost:focus,
    M3 Ripple State Feedback
    ========================================================================== */
 
-.m3-ripple {
+.m3-ripple:not(.btn-float):not(.m3-fab):not(#quiz-fab-area) {
     position: relative;
+}
+
+.m3-ripple {
     overflow: hidden;
 }
 
