@@ -49,7 +49,6 @@
         <div class="nav-bar" style="padding-left:0; padding-right:0;">
             <div>
                 <div class="nav-title">我的狗窝 <span class="bingo-badge">Pro</span></div>
-                <div style="font-size:13px; color:var(--text-sub);">离线可用 · 无限狗窝 · 随时复盘</div>
             </div>
             <div style="display:flex; gap:10px;">
                 <!-- 在 view-home 的 nav-bar div里 -->
@@ -393,29 +392,65 @@
 
     <!-- Modal: 海底水族馆 & 变身展厅 -->
     <div class="modal-mask" id="modal-pet-selection" style="display:none;">
-        <div class="modal-box pet-aquarium-modal" style="max-width:500px; max-height:88vh; display:flex; flex-direction:column; padding:18px;">
-            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
+        <div class="modal-box pet-aquarium-modal" style="max-width:580px; width:94vw; max-height:92vh; display:flex; flex-direction:column; padding:18px;">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px; flex-shrink:0;">
                 <h3 style="margin:0; font-size:18px;">🐠 海底水族馆 · 伙伴与变身</h3>
                 <button class="btn btn-ghost btn-icon" onclick="closePetModal()" style="font-size:16px;">✕</button>
             </div>
             
-            <!-- 顶部 4 大海鲜萌宠卡片 (点击即刻切换伴学伙伴) -->
-            <div style="font-weight:bold; font-size:13px; color:var(--text-sub); margin-bottom:8px; text-align:left;">
-                🐾 点击卡片直接选为伴学伙伴
-            </div>
-            <div class="pet-selector-grid" id="pet-selector-grid"></div>
+            <div class="aquarium-modal-body" style="flex:1; overflow-y:auto; padding-right:4px;">
+                <!-- 顶部 4 大海鲜萌宠卡片 (点击即刻切换伴学伙伴) -->
+                <div style="font-weight:bold; font-size:13px; color:var(--text-sub); margin-bottom:8px; text-align:left;">
+                    🐾 点击卡片直接选为伴学伙伴
+                </div>
+                <div class="pet-selector-grid" id="pet-selector-grid"></div>
 
-            <!-- 中部：当前选定萌宠的专属物种简介 -->
-            <div class="aquarium-header-card" id="aquarium-header-card" style="margin-top:10px;"></div>
+                <!-- 中部：当前选定萌宠的专属物种简介 -->
+                <div class="aquarium-header-card" id="aquarium-header-card" style="margin-top:6px;"></div>
 
-            <!-- 下部：该萌宠的 5 阶进化图鉴树 (可滚动) -->
-            <div style="font-weight:bold; font-size:13px; color:var(--text-sub); margin:12px 0 6px 0; text-align:left; display:flex; justify-content:space-between; align-items:center;">
-                <span>✨ 变身形态图鉴</span>
-                <span style="font-size:11px; color:var(--text-sub); font-weight:normal;">点击已解锁形态即可切换装扮</span>
+                <!-- 精灵习性与陪伴偏好调校 (活跃度 & 话痨度) -->
+                <div class="pet-habit-settings-card" id="pet-habit-settings" style="margin: 8px 0; background: var(--bg-input); border-radius: 14px; padding: 10px 12px;">
+                    <div style="font-weight:bold; font-size:12px; color:var(--text-main); margin-bottom:6px; display:flex; align-items:center; justify-content:space-between;">
+                        <span>🎛️ 伴学精灵习性调校</span>
+                        <span style="font-size:11px; color:var(--text-sub); font-weight:normal;">实时生效并保存</span>
+                    </div>
+
+                    <!-- 活跃度调节 -->
+                    <div style="margin-bottom:8px;">
+                        <div style="display:flex; justify-content:space-between; align-items:center; font-size:11px; margin-bottom:4px;">
+                            <span style="font-weight:600; color:var(--text-sub);">🏃 活跃度 (游动与特色动作频率)</span>
+                            <span id="pet-activity-label" style="font-size:11px; color:#FF70A6; font-weight:bold;">适中 (常规巡游)</span>
+                        </div>
+                        <div class="habit-segmented-control" id="activity-selector">
+                            <button type="button" class="habit-seg-btn" data-val="low" onclick="setPetActivity('low')">🧘 文静</button>
+                            <button type="button" class="habit-seg-btn active" data-val="normal" onclick="setPetActivity('normal')">🏊 适中</button>
+                            <button type="button" class="habit-seg-btn" data-val="high" onclick="setPetActivity('high')">⚡ 活泼</button>
+                        </div>
+                    </div>
+
+                    <!-- 话痨度调节 -->
+                    <div>
+                        <div style="display:flex; justify-content:space-between; align-items:center; font-size:11px; margin-bottom:4px;">
+                            <span style="font-weight:600; color:var(--text-sub);">💬 话痨度 (自主闲聊与脑筋急转弯频率)</span>
+                            <span id="pet-chattiness-label" style="font-size:11px; color:#FF70A6; font-weight:bold;">适中 (30~50秒)</span>
+                        </div>
+                        <div class="habit-segmented-control" id="chattiness-selector">
+                            <button type="button" class="habit-seg-btn" data-val="quiet" onclick="setPetChattiness('quiet')">🤫 乖巧</button>
+                            <button type="button" class="habit-seg-btn active" data-val="normal" onclick="setPetChattiness('normal')">💬 适中</button>
+                            <button type="button" class="habit-seg-btn" data-val="talkative" onclick="setPetChattiness('talkative')">📢 话痨</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 下部：该萌宠的 5 阶进化图鉴树 (大号展厅) -->
+                <div style="font-weight:bold; font-size:14px; color:var(--text-main); margin:12px 0 8px 0; text-align:left; display:flex; justify-content:space-between; align-items:center;">
+                    <span>✨ 变身形态图鉴 (五阶觉醒)</span>
+                    <span style="font-size:11px; color:var(--text-sub); font-weight:normal;">点击已解锁形态即可切换装扮</span>
+                </div>
+                <div class="evolution-tree-grid" id="aquarium-evolution-tree"></div>
             </div>
-            <div class="evolution-tree-grid" id="aquarium-evolution-tree" style="flex:1; overflow-y:auto; padding-right:4px;"></div>
             
-            <div style="margin-top:12px;">
+            <div style="margin-top:12px; flex-shrink:0;">
                 <button class="btn btn-primary" style="width:100%; border-radius:18px; height:42px; font-size:14px;" onclick="closePetModal()">完成 🐾</button>
             </div>
         </div>

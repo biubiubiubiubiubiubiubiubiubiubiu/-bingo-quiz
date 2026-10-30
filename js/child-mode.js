@@ -7,6 +7,74 @@ function togglePetSound(e) {
     PetSound.toggleSound();
 }
 
+// --- 伴学精灵个性习性与偏好管理 (PET HABIT & PERSONALITY CONTROLLER) ---
+function getPetActivity() {
+    return localStorage.getItem('bingo_child_pet_activity') || 'normal';
+}
+
+function setPetActivity(level) {
+    if (!['low', 'normal', 'high'].includes(level)) level = 'normal';
+    localStorage.setItem('bingo_child_pet_activity', level);
+    if (typeof PetSound !== 'undefined' && PetSound.isEnabled()) {
+        PetSound.bubble();
+    }
+    if (window.roamingPet) {
+        window.roamingPet.applyHabitSettings();
+    }
+    syncHabitControlsUI();
+}
+
+function getPetChattiness() {
+    return localStorage.getItem('bingo_child_pet_chattiness') || 'normal';
+}
+
+function setPetChattiness(level) {
+    if (!['quiet', 'normal', 'talkative'].includes(level)) level = 'normal';
+    localStorage.setItem('bingo_child_pet_chattiness', level);
+    if (typeof PetSound !== 'undefined' && PetSound.isEnabled()) {
+        PetSound.bubble();
+    }
+    if (window.roamingPet) {
+        window.roamingPet.applyHabitSettings();
+    }
+    syncHabitControlsUI();
+}
+
+function syncHabitControlsUI() {
+    const activity = getPetActivity();
+    const chattiness = getPetChattiness();
+
+    // 更新活跃度按钮高亮与文字说明
+    const actBtns = document.querySelectorAll('#activity-selector .habit-seg-btn');
+    actBtns.forEach(btn => {
+        btn.classList.toggle('active', btn.getAttribute('data-val') === activity);
+    });
+    const actLabel = document.getElementById('pet-activity-label');
+    if (actLabel) {
+        const labels = {
+            low: '文静 (安静少游动)',
+            normal: '适中 (常规巡游)',
+            high: '活泼 (元气漫游)'
+        };
+        actLabel.innerText = labels[activity] || labels.normal;
+    }
+
+    // 更新话痨度按钮高亮与文字说明
+    const chatBtns = document.querySelectorAll('#chattiness-selector .habit-seg-btn');
+    chatBtns.forEach(btn => {
+        btn.classList.toggle('active', btn.getAttribute('data-val') === chattiness);
+    });
+    const chatLabel = document.getElementById('pet-chattiness-label');
+    if (chatLabel) {
+        const labels = {
+            quiet: '乖巧 (仅互动时说话)',
+            normal: '适中 (30~50秒)',
+            talkative: '话痨 (12~20秒爆笑高频)'
+        };
+        chatLabel.innerText = labels[chattiness] || labels.normal;
+    }
+}
+
 // --- 纯前端 Web Audio 仿生物理声学合成器 (100% 离线支持) ---
 const PetSound = {
     ctx: null,
@@ -473,51 +541,73 @@ const PetSound = {
         } catch (e) {}
     },
 
-    // 20. 萌宠开口对话提示音 (按生物属性专属水滴/乐音乐阶)
+    // 20. 萌宠开口对话提示音 (按生物属性专属水族搞怪开嗓声学设计)
     voiceChime(petType = 'fish') {
         if (!this.isEnabled()) return;
         const ctx = this.getCtx();
         if (!ctx) return;
         try {
             const now = ctx.currentTime;
-            let freqs = [659.25, 880.00, 1046.50]; // 默认小泡鱼：三连升腾水滴琶音 (E5, A5, C6)
-            let waveType = 'sine';
-            let stepTime = 0.055;
-            let gainVal = 0.14;
-
             if (petType === 'crab') {
-                // 机灵蟹：两声清脆硬质大剪刀咔嚓咔嚓合击声 (B5, E6)
-                freqs = [987.77, 1318.51];
-                waveType = 'triangle';
-                stepTime = 0.05;
-                gainVal = 0.16;
+                // 🦀 机灵蟹：搞怪机械小钢钳合击咔嚓声 (Snappy Claw Snip-Clack)
+                [0, 0.045].forEach((d, idx) => {
+                    const osc = ctx.createOscillator();
+                    const gain = ctx.createGain();
+                    osc.type = 'triangle';
+                    const startF = idx === 0 ? 1200 : 1600;
+                    osc.frequency.setValueAtTime(startF, now + d);
+                    osc.frequency.exponentialRampToValueAtTime(320, now + d + 0.04);
+                    gain.gain.setValueAtTime(0.20, now + d);
+                    gain.gain.exponentialRampToValueAtTime(0.005, now + d + 0.04);
+                    osc.connect(gain);
+                    gain.connect(ctx.destination);
+                    osc.start(now + d);
+                    osc.stop(now + d + 0.045);
+                });
             } else if (petType === 'shrimp') {
-                // 跳跳虾：高亢向上冲刺暴跃火箭滑音 (G5, D6, G6)
-                freqs = [783.99, 1174.66, 1567.98];
-                waveType = 'sawtooth';
-                stepTime = 0.045;
-                gainVal = 0.13;
-            } else if (petType === 'octopus') {
-                // 皮皮章：深海沉稳柔和吸盘谐波 (E4, A4, D5)
-                freqs = [329.63, 440.00, 587.33];
-                waveType = 'sine';
-                stepTime = 0.07;
-                gainVal = 0.15;
-            }
-
-            freqs.forEach((f, idx) => {
+                // 🦐 跳跳虾：搞怪水下超高弹簧蹦射滑音 (Twangy Spring Sproing & Snap)
                 const osc = ctx.createOscillator();
                 const gain = ctx.createGain();
-                osc.type = waveType;
-                const t = now + idx * stepTime;
-                osc.frequency.setValueAtTime(f, t);
-                gain.gain.setValueAtTime(gainVal, t);
-                gain.gain.exponentialRampToValueAtTime(0.005, t + stepTime + 0.08);
+                osc.type = 'sawtooth';
+                osc.frequency.setValueAtTime(420, now);
+                osc.frequency.exponentialRampToValueAtTime(2600, now + 0.08);
+                gain.gain.setValueAtTime(0.16, now);
+                gain.gain.exponentialRampToValueAtTime(0.005, now + 0.09);
                 osc.connect(gain);
                 gain.connect(ctx.destination);
-                osc.start(t);
-                osc.stop(t + stepTime + 0.09);
-            });
+                osc.start(now);
+                osc.stop(now + 0.095);
+            } else if (petType === 'octopus') {
+                // 🐙 皮皮章：深海黏液吸盘滑音与咕嘟水压音 (Squishy Squelch & Deep Plop)
+                const osc = ctx.createOscillator();
+                const gain = ctx.createGain();
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(560, now);
+                osc.frequency.exponentialRampToValueAtTime(140, now + 0.12);
+                gain.gain.setValueAtTime(0.22, now);
+                gain.gain.exponentialRampToValueAtTime(0.005, now + 0.12);
+                osc.connect(gain);
+                gain.connect(ctx.destination);
+                osc.start(now);
+                osc.stop(now + 0.125);
+            } else {
+                // 🐟 小泡鱼：两连清脆滑稽的升腾水泡破灭音 (Glug-Plop Bubbles)
+                [0, 0.055].forEach((d, idx) => {
+                    const osc = ctx.createOscillator();
+                    const gain = ctx.createGain();
+                    osc.type = 'sine';
+                    const startF = idx === 0 ? 460 : 720;
+                    const endF = idx === 0 ? 1280 : 1850;
+                    osc.frequency.setValueAtTime(startF, now + d);
+                    osc.frequency.exponentialRampToValueAtTime(endF, now + d + 0.05);
+                    gain.gain.setValueAtTime(0.18, now + d);
+                    gain.gain.exponentialRampToValueAtTime(0.005, now + d + 0.05);
+                    osc.connect(gain);
+                    gain.connect(ctx.destination);
+                    osc.start(now + d);
+                    osc.stop(now + d + 0.055);
+                });
+            }
         } catch (e) {}
     }
 };
@@ -527,41 +617,41 @@ const PetVoice = {
     speaking: false,
     currentUtterance: null,
 
-    // 四大物种专属声线与性格配置
+    // 四大物种专属搞怪水族声线与性格配置
     SPECIES_CONFIG: {
         fish: {
-            pitch: 1.55,
-            rate: 1.05,
+            pitch: 1.82, // 调皮滑稽超萌泡泡音
+            rate: 1.16,
             preferredVoices: ['Xiaoxiao', 'Yaoyao', 'Ting-Ting', 'Huihui', 'Desktop', 'Google 普通话', 'zh-CN'],
-            personaPrefix: '【咕噜噜~ 🫧】',
-            baseFreq: 540,
+            personaPrefix: '',
+            baseFreq: 580,
             waveType: 'sine',
             name: '小泡鱼'
         },
         crab: {
-            pitch: 1.18,
-            rate: 1.18,
+            pitch: 1.45, // 傲娇快节奏小钢钳碎嘴
+            rate: 1.30,
             preferredVoices: ['Yunxi', 'Kangkang', 'Yunjian', 'Danny', 'Male', '男', '康康', '云希', 'Huihui', 'Desktop', 'Google 普通话', 'zh-CN'],
-            personaPrefix: '【咔嚓咔嚓！✂️】',
-            baseFreq: 420,
+            personaPrefix: '',
+            baseFreq: 460,
             waveType: 'triangle',
             name: '机灵蟹'
         },
         shrimp: {
-            pitch: 1.65,
-            rate: 1.25,
+            pitch: 1.95, // 极速超音速鬼畜蹦跳音
+            rate: 1.42,
             preferredVoices: ['Xiaoxiao', 'Xiaoyi', 'Yunxi', 'Ting-Ting', 'Huihui', 'Desktop', 'Google 普通话', 'zh-CN'],
-            personaPrefix: '【咻——！🚀】',
-            baseFreq: 620,
+            personaPrefix: '',
+            baseFreq: 680,
             waveType: 'sawtooth',
             name: '跳跳虾'
         },
         octopus: {
-            pitch: 0.95,
-            rate: 0.90,
+            pitch: 0.65, // 慢条斯理、黏糊糊咕嘟深海怪兽低音
+            rate: 0.88,
             preferredVoices: ['Xiaoyi', 'Yaoyao', 'Yunxi', 'Huihui', 'Desktop', 'Google 普通话', 'zh-CN'],
-            personaPrefix: '【噗嗤~ 🐙】',
-            baseFreq: 380,
+            personaPrefix: '',
+            baseFreq: 320,
             waveType: 'sine',
             name: '皮皮章'
         }
@@ -613,23 +703,45 @@ const PetVoice = {
         return zhVoices[0];
     },
 
+    // 文本语音清洗过滤系统 (彻底过滤 Emoji、粗括号与拟声前缀)
+    cleanTextForSpeech(text) {
+        if (!text || typeof text !== 'string') return '';
+        return text
+            // 1. 过滤扩展象形符号及各类 Emoji
+            .replace(/\p{Extended_Pictographic}/gu, '')
+            .replace(/[\u{1F300}-\u{1F9FF}\u{1FA00}-\u{1FAFF}\u{2600}-\u{27BF}\u{2300}-\u{23FF}\u{2B50}\u{2B55}\u{2934}\u{2935}\u{25AA}\u{25AB}\u{25FE}\u{25FD}\u{25FB}\u{25FC}\u{25B6}\u{25C0}]/gu, '')
+            // 2. 移除变体选择符 (FE0E/FE0F) 与零宽连接符 (200D/200B等)
+            .replace(/[\uFE00-\uFE0F\u200D\u200B-\u200F]/gu, '')
+            // 3. 移除各类首部括号及老旧拟声前缀 (如【咕噜噜~】、【噗嗤~】、【咔嚓咔嚓！】、【咻——！】等)
+            .replace(/^【.*?】\s*/, '')
+            .replace(/^(咕噜噜|咔嚓咔嚓|咻——|噗嗤)[~！!—\-]*\s*/, '')
+            // 4. 移除装饰用粗括号【】及[]，替换为空格以防粘连
+            .replace(/[【】\[\]]/g, ' ')
+            // 5. 整理连续多余空格
+            .replace(/\s+/g, ' ')
+            .trim();
+    },
+
     // 任天堂“动森式”程序化拟声语 (Animalese Procedural Babble: 0KB 纯前端音阶生成)
     playAnimalese(text, petType = 'fish') {
-        if (!PetSound.isEnabled()) return;
+        if (!PetSound.isEnabled() || !text) return;
         const ctx = PetSound.getCtx();
-        if (!ctx || !text) return;
+        if (!ctx) return;
+
+        const cleanText = this.cleanTextForSpeech(text);
+        if (!cleanText) return;
 
         const cfg = this.SPECIES_CONFIG[petType] || this.SPECIES_CONFIG.fish;
         const baseFreq = cfg.baseFreq;
         const waveType = cfg.waveType;
 
         const now = ctx.currentTime;
-        const len = Math.min(10, Math.max(3, text.length));
+        const len = Math.min(10, Math.max(3, cleanText.length));
         const stepTime = 0.065;
         const scaleOffsets = [0, 2, 4, 7, 9, 12, 14, 16];
 
         for (let i = 0; i < len; i++) {
-            const code = text.charCodeAt(i % text.length);
+            const code = cleanText.charCodeAt(i % cleanText.length);
             const semitone = scaleOffsets[code % scaleOffsets.length];
             const freq = baseFreq * Math.pow(2, semitone / 12);
 
@@ -657,7 +769,13 @@ const PetVoice = {
             return;
         }
 
-        // 1. 播放专属生物开口水滴提示音
+        const cleanText = this.cleanTextForSpeech(text);
+        if (!cleanText) {
+            if (typeof onEndCallback === 'function') onEndCallback();
+            return;
+        }
+
+        // 1. 播放专属生物开口搞怪水族开嗓音效
         PetSound.voiceChime(petType);
 
         const cfg = this.SPECIES_CONFIG[petType] || this.SPECIES_CONFIG.fish;
@@ -667,7 +785,7 @@ const PetVoice = {
             window.speechSynthesis.cancel();
             this.speaking = false;
 
-            const utterance = new SpeechSynthesisUtterance(text);
+            const utterance = new SpeechSynthesisUtterance(cleanText);
             utterance.lang = 'zh-CN';
             // 四大物种专属声线参数应用
             utterance.pitch = (options.pitch !== undefined) ? options.pitch : cfg.pitch;
@@ -696,7 +814,7 @@ const PetVoice = {
             utterance.onerror = () => {
                 resetSpeaking();
                 // TTS 发声异常时平滑回退至动森拟声
-                this.playAnimalese(text, petType);
+                this.playAnimalese(cleanText, petType);
             };
 
             // 语音状态看门狗 (防止个别浏览器垃圾回收漏触发 onend 事件导致状态锁死)
@@ -704,16 +822,16 @@ const PetVoice = {
                 if (this.currentUtterance === utterance) {
                     resetSpeaking();
                 }
-            }, Math.max(6000, text.length * 450));
+            }, Math.max(6000, cleanText.length * 450));
 
             // 留出 100ms 间隔使开口音先清晰入耳
             setTimeout(() => {
                 window.speechSynthesis.speak(utterance);
             }, 100);
         } else {
-            this.playAnimalese(text, petType);
+            this.playAnimalese(cleanText, petType);
             if (typeof onEndCallback === 'function') {
-                setTimeout(onEndCallback, Math.min(3000, text.length * 120));
+                setTimeout(onEndCallback, Math.min(3000, cleanText.length * 120));
             }
         }
     }
@@ -2103,7 +2221,17 @@ class RoamingPetEngine {
             }
         }
 
-        this.wanderTimer = setTimeout(() => this.stepAutonomousRoutine(), nextDelay);
+        // 根据活跃度偏好动态调节巡游间隔 (文静/适中/活泼)
+        const activity = (typeof getPetActivity === 'function') ? getPetActivity() : 'normal';
+        let activityMultiplier = 1.0;
+        if (activity === 'low') {
+            activityMultiplier = 1.85; // 文静：游动间隔长，平稳少打扰 (约 12~18s)
+        } else if (activity === 'high') {
+            activityMultiplier = 0.52; // 活泼：游动巡游频率高，欢快好动 (约 3~5s)
+        }
+        const finalDelay = Math.max(2000, Math.round(nextDelay * activityMultiplier));
+
+        this.wanderTimer = setTimeout(() => this.stepAutonomousRoutine(), finalDelay);
     }
 
     // 吐出水泡粒子 (小泡鱼连珠泡，其他物种单泡)
@@ -2452,16 +2580,57 @@ class RoamingPetEngine {
         this.updateStreak(childStreak);
     }
 
-    // 调度下一次自主幽默伴学闲聊 (默认 22~35 秒)
+    // 调度下一次自主幽默伴学闲聊 (受话痨度配置动态影响)
     scheduleAutonomousBanter(delayMs) {
         if (this.autonomousBanterTimer) {
             clearTimeout(this.autonomousBanterTimer);
             this.autonomousBanterTimer = null;
         }
-        const delay = (delayMs !== undefined) ? delayMs : (22000 + Math.random() * 13000);
+
+        const chattiness = (typeof getPetChattiness === 'function') ? getPetChattiness() : 'normal';
+        if (chattiness === 'quiet') {
+            // 乖巧模式：彻底禁用自主闲聊，只在用户主动点击/做题/连胜时互动发声
+            return;
+        }
+
+        let baseDelay = 32000;
+        let randomSpan = 18000;
+        if (chattiness === 'talkative') {
+            // 话痨模式：高频 12~20 秒爆笑闲聊
+            baseDelay = 12000;
+            randomSpan = 8000;
+        }
+
+        let delay = (delayMs !== undefined) ? delayMs : (baseDelay + Math.random() * randomSpan);
+        if (chattiness === 'talkative' && delayMs !== undefined && delayMs > 20000) {
+            delay = 14000 + Math.random() * 6000;
+        }
+
         this.autonomousBanterTimer = setTimeout(() => {
             this.triggerAutonomousBanter();
         }, delay);
+    }
+
+    // 即时应用习性调校 (活跃度 & 话痨度)
+    applyHabitSettings() {
+        const chattiness = (typeof getPetChattiness === 'function') ? getPetChattiness() : 'normal';
+        if (chattiness === 'quiet') {
+            if (this.autonomousBanterTimer) {
+                clearTimeout(this.autonomousBanterTimer);
+                this.autonomousBanterTimer = null;
+            }
+        } else {
+            this.scheduleAutonomousBanter(chattiness === 'talkative' ? 5000 : 16000);
+        }
+
+        // 立即根据新活跃度重新规划巡游计时器
+        if (this.wanderTimer) {
+            clearTimeout(this.wanderTimer);
+            this.wanderTimer = null;
+        }
+        if (!this.isSleeping && !this.isDragging && !this.isDocked) {
+            this.stepAutonomousRoutine();
+        }
     }
 
     // 触发自主幽默伴学闲聊
@@ -2757,6 +2926,11 @@ function renderAquariumModal() {
         `;
     }
 
+    // 2.5 同步精灵习性调节控制状态 (活跃度 & 话痨度)
+    if (typeof syncHabitControlsUI === 'function') {
+        syncHabitControlsUI();
+    }
+
     // 3. 渲染五阶变身进化图鉴树 (用户经验全物种通用解锁)
     const treeContainer = document.getElementById('aquarium-evolution-tree');
     if (treeContainer) {
@@ -2827,12 +3001,12 @@ function switchCompanionPet(petId) {
         }
         updatePetWidgets();
 
-        // 四大伴学宠物专属报到入场台词与专属声线 (附带标志性物种口癖)
+        // 四大伴学宠物专属报到入场台词与专属声线
         const welcomeQuotes = {
-            crab: '【咔嚓咔嚓！✂️】太棒啦！机灵蟹前来报到！横着走谁也难不倒我们！🦀',
-            shrimp: '【咻——！🚀】太棒啦！跳跳虾小火箭发射！嗖的一下，做题全对！🚀',
-            octopus: '【噗嗤~ 🐙】太棒啦！皮皮章智多星在此！八只手帮你抓牢所有的正确答案！🐙',
-            fish: '【咕噜噜~ 🫧】太棒啦！小泡鱼好搭档来啦！今天也要开开心心！🫧'
+            crab: '太棒啦！机灵蟹前来报到！横着走谁也难不倒我们！🦀',
+            shrimp: '太棒啦！跳跳虾小火箭发射！嗖的一下，做题全对！🚀',
+            octopus: '太棒啦！皮皮章智多星在此！八只手帮你抓牢所有的正确答案！🐙',
+            fish: '太棒啦！小泡鱼好搭档来啦！今天也要开开心心！🫧'
         };
         const welcomeText = welcomeQuotes[petId] || `太棒啦！从现在开始，${SEAFOOD_PETS[petId].name}就是你的伴学好搭档啦！`;
 
@@ -2908,6 +3082,9 @@ function enableChildMode(enable) {
         html.setAttribute('data-theme', kidTheme);
 
         updatePetWidgets();
+        if (typeof syncHabitControlsUI === 'function') {
+            syncHabitControlsUI();
+        }
         if (window.roamingPet) {
             window.roamingPet.show();
         }
