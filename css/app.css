@@ -1277,14 +1277,9 @@
     transform: scaleX(-1);
 }
 
-/* 变身光环容器 */
+/* 变身光环容器 (漫游时纯净化隐藏，去除生硬外圈，保留100%纯净真实水族外形) */
 .roaming-pet-aura {
-    position: absolute;
-    inset: -6px;
-    border-radius: 50%;
-    z-index: 1;
-    pointer-events: none;
-    transition: all 0.4s ease;
+    display: none !important;
 }
 
 /* 17种形态光环特效定义 */
@@ -1497,19 +1492,9 @@
     animation: petSnore 2s infinite ease-in-out;
 }
 
-/* 等级小标签 */
+/* 等级小标签 (漫游时纯净化隐藏，仅在首页卡片与水族馆展厅展示) */
 .roaming-pet-tag {
-    position: absolute;
-    bottom: -6px;
-    background: #FF70A6;
-    color: white;
-    font-size: 10px;
-    font-weight: 800;
-    padding: 1px 6px;
-    border-radius: 8px;
-    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
-    z-index: 3;
-    white-space: nowrap;
+    display: none !important;
 }
 
 [data-theme="boy"] .roaming-pet-tag {
