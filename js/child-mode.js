@@ -808,8 +808,8 @@ function updatePetWidgets() {
                 <span style="font-size:32px;">${activeForm.avatar}</span>
             </div>
             <div class="pet-badge-info" onclick="openPetModal()">
-                <div style="font-weight:bold; font-size:15px; color:var(--text-main);">
-                    ${pet.customName || petDef.name}
+                <div style="font-weight:bold; font-size:15px; color:var(--text-main); display:flex; align-items:center; gap:6px;">
+                    <span>${pet.customName || petDef.name}</span>
                     <span class="pet-level-tag">Lv.${lvlInfo.level} · ${activeForm.title}</span>
                 </div>
                 <div style="font-size:12px; color:var(--text-sub); margin-top:2px;">
@@ -817,7 +817,7 @@ function updatePetWidgets() {
                 </div>
                 <div class="pet-exp-bar"><div class="pet-exp-fill" style="width:${Math.min(100, Math.round(((pet.exp - lvlInfo.minExp) / (lvlInfo.nextExp - lvlInfo.minExp)) * 100))}%;"></div></div>
             </div>
-            <button class="btn btn-ghost" style="padding:5px 12px; font-size:12px; border-radius:14px; border:1px solid rgba(255,112,166,0.4);" onclick="openPetModal()">水族馆 🐠</button>
+            <button class="btn btn-ghost btn-aquarium-entry" onclick="openPetModal()">水族馆 🐠</button>
         `;
         homeBadge.style.display = 'flex';
     }

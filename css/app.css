@@ -826,13 +826,18 @@
 }
 
 .pet-badge-info {
-    flex-grow: 1;
+    flex: 1 1 auto;
+    min-width: 0;
     cursor: pointer;
 }
 
 .pet-level-tag {
+    display: inline-flex;
+    align-items: center;
+    white-space: nowrap;
+    flex-shrink: 0;
     font-size: 11px;
-    padding: 2px 7px;
+    padding: 2px 8px;
     border-radius: 10px;
     background: linear-gradient(135deg, #FF70A6, #FF9F1C);
     color: white;
@@ -844,6 +849,37 @@
 
 [data-theme="boy"] .pet-level-tag {
     background: linear-gradient(135deg, #70C1B3, #247BA0);
+}
+
+.child-pet-home-badge .btn-aquarium-entry {
+    width: auto !important;
+    height: 36px !important;
+    padding: 0 14px !important;
+    font-size: 13px !important;
+    flex-shrink: 0 !important;
+    white-space: nowrap !important;
+    border-radius: 18px !important;
+    border: 1.5px solid rgba(255, 112, 166, 0.45) !important;
+    background: rgba(255, 255, 255, 0.9) !important;
+    color: var(--text-main) !important;
+    box-shadow: 0 2px 8px rgba(255, 112, 166, 0.15) !important;
+    cursor: pointer;
+    margin: 0 !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+}
+
+[data-theme="boy"] .child-pet-home-badge .btn-aquarium-entry {
+    background: rgba(30, 41, 59, 0.95) !important;
+    border-color: rgba(112, 193, 179, 0.5) !important;
+    color: #F1F5F9 !important;
+    box-shadow: 0 2px 8px rgba(112, 193, 179, 0.15) !important;
+}
+
+.child-pet-home-badge .btn-aquarium-entry:hover {
+    border-color: #FF70A6 !important;
+    transform: translateY(-1px);
 }
 
 .pet-exp-bar {
@@ -1400,6 +1436,9 @@
 }
 
 .btn-evolution-confirm {
+    width: auto !important;
+    height: auto !important;
+    display: inline-flex !important;
     padding: 12px 36px;
     font-size: 16px;
     font-weight: 800;
@@ -1569,6 +1608,15 @@
 
 .evo-stage-action {
     flex-shrink: 0;
+}
+
+.evo-stage-action .btn {
+    width: auto !important;
+    height: 32px !important;
+    padding: 0 12px !important;
+    font-size: 12px !important;
+    border-radius: 12px !important;
+    white-space: nowrap !important;
 }
 
 /* 进食动画（儿童模式即时反馈） */
