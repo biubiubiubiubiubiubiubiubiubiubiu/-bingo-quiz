@@ -514,14 +514,49 @@ const PetVoice = {
     speaking: false,
     currentUtterance: null,
 
-    // 获取最佳中文童声/亲和女声
-    getBestChineseVoice() {
+    // 四大物种专属声线与性格配置
+    SPECIES_CONFIG: {
+        fish: {
+            pitch: 1.55,
+            rate: 1.08,
+            preferredVoices: ['Xiaoxiao', 'Yaoyao', 'Ting-Ting', 'Google 普通话', 'zh-CN'],
+            baseFreq: 540,
+            waveType: 'sine',
+            name: '小泡鱼'
+        },
+        crab: {
+            pitch: 1.22,
+            rate: 1.16,
+            preferredVoices: ['Yunxi', 'Kangkang', 'Yunjian', 'Xiaoyi', 'zh-CN'],
+            baseFreq: 420,
+            waveType: 'triangle',
+            name: '机灵蟹'
+        },
+        shrimp: {
+            pitch: 1.65,
+            rate: 1.20,
+            preferredVoices: ['Xiaoxiao', 'Yunxi', 'Xiaoyi', 'Ting-Ting', 'zh-CN'],
+            baseFreq: 620,
+            waveType: 'sawtooth',
+            name: '跳跳虾'
+        },
+        octopus: {
+            pitch: 1.10,
+            rate: 0.95,
+            preferredVoices: ['Xiaoyi', 'Yaoyao', 'Yunxi', 'Ting-Ting', 'zh-CN'],
+            baseFreq: 380,
+            waveType: 'sine',
+            name: '皮皮章'
+        }
+    },
+
+    // 获取特定物种匹配的最佳中文童声/亲和女声
+    getBestChineseVoice(preferredList) {
         if (!('speechSynthesis' in window)) return null;
         const voices = window.speechSynthesis.getVoices();
         if (!voices || voices.length === 0) return null;
 
-        // 优先级：微软晓晓(童声/元气)、云希(童声)、晓伊、谷歌普通话、苹果婷婷
-        const preferred = [
+        const preferred = preferredList || [
             'Xiaoxiao',
             'Yunxi',
             'Xiaoyi',
@@ -548,12 +583,9 @@ const PetVoice = {
         const ctx = PetSound.getCtx();
         if (!ctx || !text) return;
 
-        let baseFreq = 520;
-        let waveType = 'sine';
-        if (petType === 'fish') { baseFreq = 540; waveType = 'sine'; }
-        else if (petType === 'crab') { baseFreq = 420; waveType = 'triangle'; }
-        else if (petType === 'shrimp') { baseFreq = 620; waveType = 'sawtooth'; }
-        else if (petType === 'octopus') { baseFreq = 380; waveType = 'sine'; }
+        const cfg = this.SPECIES_CONFIG[petType] || this.SPECIES_CONFIG.fish;
+        const baseFreq = cfg.baseFreq;
+        const waveType = cfg.waveType;
 
         const now = ctx.currentTime;
         const len = Math.min(10, Math.max(3, text.length));
@@ -582,12 +614,17 @@ const PetVoice = {
         }
     },
 
-    // 核心统一发声入口
-    speak(text, petType = 'fish', options = {}) {
-        if (!PetSound.isEnabled() || !text) return;
+    // 核心统一发声入口 (支持完成回调 onEndCallback)
+    speak(text, petType = 'fish', options = {}, onEndCallback = null) {
+        if (!PetSound.isEnabled() || !text) {
+            if (typeof onEndCallback === 'function') onEndCallback();
+            return;
+        }
 
         // 1. 播放专属生物开口水滴提示音
         PetSound.voiceChime(petType);
+
+        const cfg = this.SPECIES_CONFIG[petType] || this.SPECIES_CONFIG.fish;
 
         // 2. 调校版萌童声发音
         if ('speechSynthesis' in window) {
@@ -596,12 +633,12 @@ const PetVoice = {
 
             const utterance = new SpeechSynthesisUtterance(text);
             utterance.lang = 'zh-CN';
-            // 稚嫩童声参数调校：音调 pitch 提升至 1.40，语速 1.05 轻快活泼
-            utterance.pitch = (options.pitch !== undefined) ? options.pitch : 1.40;
-            utterance.rate = (options.rate !== undefined) ? options.rate : 1.05;
+            // 四大物种专属声线参数应用
+            utterance.pitch = (options.pitch !== undefined) ? options.pitch : cfg.pitch;
+            utterance.rate = (options.rate !== undefined) ? options.rate : cfg.rate;
             utterance.volume = (options.volume !== undefined) ? options.volume : 0.95;
 
-            const bestVoice = this.getBestChineseVoice();
+            const bestVoice = this.getBestChineseVoice(cfg.preferredVoices);
             if (bestVoice) {
                 utterance.voice = bestVoice;
             }
@@ -612,6 +649,11 @@ const PetVoice = {
             const resetSpeaking = () => {
                 this.speaking = false;
                 this.currentUtterance = null;
+                if (typeof onEndCallback === 'function') {
+                    const cb = onEndCallback;
+                    onEndCallback = null;
+                    cb();
+                }
             };
 
             utterance.onend = resetSpeaking;
@@ -634,6 +676,9 @@ const PetVoice = {
             }, 100);
         } else {
             this.playAnimalese(text, petType);
+            if (typeof onEndCallback === 'function') {
+                setTimeout(onEndCallback, Math.min(3000, text.length * 120));
+            }
         }
     }
 };
@@ -1127,14 +1172,17 @@ const PetBanterEngine = {
         this.lastBanterTime = Date.now();
 
         if (banter.type === 'riddle' && banter.q && banter.a) {
-            // 二段式脑筋急转弯：先出谜面 -> 延时 2.6s 揭晓爆笑答案
+            // 二段式脑筋急转弯：完整念完谜面 -> 悬念思考停顿 1.8~2.2s -> 揭晓爆笑答案
             this.riddleActive = true;
+            if (this.riddleTimer) clearTimeout(this.riddleTimer);
             if (this.riddleSafetyTimer) clearTimeout(this.riddleSafetyTimer);
-            this.riddleSafetyTimer = setTimeout(() => {
-                this.riddleActive = false;
-            }, 12000);
-            window.roamingPet.say(banter.q, 2800);
-            PetVoice.speak(banter.q, petType);
+
+            // 预估问题发音时长 (每字约 280ms + 600ms 缓冲)
+            const questionAudioDuration = Math.max(3800, banter.q.length * 280 + 600);
+            const questionBubbleDuration = questionAudioDuration + 2400; // 气泡一直保留至答案揭晓
+
+            // 1. 弹出谜面气泡
+            window.roamingPet.say(banter.q, questionBubbleDuration);
 
             // 伴随思考微动作
             if (window.roamingPet.body) {
@@ -1143,16 +1191,22 @@ const PetBanterEngine = {
                     if (window.roamingPet && window.roamingPet.body) {
                         window.roamingPet.body.classList.remove('pet-bounce');
                     }
-                }, 400);
+                }, 600);
             }
 
-            if (this.riddleTimer) clearTimeout(this.riddleTimer);
-            this.riddleTimer = setTimeout(() => {
+            let answerRevealed = false;
+            const revealAnswer = () => {
+                if (answerRevealed || !this.riddleActive) return;
+                answerRevealed = true;
+                if (this.riddleTimer) clearTimeout(this.riddleTimer);
+                if (this.riddleSafetyTimer) clearTimeout(this.riddleSafetyTimer);
+
                 if (!window.roamingPet) {
                     this.riddleActive = false;
                     return;
                 }
-                const answerDuration = Math.max(3800, banter.a.length * 240);
+
+                const answerDuration = Math.max(4200, banter.a.length * 260);
                 window.roamingPet.say(banter.a, answerDuration);
                 PetVoice.speak(banter.a, petType);
 
@@ -1161,8 +1215,20 @@ const PetBanterEngine = {
 
                 setTimeout(() => {
                     this.riddleActive = false;
-                }, answerDuration);
-            }, 2700);
+                }, answerDuration + 400);
+            };
+
+            // 2. 朗读谜面：只有当谜面完整念完之后，再留出 1.8 秒思考停顿，才揭晓答案！
+            PetVoice.speak(banter.q, petType, {}, () => {
+                this.riddleTimer = setTimeout(() => {
+                    revealAnswer();
+                }, 1800);
+            });
+
+            // 3. 兜底看门狗安全定时器：若静音或浏览器未触发 onend，在问题预估时长 + 2秒后自动揭晓
+            this.riddleSafetyTimer = setTimeout(() => {
+                revealAnswer();
+            }, questionAudioDuration + 2200);
 
         } else {
             // 常规搞笑生活台词 / 宇宙科普 / 美食趣事 / 幻想
@@ -2430,7 +2496,7 @@ function speakPetQuote() {
         const activeForm = getPetActiveForm(pet);
         PetSound.bubble();
         if (typeof window.speakText === 'function') {
-            window.speakText(activeForm.quote);
+            window.speakText(activeForm.quote, pet.type);
         }
     }
 }
@@ -2709,12 +2775,24 @@ function switchCompanionPet(petId) {
         if (window.roamingPet) {
             window.roamingPet.render();
             window.roamingPet.startWanderLoop();
+            // 切换物种后，将下一次自主闲聊重置为 12~18 秒（让新宠物尽快开口展示自己的语言系统）
+            window.roamingPet.scheduleAutonomousBanter(12000 + Math.random() * 4000);
         }
         updatePetWidgets();
 
-        if (typeof window.speakText === 'function') {
-            window.speakText(`太棒啦！从现在开始，${SEAFOOD_PETS[petId].name}就是你的伴学好搭档啦！`);
+        // 四大伴学宠物专属报到入场台词与专属声线
+        const welcomeQuotes = {
+            crab: '太棒啦！机灵蟹前来报到！咔嚓咔嚓，横着走谁也难不倒我们！🦀',
+            shrimp: '太棒啦！跳跳虾小火箭发射！嗖的一下，做题全对！🚀',
+            octopus: '太棒啦！皮皮章智多星在此！八只手帮你抓牢所有的正确答案！🐙',
+            fish: '太棒啦！小泡鱼好搭档来啦！咕噜咕噜，今天也要开开心心！🫧'
+        };
+        const welcomeText = welcomeQuotes[petId] || `太棒啦！从现在开始，${SEAFOOD_PETS[petId].name}就是你的伴学好搭档啦！`;
+
+        if (window.roamingPet) {
+            window.roamingPet.say(welcomeText, 4500);
         }
+        PetVoice.speak(welcomeText, petId);
     }
     aquariumSelectedFamily = petId;
     renderAquariumModal();
@@ -2739,7 +2817,7 @@ function equipPetForm(stageIndex) {
     renderAquariumModal();
 
     if (typeof window.speakText === 'function') {
-        window.speakText(`变身完毕！现在我是${activeForm.title}啦！`);
+        window.speakText(`变身完毕！现在我是${activeForm.title}啦！`, pet.type);
     }
 }
 
