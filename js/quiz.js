@@ -311,7 +311,7 @@
 
                         const uAns = userAnswers[idx] || '';
 
-                        let cardClass = 'ios-card';
+                        let cardClass = 'm3-card m3-card--elevated ios-card';
 
         
 
@@ -365,7 +365,7 @@
 
                         } else if (quizType !== 'mock_exam') {
 
-                            peekButtonHtml = `<div style="text-align:right; margin-top:10px;"><button class="btn-peek" onclick="toggleAnalysis(${idx})">👀 偷偷看一眼</button></div>`;
+                            peekButtonHtml = `<div style="text-align:right; margin-top:10px;"><button class="btn-peek m3-ripple" onclick="toggleAnalysis(${idx})">👀 偷偷看一眼</button></div>`;
 
                             analysisHtml = `<div class="analysis-box" id="analysis-${idx}" style="display:none;">${answerContent}</div>`;
 
@@ -399,7 +399,7 @@
 
                             optionsHtml += `
 
-                            <div class="option-row ${isSelected} ${isRealAnswer} ${childCorrectClass}" tabindex="0" role="button" onclick="selectOption(event, ${idx}, '${key}', '${item.t}')" onkeydown="handleOptionKeyDown(event, ${idx}, '${key}', '${item.t}')">
+                            <div class="option-row m3-ripple ${isSelected} ${isRealAnswer} ${childCorrectClass}" tabindex="0" role="button" onclick="selectOption(event, ${idx}, '${key}', '${item.t}')" onkeydown="handleOptionKeyDown(event, ${idx}, '${key}', '${item.t}')">
 
                                 <div class="option-circle">${key}</div>
 

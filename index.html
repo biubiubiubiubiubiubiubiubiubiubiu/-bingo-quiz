@@ -45,50 +45,50 @@
     </div>
 
     <!-- VIEW 1: 题库列表首页 -->
-    <div id="view-home" class="container" style="padding: 0 20px;">
-        <div class="nav-bar" style="padding-left:0; padding-right:0;">
+    <div id="view-home" class="container">
+        <div class="nav-bar m3-top-app-bar">
             <div>
-                <div class="nav-title">我的狗窝 <span class="bingo-badge">Pro</span></div>
+                <div class="nav-title m3-title-large">我的狗窝 <span class="bingo-badge m3-badge">Pro</span></div>
             </div>
-            <div style="display:flex; gap:10px;">
+            <div style="display:flex; gap:6px; align-items:center;">
                 <!-- 在 view-home 的 nav-bar div里 -->
-                <button class="btn btn-ghost btn-icon btn-child-toggle" onclick="toggleChildMode()" title="切换儿童模式"
+                <button class="btn btn-ghost btn-icon m3-icon-btn btn-child-toggle m3-ripple" onclick="toggleChildMode()" title="切换儿童模式"
                     style="color: #FF9F1C;">
                     <span id="child-icon">👶</span>
                 </button>
-                <button class="btn btn-ghost btn-icon btn-theme-toggle" onclick="toggleTheme()" title="切换主题">
+                <button class="btn btn-ghost btn-icon m3-icon-btn btn-theme-toggle m3-ripple" onclick="toggleTheme()" title="切换主题">
                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                        stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                        stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
                         <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
                     </svg>
                 </button>
-                <button class="btn btn-ghost btn-icon" onclick="exportBackup()" title="导出备份">
+                <button class="btn btn-ghost btn-icon m3-icon-btn m3-ripple" onclick="exportBackup()" title="导出备份">
                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                        stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                        stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
                         <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
                         <polyline points="7 10 12 15 17 10"></polyline>
                         <line x1="12" y1="15" x2="12" y2="3"></line>
                     </svg>
                 </button>
-                <button class="btn btn-ghost btn-icon" onclick="document.getElementById('backup-input').click()"
+                <button class="btn btn-ghost btn-icon m3-icon-btn m3-ripple" onclick="document.getElementById('backup-input').click()"
                     title="导入备份">
                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                        stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                        stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
                         <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
                         <polyline points="17 8 12 3 7 8"></polyline>
                         <line x1="12" y1="3" x2="12" y2="15"></line>
                     </svg>
                 </button>
-                <button class="btn btn-ghost btn-icon btn-delete" onclick="deleteAllData()" title="删除所有数据">
+                <button class="btn btn-ghost btn-icon m3-icon-btn btn-delete m3-ripple" onclick="deleteAllData()" title="删除所有数据">
                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                        stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                        stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
                         <polyline points="3 6 5 6 21 6"></polyline>
                         <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
                     </svg>
                 </button>
-                <button id="btn-install-pwa" class="btn btn-ghost btn-icon" style="display: none;" title="安装应用">
+                <button id="btn-install-pwa" class="btn btn-ghost btn-icon m3-icon-btn m3-ripple" style="display: none;" title="安装应用">
                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                        stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                        stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
                         <polyline points="8 17 12 21 16 17"></polyline>
                         <line x1="12" y1="12" x2="12" y2="21"></line>
                         <path d="M20.88 18.09A5 5 0 0 0 18 9h-1.26A8 8 0 1 0 3 16.29"></path>
@@ -98,49 +98,55 @@
         </div>
 
         <!-- 儿童模式海鲜宠物伴学卡片 -->
-        <div id="child-pet-home-badge" class="child-pet-home-badge ios-card" style="display:none;"></div>
+        <div id="child-pet-home-badge" class="child-pet-home-badge m3-card m3-card--elevated ios-card" style="display:none;"></div>
 
         <div id="db-list-container"></div>
 
-        <div class="ios-card" id="empty-state"
-            style="text-align:center; padding:40px 20px; display:none; cursor: pointer;" onclick="showImportModal()">
-            <div style="font-size:40px; margin-bottom:10px;">🦴</div>
-            <h3 style="margin:0;">狗窝空空如也</h3>
-            <p style="color:var(--text-sub);">快去挖点新骨头 (+)，支持表格文件</p>
+        <div class="m3-card m3-card--outlined m3-empty-state ios-card" id="empty-state"
+            style="display:none;" onclick="showImportModal()">
+            <div class="m3-empty-icon">🦴</div>
+            <h3 class="m3-title-medium" style="margin:0;">狗窝空空如也</h3>
+            <p class="m3-body-medium" style="color:var(--text-sub); margin:6px 0 0 0;">快去挖点新骨头 (+)，支持 Excel 表格导入</p>
         </div>
 
-        <div class="btn-float" onclick="showImportModal()">+</div>
+        <button class="btn-float m3-fab m3-ripple" onclick="showImportModal()" title="新建题库" aria-label="新建题库">
+            <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <line x1="12" y1="5" x2="12" y2="19"></line>
+                <line x1="5" y1="12" x2="19" y2="12"></line>
+            </svg>
+        </button>
     </div>
 
     <!-- VIEW 2: 单个题库仪表盘 -->
-    <div id="view-dashboard" class="container" style="padding: 0 20px; display:none;">
-        <div class="nav-bar" style="padding-left:0; padding-right:0;">
-            <button class="btn btn-ghost btn-icon btn-back-home" onclick="history.back()" title="返回">
+    <div id="view-dashboard" class="container" style="display:none;">
+        <div class="nav-bar m3-top-app-bar">
+            <button class="btn btn-ghost btn-icon m3-icon-btn btn-back-home m3-ripple" onclick="history.back()" title="返回">
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                    stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                    stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
                     <polyline points="15 18 9 12 15 6"></polyline>
                 </svg>
             </button>
-            <div style="font-weight:bold; font-size:16px; max-width: 150px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;"
+            <div class="m3-title-large" style="max-width: 180px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;"
                 id="dash-title">狗窝详情</div>
-            <div style="display:flex; gap:10px;">
-                <button class="btn btn-ghost btn-icon btn-theme-toggle" onclick="toggleTheme()" title="切换主题">
+            <div style="display:flex; gap:6px; align-items:center;">
+                <button class="btn btn-ghost btn-icon m3-icon-btn btn-theme-toggle m3-ripple" onclick="toggleTheme()" title="切换主题">
                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                        stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                        stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
                         <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
                     </svg>
                 </button>
-                <button class="btn btn-ghost btn-icon" onclick="exportDbToExcel(currentDb.id)" title="导出题库为 Excel">
+                <button class="btn btn-ghost btn-icon m3-icon-btn m3-ripple" onclick="exportDbToExcel(currentDb.id)" title="导出题库为 Excel">
                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                        stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                        stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
                         <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
                         <polyline points="7 10 12 15 17 10"></polyline>
                         <line x1="12" y1="15" x2="12" y2="3"></line>
                     </svg>
                 </button>
-                <button class="btn btn-ghost btn-icon btn-delete" onclick="deleteCurrentDb()" title="删除题库">
+                <button class="btn btn-ghost btn-icon m3-icon-btn btn-delete m3-ripple" onclick="deleteCurrentDb()" title="删除题库">
                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                        stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                        stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
                         <polyline points="3 6 5 6 21 6"></polyline>
                         <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
                         <line x1="10" y1="11" x2="10" y2="17"></line>
@@ -150,135 +156,153 @@
             </div>
         </div>
 
-        <div class="ios-card">
-            <div style="display:flex; justify-content:space-between; margin-bottom:15px;">
-                <div>
-                    <h2 style="margin:0; font-size:28px;" id="dash-count">0</h2>
-                    <div style="font-size:12px; color:var(--text-sub);">骨头总数</div>
+        <!-- Hero 统计与进度卡片 -->
+        <div class="m3-card m3-card--elevated ios-card">
+            <div style="display:flex; justify-content:space-between; align-items:center;">
+                <div class="m3-stat-item">
+                    <span class="m3-stat-num" id="dash-count">0</span>
+                    <span class="m3-stat-label">骨头总数</span>
                 </div>
-                <div style="text-align:right;">
-                    <h2 style="margin:0; font-size:28px; color:var(--success);" id="dash-progress">0</h2>
-                    <div style="font-size:12px; color:var(--text-sub);">啃骨头进度</div>
+                <div class="m3-stat-item" style="text-align:right;">
+                    <span class="m3-stat-num" style="color:var(--md-sys-color-success);" id="dash-progress">0</span>
+                    <span class="m3-stat-label">已啃进度</span>
                 </div>
             </div>
 
-            <div id="category-container"
-                style="margin-bottom: 20px; border-top: 1px solid var(--bg-input); padding-top: 15px;">
-                <label for="category-select"
-                    style="font-weight: bold; font-size: 14px; color: var(--text-sub); margin-bottom: 8px; display: block;">选择分类</label>
-                <select id="category-select" class="btn btn-ghost"
-                    style="width:100%; -webkit-appearance: none; appearance: none; text-align: left;"></select>
+            <div class="m3-linear-progress">
+                <div class="m3-linear-progress__bar" id="dash-progress-bar" style="width:0%;"></div>
             </div>
 
-            <button id="btn-resume-quiz" class="btn"
-                style="display:none; margin-bottom: 20px; background: linear-gradient(135deg, var(--primary), var(--success)); color: white;"
+            <div id="category-container" style="margin-top: 14px; display:none;">
+                <label for="category-select" class="m3-label-medium" style="display:block; margin-bottom: 6px; color:var(--text-sub);">分类筛选</label>
+                <select id="category-select" class="m3-select btn-ghost"></select>
+            </div>
+
+            <button id="btn-resume-quiz" class="btn btn-primary m3-btn--filled m3-ripple"
+                style="display:none; margin-top: 14px; width:100%;"
                 onclick="resumeQuiz()">继续上次的进度</button>
+        </div>
 
-            <!-- 按顺序啃区域优化 -->
-            <div style="margin-bottom: 10px;">
-                <div
-                    style="font-size:12px; color:var(--text-sub); margin-bottom:8px; display:flex; justify-content:space-between; align-items:center;">
-                    <span>📍 起始序号 (进度: <span id="current-prog-display">0</span>)</span>
-                    <span id="max-count-hint" style="background:var(--bg-input); padding:2px 6px; border-radius:4px;">共
-                        0 根</span>
-                </div>
+        <!-- 模式卡片 1: 按顺序啃 -->
+        <div class="m3-card m3-card--outlined ios-card">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 12px;">
+                <span class="m3-title-medium">📍 按顺序啃</span>
+                <span id="max-count-hint" class="m3-badge">共 0 根</span>
+            </div>
 
-                <!-- 顺序开啃控制区 -->
-                <div style="display:flex; gap:10px; align-items: stretch; height: 48px;">
-                    <!-- 重置进度按钮 -->
-                    <button class="btn btn-ghost" onclick="resetProgress()" title="重置进度到1"
-                        style="width: 48px; padding: 0; color: var(--md-sys-color-error); flex-shrink: 0; border-radius: var(--md-sys-shape-corner-large);">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
-                            stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                            <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 12" />
-                            <path d="M3 5v7h7" />
-                        </svg>
-                    </button>
-
-                    <!-- 输入框 -->
-                    <div style="flex-grow: 1;">
-                        <input type="number" id="sequence-start-input" class="input-ghost" onclick="this.select()"
-                            onchange="manualUpdateProgress()">
-                    </div>
-
-                    <!-- 按钮 -->
-                    <button class="btn btn-primary" style="width: 84px; flex-shrink: 0;"
-                        onclick="startQuiz('sequence')">开啃</button>
-
-                    <!-- 下拉框 -->
-                    <div style="flex-shrink: 0; width: 95px;">
-                        <select id="sequence-count" class="btn btn-ghost">
-                            <option value="10">10根</option>
-                            <option value="20">20根</option>
-                            <option value="50" selected>50根</option>
-                            <option value="all">梭哈</option>
-                        </select>
-                    </div>
-                </div>
-                <div style="font-size:12px; color:var(--text-sub); margin-top:6px; text-align:center;">
-                    * 输入数字后直接开啃，系统会自动记录新进度
+            <div style="display:flex; gap:10px; align-items:center; margin-bottom: 12px;">
+                <button class="btn btn-ghost m3-icon-btn m3-ripple" onclick="resetProgress()" title="重置进度到1"
+                    style="color: var(--md-sys-color-error); flex-shrink: 0;">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
+                        stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 12" />
+                        <path d="M3 5v7h7" />
+                    </svg>
+                </button>
+                <div style="flex-grow: 1;">
+                    <input type="number" id="sequence-start-input" class="input-ghost m3-text-field" onclick="this.select()"
+                        onchange="manualUpdateProgress()" placeholder="起始序号">
                 </div>
             </div>
 
-            <div style="display:flex; gap:10px;">
-                <button class="btn btn-success" style="flex-grow: 1;" onclick="startQuiz('random')">随便刨一个</button>
-                <select id="random-count" class="btn btn-ghost"
-                    style="max-width: 100px; padding: 0 15px; -webkit-appearance: none; appearance: none; background-image: none;">
-                    <option value="10">10根</option>
-                    <option value="20" selected>20根</option>
-                    <option value="50">50根</option>
-                    <option value="100">100根</option>
-                    <option value="all">梭哈</option>
-                </select>
+            <div class="m3-segmented-button" data-for="sequence-count" style="margin-bottom: 12px;">
+                <button type="button" class="m3-segmented-button__btn" data-val="10">10根</button>
+                <button type="button" class="m3-segmented-button__btn" data-val="20">20根</button>
+                <button type="button" class="m3-segmented-button__btn active" data-val="50">50根</button>
+                <button type="button" class="m3-segmented-button__btn" data-val="all">梭哈</button>
             </div>
-            <div style="margin-top: 15px;">
-                <button id="btn-wrong-answers" class="btn btn-danger" onclick="startWrongAnswerQuiz()">啃硬骨头</button>
-                <button id="btn-export-wrong" class="btn btn-ghost" style="display:none; margin-top:8px; width:100%; font-size:13px;" onclick="exportWrongQuestionsToExcel(currentDb.id)">📥 导出硬骨头错题 Excel</button>
-            </div>
+            <select id="sequence-count" class="btn btn-ghost" style="display:none;">
+                <option value="10">10根</option>
+                <option value="20">20根</option>
+                <option value="50" selected>50根</option>
+                <option value="all">梭哈</option>
+            </select>
 
-            <div
-                style="margin-top: 20px; border-top: 1px solid var(--md-sys-color-outline-variant); padding-top: 15px; display:flex; gap:10px;">
-                <button class="btn btn-primary"
-                    style="background: linear-gradient(135deg, var(--md-sys-color-primary), var(--md-sys-color-secondary)); flex-grow: 1;"
-                    onclick="startMockExam()">模拟开啃</button>
-                <select id="mock-exam-count" class="btn btn-ghost"
-                    style="max-width: 100px; padding: 0 15px; -webkit-appearance: none; appearance: none; background-image: none;">
-                    <option value="10">10根</option>
-                    <option value="20">20根</option>
-                    <option value="50" selected>50根</option>
-                    <option value="100">100根</option>
-                </select>
+            <button class="btn btn-primary m3-btn--filled m3-ripple" style="width:100%;"
+                onclick="startQuiz('sequence')">按序开啃</button>
+            <div style="font-size:12px; color:var(--text-sub); margin-top:6px; text-align:center;">
+                * 当前序号：第 <span id="current-prog-display">0</span> 根，系统会自动更新记录
             </div>
         </div>
 
-        <div class="ios-card">
-            <h4 style="margin:0 0 15px 0;">📜 啃骨头的记忆 (点击回看)</h4>
+        <!-- 模式卡片 2: 随便刨一个 -->
+        <div class="m3-card m3-card--outlined ios-card">
+            <div class="m3-title-medium" style="margin-bottom: 12px;">🎲 随便刨一个</div>
+            <div class="m3-segmented-button" data-for="random-count" style="margin-bottom: 12px;">
+                <button type="button" class="m3-segmented-button__btn" data-val="10">10根</button>
+                <button type="button" class="m3-segmented-button__btn active" data-val="20">20根</button>
+                <button type="button" class="m3-segmented-button__btn" data-val="50">50根</button>
+                <button type="button" class="m3-segmented-button__btn" data-val="100">100根</button>
+                <button type="button" class="m3-segmented-button__btn" data-val="all">梭哈</button>
+            </div>
+            <select id="random-count" class="btn btn-ghost" style="display:none;">
+                <option value="10">10根</option>
+                <option value="20" selected>20根</option>
+                <option value="50">50根</option>
+                <option value="100">100根</option>
+                <option value="all">梭哈</option>
+            </select>
+            <button class="btn btn-success m3-btn--success m3-ripple" style="width: 100%;" onclick="startQuiz('random')">随便刨一组</button>
+        </div>
+
+        <!-- 模式卡片 3: 模拟开啃 -->
+        <div class="m3-card m3-card--outlined ios-card">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 12px;">
+                <span class="m3-title-medium">⏱️ 模拟开啃</span>
+                <span class="m3-badge">模拟考试模式</span>
+            </div>
+            <div class="m3-segmented-button" data-for="mock-exam-count" style="margin-bottom: 12px;">
+                <button type="button" class="m3-segmented-button__btn" data-val="10">10根</button>
+                <button type="button" class="m3-segmented-button__btn" data-val="20">20根</button>
+                <button type="button" class="m3-segmented-button__btn active" data-val="50">50根</button>
+                <button type="button" class="m3-segmented-button__btn" data-val="100">100根</button>
+            </div>
+            <select id="mock-exam-count" class="btn btn-ghost" style="display:none;">
+                <option value="10">10根</option>
+                <option value="20">20根</option>
+                <option value="50" selected>50根</option>
+                <option value="100">100根</option>
+            </select>
+            <button class="btn btn-primary m3-btn--filled m3-ripple"
+                style="width: 100%;"
+                onclick="startMockExam()">进入模拟考场</button>
+        </div>
+
+        <!-- 错题处理区 -->
+        <div id="wrong-answers-container">
+            <button id="btn-wrong-answers" class="btn btn-danger m3-btn--error m3-ripple" style="display:none; margin-bottom:8px; width:100%;" onclick="startWrongAnswerQuiz()">啃硬骨头</button>
+            <button id="btn-export-wrong" class="btn btn-ghost m3-btn--tonal m3-ripple" style="display:none; width:100%; font-size:13px; margin-bottom: 16px;" onclick="exportWrongQuestionsToExcel(currentDb.id)">📥 导出硬骨头错题 Excel</button>
+        </div>
+
+        <!-- 历史记录卡片 -->
+        <div class="m3-card m3-card--elevated ios-card">
+            <h4 class="m3-title-medium" style="margin:0 0 14px 0;">📜 啃骨头的记忆 (点击回看)</h4>
             <div id="history-list"></div>
-            <button class="btn btn-ghost" id="no-history-btn" style="display:none;">还没啃过呢</button>
+            <button class="btn btn-ghost m3-btn--tonal" id="no-history-btn" style="display:none; width:100%;">还没啃过呢</button>
         </div>
     </div>
 
     <!-- VIEW 3: 答题/回看界面 -->
     <div id="view-quiz" style="display:none;">
-        <div class="nav-bar">
+        <div class="nav-bar m3-top-app-bar">
             <div style="display:flex; align-items:center; gap:8px; flex-shrink:0;">
-                <div style="font-size:14px; font-weight:bold; color:var(--text-sub);" id="quiz-progress-text">1/20</div>
-                <div style="font-size:15px; font-weight:bold; color:var(--primary);" id="quiz-timer"></div>
+                <div class="m3-badge" id="quiz-progress-text">1/20</div>
+                <div style="font-size:15px; font-weight:bold; color:var(--md-sys-color-primary);" id="quiz-timer"></div>
             </div>
 
             <!-- 儿童模式海鲜萌宠答题伴学小组件 (内置于标题栏居中) -->
             <div id="child-pet-quiz-widget" class="child-pet-quiz-widget" style="display:none;" onclick="speakPetQuote()" title="轻触听我说说话！"></div>
 
-            <div style="display:flex; align-items:center; gap:4px; flex-shrink:0;">
-                <button class="btn btn-ghost btn-icon btn-theme-toggle" onclick="toggleTheme()" title="切换主题">
+            <div style="display:flex; align-items:center; gap:6px; flex-shrink:0;">
+                <button class="btn btn-ghost btn-icon m3-icon-btn btn-theme-toggle m3-ripple" onclick="toggleTheme()" title="切换主题">
                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                        stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                        stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
                         <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
                     </svg>
                 </button>
-                <button class="btn btn-ghost btn-icon btn-quiz-exit" onclick="handleQuizExit()" title="退出">
+                <button class="btn btn-ghost btn-icon m3-icon-btn btn-quiz-exit m3-ripple" onclick="handleQuizExit()" title="退出">
                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                        stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                        stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
                         <line x1="18" y1="6" x2="6" y2="18"></line>
                         <line x1="6" y1="6" x2="18" y2="18"></line>
                     </svg>
@@ -292,36 +316,36 @@
 
         <!-- 提交按钮区 (M3 Bottom Sheet FAB Area) -->
         <div id="quiz-fab-area">
-            <button class="btn btn-success" onclick="submitPaper()">汪！交卷！</button>
+            <button class="btn btn-success m3-btn--success m3-ripple" onclick="submitPaper()">汪！交卷！</button>
         </div>
     </div>
 
     <!-- Modal: 导入 -->
     <div class="modal-mask" id="modal-import">
-        <div class="modal-box">
-            <h3 style="margin-top:0;">挖掘新宝藏</h3>
-            <p style="font-size:13px; color:var(--text-sub);">宝藏地图 (.xlsx/.xls) 指南：<br>必须标明 "题目"、"答案" 等...</p>
+        <div class="modal-box m3-dialog">
+            <h3 class="m3-dialog__headline">挖掘新宝藏</h3>
+            <p class="m3-body-medium" style="color:var(--text-sub); margin-bottom: 16px;">宝藏地图 (.xlsx/.xls) 指南：<br>表格第一行必须包含 “题目”、“答案” 等字段。</p>
 
             <div id="import-feedback" style="margin-top:15px; display:none;">
                 <div id="import-loader" class="spinner"
-                    style="display:none; margin: 0 auto 10px auto; width:25px; height:25px; border-width: 3px;"></div>
-                <p id="import-status" style="font-size:13px; color:var(--danger); text-align:center; margin:0;"></p>
+                    style="display:none; margin: 0 auto 10px auto; width:28px; height:28px; border-width: 3px;"></div>
+                <p id="import-status" style="font-size:13px; color:var(--md-sys-color-error); text-align:center; margin:0;"></p>
             </div>
 
             <input type="file" id="file-input" accept=".xlsx, .xls" style="display:none"
                 onchange="handleFileSelect(this)">
 
-            <button class="btn btn-primary" id="btn-select-file"
+            <button class="btn btn-primary m3-btn--filled m3-ripple" id="btn-select-file" style="width:100%;"
                 onclick="document.getElementById('file-input').click()">📂 选择藏宝图</button>
 
             <div id="import-preview" style="display:none; margin-top:15px;">
                 <div id="sheet-selection-container"></div>
-                <div style="font-size:12px; color:var(--success);">发现宝藏！</div>
+                <div style="font-size:13px; color:var(--md-sys-color-success); font-weight:600; margin-top:8px;">发现宝藏！</div>
             </div>
 
-            <div style="display:flex; gap:10px; margin-top:20px;">
-                <button class="btn btn-ghost" onclick="closeImportModal()">溜了溜了</button>
-                <button class="btn btn-primary" id="btn-confirm-import" style="display:none;"
+            <div class="m3-dialog__actions">
+                <button class="btn btn-ghost m3-btn--text m3-ripple" onclick="closeImportModal()">溜了溜了</button>
+                <button class="btn btn-primary m3-btn--filled m3-ripple" id="btn-confirm-import" style="display:none;"
                     onclick="confirmImport()">埋进狗窝</button>
             </div>
         </div>
@@ -329,13 +353,13 @@
 
     <!-- Modal: 成绩单 -->
     <div class="modal-mask" id="modal-score">
-        <div class="modal-box" style="text-align:center;">
-            <h2 style="margin:10px 0;">啃完啦！</h2>
-            <div style="font-size:48px; font-weight:800; color:var(--primary);" id="result-score">90</div>
-            <p style="color:var(--text-sub);">智力值</p>
-            <div style="display:flex; gap:10px; margin-top:20px;">
-                <button class="btn btn-ghost" onclick="finishExamAndExit()">回狗窝</button>
-                <button class="btn btn-primary" onclick="enterReviewMode()">回味一下</button>
+        <div class="modal-box m3-dialog" style="text-align:center;">
+            <h2 class="m3-dialog__headline">啃完啦！</h2>
+            <div style="font-size:52px; font-weight:800; color:var(--md-sys-color-primary); margin:8px 0;" id="result-score">90</div>
+            <p class="m3-body-medium" style="color:var(--text-sub); margin-bottom: 20px;">智力值评估</p>
+            <div class="m3-dialog__actions" style="justify-content:center; gap:12px;">
+                <button class="btn btn-ghost m3-btn--tonal m3-ripple" onclick="finishExamAndExit()">回狗窝</button>
+                <button class="btn btn-primary m3-btn--filled m3-ripple" onclick="enterReviewMode()">回味一下</button>
             </div>
         </div>
     </div>

@@ -91,7 +91,17 @@
             document.getElementById('dash-title').innerText = meta.name;
             document.getElementById('dash-count').innerText = questions.length;
             // 顶部大进度条
-            document.getElementById('dash-progress').innerText = `${progress} / ${questions.length}`;
+                        document.getElementById('dash-progress').innerText = `${progress} / ${questions.length}`;
+            
+            // --- M3 Linear Progress Bar & Segmented Buttons ---
+            const progBar = document.getElementById('dash-progress-bar');
+            if (progBar && questions.length > 0) {
+                const pct = Math.min(100, Math.round((progress / questions.length) * 100));
+                progBar.style.width = `${pct}%`;
+            } else if (progBar) {
+                progBar.style.width = '0%';
+            }
+            if (typeof syncSegmentedButtons === 'function') syncSegmentedButtons();
             
             // --- 进度显示优化 ---
             // 小标题上的进度显示
@@ -211,13 +221,18 @@
 
             list.forEach(db => {
                 const div = document.createElement('div');
-                div.className = 'db-list-item ios-card';
+                div.className = 'db-list-item m3-card m3-card--elevated ios-card m3-ripple';
                 div.innerHTML = `
-                <div class="db-info">
-                    <h4>${db.name}</h4>
-                    <p>共 ${db.count} 根骨头 · 上次开啃 ${new Date(db.lastUsed).toLocaleDateString()}</p>
+                <div style="display:flex; align-items:center; gap:14px;">
+                    <div style="width:40px; height:40px; border-radius:50%; background:var(--md-sys-color-primary-container); color:var(--md-sys-color-on-primary-container); display:flex; align-items:center; justify-content:center; font-size:20px; flex-shrink:0;">
+                        🦴
+                    </div>
+                    <div class="db-info">
+                        <h4 style="margin:0 0 4px 0; font-size:16px; font-weight:600; color:var(--md-sys-color-on-surface);">${escapeHtml(db.name)}</h4>
+                        <p style="margin:0; font-size:13px; color:var(--md-sys-color-on-surface-variant);">共 ${db.count} 根骨头 · 上次开啃 ${new Date(db.lastUsed).toLocaleDateString()}</p>
+                    </div>
                 </div>
-                <div style="color:var(--text-sub);">ᐳ</div>
+                <div style="color:var(--md-sys-color-on-surface-variant); font-size:18px; font-weight:700;">›</div>
             `;
                 div.onclick = () => openDashboard(db.id);
                 container.appendChild(div);
@@ -251,7 +266,7 @@
                     const originalIndex = list.length - 1 - index;
                     const scoreClass = item.score >= 90 ? 'score-high' : (item.score < 60 ? 'score-low' : '');
                     const el = document.createElement('div');
-                    el.className = 'history-item';
+                    el.className = 'history-item m3-ripple';
 
                     let quizName = '随便刨一个';
                     if (item.type === 'sequence') quizName = '按序开啃';
@@ -259,11 +274,11 @@
 
                     el.innerHTML = `
                     <div style="flex-grow: 1; cursor: pointer;" onclick="loadReview(${originalIndex})">
-                        <div style="font-weight:bold; font-size:14px;">${quizName}</div>
+                        <div style="font-weight:600; font-size:14px; color:var(--md-sys-color-on-surface);">${quizName}</div>
                         <div style="font-size:12px; color:var(--text-sub);">${new Date(item.date).toLocaleString()}</div>
                     </div>
-                    <div class="score-badge ${scoreClass}">${item.score}</div>
-                    <button class="btn-delete-hist" onclick="event.stopPropagation(); deleteHistoryRecord(${originalIndex})">×</button>
+                    <div class="score-badge ${scoreClass}" style="margin-right:8px;">${item.score}</div>
+                    <button class="btn-delete-hist m3-ripple" onclick="event.stopPropagation(); deleteHistoryRecord(${originalIndex})" title="删除此记录">×</button>
                 `;
                     container.appendChild(el);
                 });

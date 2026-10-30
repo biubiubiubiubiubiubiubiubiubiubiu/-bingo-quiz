@@ -1,1033 +1,1212 @@
-        /* --- Google Material Design 3 (Material You) 样式系统 --- */
-        :root {
-            /* M3 Baseline: Botanical Sage & Deep Lake Teal */
-            --md-sys-color-primary: #006A60;
-            --md-sys-color-on-primary: #FFFFFF;
-            --md-sys-color-primary-container: #88F4E4;
-            --md-sys-color-on-primary-container: #00201D;
-            --md-sys-color-secondary: #4A635D;
-            --md-sys-color-on-secondary: #FFFFFF;
-            --md-sys-color-secondary-container: #CCE8E0;
-            --md-sys-color-on-secondary-container: #05201B;
-            --md-sys-color-tertiary: #456179;
-            --md-sys-color-on-tertiary: #FFFFFF;
-            --md-sys-color-tertiary-container: #CCE5FF;
-            --md-sys-color-on-tertiary-container: #001E31;
-            --md-sys-color-error: #BA1A1A;
-            --md-sys-color-on-error: #FFFFFF;
-            --md-sys-color-error-container: #FFDAD6;
-            --md-sys-color-on-error-container: #410002;
-            --md-sys-color-success: #2E6C43;
-            --md-sys-color-on-success: #FFFFFF;
-            --md-sys-color-success-container: #B1F5C0;
-            --md-sys-color-on-success-container: #00210E;
-            --md-sys-color-surface: #F4FBF7;
-            --md-sys-color-surface-container-lowest: #FFFFFF;
-            --md-sys-color-surface-container-low: #EEF5F1;
-            --md-sys-color-surface-container: #E8EFEB;
-            --md-sys-color-surface-container-high: #E2E9E5;
-            --md-sys-color-surface-container-highest: #DCE4E0;
-            --md-sys-color-on-surface: #161D1A;
-            --md-sys-color-on-surface-variant: #3F4945;
-            --md-sys-color-outline: #6F7975;
-            --md-sys-color-outline-variant: #BFC9C4;
-            --md-sys-color-inverse-surface: #2B322F;
-            --md-sys-color-inverse-on-surface: #ECF2EE;
-            --md-sys-color-inverse-primary: #53DBC8;
-
-            /* M3 Shape Tokens */
-            --md-sys-shape-corner-none: 0px;
-            --md-sys-shape-corner-extra-small: 4px;
-            --md-sys-shape-corner-small: 8px;
-            --md-sys-shape-corner-medium: 12px;
-            --md-sys-shape-corner-large: 16px;
-            --md-sys-shape-corner-extra-large: 28px;
-            --md-sys-shape-corner-full: 9999px;
-
-            /* M3 Elevation Tokens */
-            --md-sys-elevation-level0: none;
-            --md-sys-elevation-level1: 0 1px 3px 1px rgba(0, 0, 0, 0.07), 0 1px 2px 0 rgba(0, 0, 0, 0.10);
-            --md-sys-elevation-level2: 0 2px 6px 2px rgba(0, 0, 0, 0.07), 0 1px 2px 0 rgba(0, 0, 0, 0.12);
-            --md-sys-elevation-level3: 0 4px 8px 3px rgba(0, 0, 0, 0.08), 0 1px 3px 0 rgba(0, 0, 0, 0.14);
-            --md-sys-elevation-level4: 0 6px 10px 4px rgba(0, 0, 0, 0.08), 0 2px 3px 0 rgba(0, 0, 0, 0.14);
-            --md-sys-elevation-level5: 0 8px 12px 6px rgba(0, 0, 0, 0.09), 0 4px 4px 0 rgba(0, 0, 0, 0.15);
-
-            /* M3 State Layers */
-            --md-sys-state-hover: rgba(0, 106, 96, 0.08);
-            --md-sys-state-focus: rgba(0, 106, 96, 0.12);
-            --md-sys-state-pressed: rgba(0, 106, 96, 0.14);
-
-            /* M3 Typography */
-            --md-sys-typescale-font: 'Google Sans', 'Roboto', -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-
-            /* 向后兼容映射层 */
-            --primary: var(--md-sys-color-primary);
-            --primary-light: var(--md-sys-color-primary-container);
-            --success: var(--md-sys-color-success);
-            --success-light: var(--md-sys-color-success-container);
-            --danger: var(--md-sys-color-error);
-            --danger-light: var(--md-sys-color-error-container);
-            --bg-body: var(--md-sys-color-surface);
-            --bg-card: var(--md-sys-color-surface-container-low);
-            --bg-input: var(--md-sys-color-surface-container-highest);
-            --text-main: var(--md-sys-color-on-surface);
-            --text-sub: var(--md-sys-color-on-surface-variant);
-            --text-inverse: var(--md-sys-color-on-primary);
-            --shadow: var(--md-sys-elevation-level1);
-            --radius-l: var(--md-sys-shape-corner-extra-large);
-            --safe-area-bottom: env(safe-area-inset-bottom);
-        }
-
-        [data-theme="everforest"] {
-            /* M3 Dark Scheme: Basalt Slate & Luminous Mint */
-            --md-sys-color-primary: #53DBC8;
-            --md-sys-color-on-primary: #003731;
-            --md-sys-color-primary-container: #005047;
-            --md-sys-color-on-primary-container: #72F8E4;
-            --md-sys-color-secondary: #B1CCC4;
-            --md-sys-color-on-secondary: #1C352F;
-            --md-sys-color-secondary-container: #334B45;
-            --md-sys-color-on-secondary-container: #CDE8E0;
-            --md-sys-color-tertiary: #AEC9E6;
-            --md-sys-color-on-tertiary: #13334A;
-            --md-sys-color-tertiary-container: #2D4A61;
-            --md-sys-color-on-tertiary-container: #CCE5FF;
-            --md-sys-color-error: #FFB4AB;
-            --md-sys-color-on-error: #690005;
-            --md-sys-color-error-container: #93000A;
-            --md-sys-color-on-error-container: #FFDAD6;
-            --md-sys-color-success: #86D994;
-            --md-sys-color-on-success: #003918;
-            --md-sys-color-success-container: #0A5328;
-            --md-sys-color-on-success-container: #B1F5C0;
-            --md-sys-color-surface: #101413;
-            --md-sys-color-surface-container-lowest: #0B0F0E;
-            --md-sys-color-surface-container-low: #181D1B;
-            --md-sys-color-surface-container: #1C211F;
-            --md-sys-color-surface-container-high: #272C2A;
-            --md-sys-color-surface-container-highest: #323835;
-            --md-sys-color-on-surface: #DEE4E0;
-            --md-sys-color-on-surface-variant: #BFC9C4;
-            --md-sys-color-outline: #89938E;
-            --md-sys-color-outline-variant: #3F4945;
-            --md-sys-color-inverse-surface: #DEE4E0;
-            --md-sys-color-inverse-on-surface: #2B322F;
-            --md-sys-color-inverse-primary: #006A60;
-
-            --md-sys-elevation-level1: 0 1px 3px 1px rgba(0, 0, 0, 0.25), 0 1px 2px 0 rgba(0, 0, 0, 0.35);
-            --md-sys-elevation-level2: 0 2px 6px 2px rgba(0, 0, 0, 0.28), 0 1px 2px 0 rgba(0, 0, 0, 0.38);
-            --md-sys-elevation-level3: 0 4px 8px 3px rgba(0, 0, 0, 0.32), 0 1px 3px 0 rgba(0, 0, 0, 0.42);
-            --md-sys-elevation-level4: 0 6px 10px 4px rgba(0, 0, 0, 0.35), 0 2px 3px 0 rgba(0, 0, 0, 0.45);
-            --md-sys-elevation-level5: 0 8px 12px 6px rgba(0, 0, 0, 0.40), 0 4px 4px 0 rgba(0, 0, 0, 0.50);
-
-            --md-sys-state-hover: rgba(83, 219, 200, 0.10);
-            --md-sys-state-focus: rgba(83, 219, 200, 0.14);
-            --md-sys-state-pressed: rgba(83, 219, 200, 0.16);
-
-            --shadow: var(--md-sys-elevation-level1);
-        }
-
-        html {
-            overscroll-behavior-x: contain;
-        }
-
-        * {
-            box-sizing: border-box;
-            -webkit-tap-highlight-color: transparent;
-            outline: none;
-        }
-
-        body {
-            margin: 0;
-            font-family: var(--md-sys-typescale-font);
-            background: var(--md-sys-color-surface);
-            color: var(--md-sys-color-on-surface);
-            padding-bottom: calc(80px + var(--safe-area-bottom));
-            transition: background 0.25s ease, color 0.25s ease;
-            touch-action: pan-y;
-            overscroll-behavior-x: contain;
-            -webkit-font-smoothing: antialiased;
-            -moz-osx-font-smoothing: grayscale;
-        }
-
-        .container {
-            padding: 0 20px;
-        }
-
-        /* 导航栏 (Material Design 3 Top App Bar) */
-        .nav-bar {
-            padding: calc(14px + env(safe-area-inset-top)) 20px 14px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            background: var(--md-sys-color-surface);
-            position: sticky;
-            top: 0;
-            z-index: 90;
-            transition: background 0.25s ease, box-shadow 0.25s ease;
-        }
-
-        .nav-title {
-            font-size: 24px;
-            font-weight: 700;
-            letter-spacing: -0.2px;
-            color: var(--md-sys-color-on-surface);
-            display: flex;
-            align-items: center;
-        }
-
-        .bingo-badge {
-            background: var(--md-sys-color-primary-container);
-            color: var(--md-sys-color-on-primary-container);
-            border: 1px solid var(--md-sys-color-primary);
-            padding: 2px 10px;
-            border-radius: var(--md-sys-shape-corner-full);
-            font-size: 12px;
-            font-weight: 700;
-            margin-left: 8px;
-            vertical-align: middle;
-            display: inline-flex;
-            align-items: center;
-            box-shadow: var(--md-sys-elevation-level1);
-        }
-
-        /* M3 Elevated Card */
-        .ios-card {
-            background: var(--md-sys-color-surface-container-low);
-            border-radius: var(--md-sys-shape-corner-extra-large);
-            padding: 22px;
-            box-shadow: var(--md-sys-elevation-level1);
-            border: 1px solid var(--md-sys-color-outline-variant);
-            margin-bottom: 20px;
-            position: relative;
-            transition: transform 0.2s cubic-bezier(0.2, 0, 0, 1), box-shadow 0.2s cubic-bezier(0.2, 0, 0, 1), border-color 0.2s ease;
-        }
-
-        .ios-card:hover {
-            transform: translateY(-2px);
-            box-shadow: var(--md-sys-elevation-level2);
-        }
-
-        /* 统一高度 */
-        .btn,
-        .input-ghost,
-        select.btn-ghost {
-            height: 48px;
-            line-height: normal;
-            box-sizing: border-box;
-        }
-
-        /* M3 按钮系统 (Buttons) */
-        .btn {
-            width: 100%;
-            padding: 0 20px;
-            border: none;
-            border-radius: var(--md-sys-shape-corner-full);
-            font-family: inherit;
-            font-size: 15px;
-            font-weight: 600;
-            letter-spacing: 0.1px;
-            cursor: pointer;
-            transition: transform 0.15s ease, box-shadow 0.2s ease, filter 0.2s ease, background 0.2s ease;
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            gap: 8px;
-            text-decoration: none;
-            box-sizing: border-box;
-        }
-
-        .btn:active {
-            transform: scale(0.98);
-        }
-
-        /* M3 Outlined / Filled Text Field */
-        .input-ghost {
-            background: var(--md-sys-color-surface-container-highest);
-            color: var(--md-sys-color-primary);
-            border: 1.5px solid var(--md-sys-color-outline-variant);
-            border-radius: var(--md-sys-shape-corner-large);
-            font-family: inherit;
-            font-size: 18px;
-            font-weight: 700;
-            text-align: center;
-            transition: border-color 0.2s ease, box-shadow 0.2s ease, background-color 0.2s ease;
-            width: 100%;
-            padding: 0 12px;
-            -moz-appearance: textfield;
-        }
-
-        .input-ghost::-webkit-outer-spin-button,
-        .input-ghost::-webkit-inner-spin-button {
-            -webkit-appearance: none;
-            margin: 0;
-        }
-
-        .input-ghost:focus {
-            background: var(--md-sys-color-surface-container-lowest);
-            border-color: var(--md-sys-color-primary);
-            box-shadow: 0 0 0 3px var(--md-sys-color-primary-container);
-        }
-
-        /* M3 Select Dropdown */
-        select.btn-ghost {
-            appearance: none;
-            -webkit-appearance: none;
-            -moz-appearance: none;
-            background-color: var(--md-sys-color-surface-container-highest);
-            color: var(--md-sys-color-on-surface-variant);
-            padding-right: 36px !important;
-            padding-left: 16px;
-            text-align: center;
-            text-align-last: center;
-            border-radius: var(--md-sys-shape-corner-full);
-            border: 1.5px solid var(--md-sys-color-outline-variant);
-            font-family: inherit;
-            font-size: 14px;
-            font-weight: 600;
-            width: 100%;
-            cursor: pointer;
-            transition: border-color 0.2s ease, background-color 0.2s ease;
-            background-image: url('data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2220%22%20height%3D%2220%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22%236F7975%22%20stroke-width%3D%222.5%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpolyline%20points%3D%226%209%2012%2015%2018%209%22%3E%3C%2Fpolyline%3E%3C%2Fsvg%3E');
-            background-repeat: no-repeat;
-            background-position: right 14px center;
-            background-size: 16px;
-        }
-
-        select.btn-ghost:hover {
-            background-color: var(--md-sys-color-surface-container-high);
-            background-repeat: no-repeat !important;
-            background-position: right 14px center !important;
-            background-size: 16px !important;
-        }
-
-        select.btn-ghost:focus {
-            border-color: var(--md-sys-color-primary);
-        }
-
-        [data-theme="everforest"] select.btn-ghost {
-            background-image: url('data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2220%22%20height%3D%2220%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22%2389938E%22%20stroke-width%3D%222.5%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpolyline%20points%3D%226%209%2012%2015%2018%209%22%3E%3C%2Fpolyline%3E%3C%2Fsvg%3E');
-        }
-
-        /* M3 Filled Button */
-        .btn-primary {
-            background: var(--md-sys-color-primary);
-            color: var(--md-sys-color-on-primary);
-            box-shadow: var(--md-sys-elevation-level1);
-        }
-
-        .btn-primary:hover {
-            box-shadow: var(--md-sys-elevation-level2);
-            filter: brightness(1.05);
-        }
-
-        /* M3 Filled Success Button */
-        .btn-success {
-            background: var(--md-sys-color-success);
-            color: var(--md-sys-color-on-success);
-            box-shadow: var(--md-sys-elevation-level1);
-        }
-
-        .btn-success:hover {
-            box-shadow: var(--md-sys-elevation-level2);
-            filter: brightness(1.05);
-        }
-
-        /* M3 Tonal Destructive Button */
-        .btn-danger {
-            background: var(--md-sys-color-error-container);
-            color: var(--md-sys-color-on-error-container);
-            border: 1px solid var(--md-sys-color-outline-variant);
-        }
-
-        .btn-danger:hover {
-            background: var(--md-sys-color-error);
-            color: var(--md-sys-color-on-error);
-        }
-
-        /* M3 Tonal Neutral Button */
-        .btn-ghost {
-            background: var(--md-sys-color-surface-container-highest);
-            color: var(--md-sys-color-on-surface-variant);
-            border: 1px solid var(--md-sys-color-outline-variant);
-        }
-
-        .btn-ghost:hover {
-            background-color: var(--md-sys-color-surface-container-high);
-            color: var(--md-sys-color-on-surface);
-        }
-
-        /* M3 Floating Action Button (FAB) */
-        .btn-float {
-            position: fixed;
-            bottom: calc(24px + env(safe-area-inset-bottom));
-            right: 24px;
-            width: 56px;
-            height: 56px;
-            border-radius: 18px; /* M3 FAB standard corner */
-            background: var(--md-sys-color-primary-container);
-            color: var(--md-sys-color-on-primary-container);
-            border: 1px solid var(--md-sys-color-outline-variant);
-            font-size: 28px;
-            box-shadow: var(--md-sys-elevation-level3);
-            z-index: 100;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            transition: transform 0.2s cubic-bezier(0.2, 0, 0, 1), box-shadow 0.2s cubic-bezier(0.2, 0, 0, 1);
-        }
-
-        .btn-float:hover {
-            transform: translateY(-2px) scale(1.03);
-            box-shadow: var(--md-sys-elevation-level4);
-            background: var(--md-sys-color-primary);
-            color: var(--md-sys-color-on-primary);
-        }
-
-        .btn-float:active {
-            transform: scale(0.95);
-        }
-
-        /* 题库列表项 */
-        .db-list-item {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 20px 22px;
-            cursor: pointer;
-        }
-
-        .db-info h4 {
-            margin: 0 0 6px 0;
-            font-size: 17px;
-            font-weight: 600;
-            color: var(--md-sys-color-on-surface);
-        }
-
-        .db-info p {
-            margin: 0;
-            font-size: 13px;
-            color: var(--md-sys-color-on-surface-variant);
-        }
-
-        /* 历史记录项 */
-        .history-item {
-            background: var(--md-sys-color-surface-container-highest);
-            padding: 14px 18px;
-            border-radius: var(--md-sys-shape-corner-large);
-            border: 1px solid var(--md-sys-color-outline-variant);
-            margin-bottom: 12px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            transition: background 0.2s ease, transform 0.15s ease;
-        }
-
-        .history-item:hover {
-            background: var(--md-sys-color-surface-container-high);
-            transform: translateX(2px);
-        }
-
-        .score-badge {
-            font-weight: 800;
-            font-size: 20px;
-            letter-spacing: -0.5px;
-        }
-
-        .score-high {
-            color: var(--md-sys-color-success);
-        }
-
-        .score-low {
-            color: var(--md-sys-color-error);
-        }
-
-        /* M3 答题选项交互卡片 (Option Card) */
-        .option-row {
-            padding: 16px 18px;
-            background: var(--md-sys-color-surface-container-low);
-            border-radius: var(--md-sys-shape-corner-large);
-            margin-bottom: 12px;
-            display: flex;
-            align-items: center;
-            cursor: pointer;
-            border: 1.5px solid var(--md-sys-color-outline-variant);
-            transition: background 0.2s ease, border-color 0.2s ease, transform 0.15s ease, box-shadow 0.2s ease;
-            color: var(--md-sys-color-on-surface);
-        }
-
-        .option-row:hover {
-            background: var(--md-sys-color-surface-container);
-            border-color: var(--md-sys-color-outline);
-        }
-
-        .option-row:active {
-            transform: scale(0.99);
-        }
-
-        .option-row.selected {
-            background: var(--md-sys-color-primary-container);
-            border-color: var(--md-sys-color-primary);
-            color: var(--md-sys-color-on-primary-container);
-            font-weight: 600;
-            box-shadow: var(--md-sys-elevation-level1);
-        }
-
-        .option-circle {
-            width: 28px;
-            height: 28px;
-            border-radius: var(--md-sys-shape-corner-full);
-            border: 2px solid var(--md-sys-color-outline);
-            margin-right: 14px;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            font-size: 13px;
-            font-weight: 700;
-            flex-shrink: 0;
-            transition: background 0.2s ease, border-color 0.2s ease, color 0.2s ease;
-            color: var(--md-sys-color-on-surface-variant);
-        }
-
-        .selected .option-circle {
-            background: var(--md-sys-color-primary);
-            border-color: var(--md-sys-color-primary);
-            color: var(--md-sys-color-on-primary);
-        }
-
-        /* 错题/回看样式 */
-        .ios-card.correct {
-            border: 2px solid var(--md-sys-color-success);
-        }
-
-        .ios-card.wrong {
-            border: 2px solid var(--md-sys-color-error);
-        }
-
-        .review-mode .selected .option-circle {
-            color: white;
-        }
-
-        .review-mode .ios-card.correct .selected .option-circle {
-            background: var(--md-sys-color-success);
-            border-color: var(--md-sys-color-success);
-        }
-
-        .review-mode .ios-card.wrong .selected .option-circle {
-            background: var(--md-sys-color-error);
-            border-color: var(--md-sys-color-error);
-        }
-
-        .review-mode .option-row.correct-answer {
-            background: var(--md-sys-color-success-container);
-            border: 2px solid var(--md-sys-color-success);
-            color: var(--md-sys-color-on-success-container);
-        }
-
-        /* M3 模态对话框 (Dialogs) */
-        .modal-mask {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.45);
-            backdrop-filter: blur(10px);
-            -webkit-backdrop-filter: blur(10px);
-            z-index: 200;
-            display: none;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .modal-box {
-            background: var(--md-sys-color-surface-container-high);
-            color: var(--md-sys-color-on-surface);
-            width: 90%;
-            max-width: 400px;
-            border-radius: var(--md-sys-shape-corner-extra-large); /* 28px */
-            padding: 28px;
-            border: 1px solid var(--md-sys-color-outline-variant);
-            box-shadow: var(--md-sys-elevation-level3);
-            animation: popIn 0.25s cubic-bezier(0.2, 0, 0, 1);
-        }
-
-        @keyframes popIn {
-            from {
-                transform: scale(0.9);
-                opacity: 0;
-            }
-
-            to {
-                transform: scale(1);
-                opacity: 1;
-            }
-        }
-
-        /* Loading */
-        .loader-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: var(--bg-body);
-            z-index: 999;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            display: none;
-        }
-
-        .spinner {
-            width: 45px;
-            height: 45px;
-            border: 5px solid var(--primary-light);
-            border-top-color: var(--primary);
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
-        }
-
-        @keyframes spin {
-            to {
-                transform: rotate(360deg);
-            }
-        }
-
-        #sheet-selection-container label {
-            display: block;
-            padding: 10px;
-            border-radius: 8px;
-            cursor: pointer;
-        }
-
-        #sheet-selection-container label:hover {
-            background: var(--bg-input);
-        }
-
-        #sheet-selection-container input {
-            margin-right: 10px;
-        }
-
-        .btn-primary:hover,
-        .btn-success:hover {
-            filter: brightness(1.1);
-        }
-
-        .btn-ghost:not(select):hover {
-            background-color: var(--bg-card);
-        }
-
-        /* M3 Icon Buttons with State Layers */
-        .nav-bar .btn-icon {
-            width: 40px;
-            height: 40px;
-            padding: 0;
-            border-radius: var(--md-sys-shape-corner-full);
-            background: transparent;
-            border: none;
-            color: var(--md-sys-color-on-surface-variant);
-            position: relative;
-            overflow: hidden;
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            transition: background-color 0.2s ease, transform 0.15s ease, color 0.2s ease;
-        }
-
-        .nav-bar .btn-icon:hover {
-            background: var(--md-sys-color-surface-container-highest);
-            color: var(--md-sys-color-on-surface);
-        }
-
-        .nav-bar .btn-icon:active {
-            transform: scale(0.92);
-        }
-
-        .nav-bar .btn-icon svg {
-            width: 20px;
-            height: 20px;
-        }
-
-        .nav-bar .btn-icon.btn-delete {
-            color: var(--md-sys-color-error);
-        }
-
-        .nav-bar .btn-icon.btn-delete:hover {
-            background: var(--md-sys-color-error-container);
-            color: var(--md-sys-color-error);
-        }
-
-        .btn-mastered {
-            padding: 4px 10px;
-            font-size: 12px;
-            font-weight: 600;
-            border-radius: var(--md-sys-shape-corner-small);
-            background: var(--md-sys-color-success-container);
-            color: var(--md-sys-color-on-success-container);
-            border: 1px solid var(--md-sys-color-success);
-            cursor: pointer;
-            flex-shrink: 0;
-            transition: filter 0.2s;
-        }
-
-        .btn-mastered:hover {
-            filter: brightness(1.08);
-        }
-
-        .btn-delete-hist {
-            background: var(--md-sys-color-error-container);
-            color: var(--md-sys-color-on-error-container);
-            border: none;
-            border-radius: var(--md-sys-shape-corner-full);
-            width: 28px;
-            height: 28px;
-            line-height: 28px;
-            text-align: center;
-            cursor: pointer;
-            font-weight: 700;
-            margin-left: 12px;
-            flex-shrink: 0;
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            transition: transform 0.15s ease, background 0.2s ease;
-        }
-
-        .btn-delete-hist:hover {
-            background: var(--md-sys-color-error);
-            color: var(--md-sys-color-on-error);
-            transform: scale(1.08);
-        }
-
-        #view-quiz .nav-bar {
-            background: rgba(244, 251, 247, 0.85);
-            backdrop-filter: blur(16px);
-            -webkit-backdrop-filter: blur(16px);
-            border-bottom: 1px solid var(--md-sys-color-outline-variant);
-            padding: 12px 20px;
-            padding-top: calc(12px + env(safe-area-inset-top));
-        }
-
-        [data-theme="everforest"] #view-quiz .nav-bar {
-            background: rgba(16, 20, 19, 0.85);
-            border-bottom-color: var(--md-sys-color-outline-variant);
-        }
-
-        [data-mode="child"][data-theme="girl"] #view-quiz .nav-bar {
-            background: rgba(255, 248, 247, 0.85);
-            border-bottom-color: var(--md-sys-color-outline-variant);
-        }
-
-        [data-mode="child"][data-theme="boy"] #view-quiz .nav-bar {
-            background: rgba(13, 17, 26, 0.85);
-            border-bottom-color: var(--md-sys-color-outline-variant);
-        }
-
-        /* 偷偷看一眼按钮 */
-        .btn-peek {
-            background: transparent;
-            border: 1px dashed var(--text-sub);
-            color: var(--text-sub);
-            padding: 4px 10px;
-            font-size: 13px;
-            font-weight: 600;
-            border-radius: 10px;
-            cursor: pointer;
-            transition: 0.2s;
-        }
-
-        .btn-peek:hover {
-            background: var(--bg-input);
-            border-style: solid;
-        }
-
-        /* 偷偷看一眼的答案区域 */
-        .analysis-box {
-            margin-top: 15px;
-            padding: 12px;
-            background: var(--primary-light);
-            border-radius: 12px;
-            font-size: 14px;
-            border: 1px solid var(--primary);
-            animation: fadeIn 0.3s;
-        }
-
-        @keyframes fadeIn {
-            from {
-                opacity: 0;
-                transform: translateY(-5px);
-            }
-
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        @media (min-width: 600px) {
-            .container {
-                max-width: 800px;
-                margin: 0 auto;
-            }
-
-            .modal-box {
-                max-width: 400px;
-            }
-        }
-
-        /* --- 儿童模式样式 (Material Design 3 Expressive) --- */
-        [data-mode="child"] {
-            --radius-l: var(--md-sys-shape-corner-extra-large);
-            font-family: -apple-system, BlinkMacSystemFont, "Google Sans", "Comic Sans MS", "YouYuan", "Chalkboard SE", sans-serif;
-        }
-
-        [data-mode="child"][data-theme="girl"] {
-            /* M3 Expressive Berry & Strawberry Coral */
-            --md-sys-color-primary: #9B4061;
-            --md-sys-color-on-primary: #FFFFFF;
-            --md-sys-color-primary-container: #FFD9E2;
-            --md-sys-color-on-primary-container: #3E001D;
-            --md-sys-color-secondary: #74565F;
-            --md-sys-color-on-secondary: #FFFFFF;
-            --md-sys-color-secondary-container: #FFD9E2;
-            --md-sys-color-on-secondary-container: #2B151C;
-            --md-sys-color-tertiary: #7C5635;
-            --md-sys-color-on-tertiary: #FFFFFF;
-            --md-sys-color-tertiary-container: #FFDCC1;
-            --md-sys-color-on-tertiary-container: #2E1500;
-            --md-sys-color-error: #BA1A1A;
-            --md-sys-color-on-error: #FFFFFF;
-            --md-sys-color-error-container: #FFDAD6;
-            --md-sys-color-on-error-container: #410002;
-            --md-sys-color-success: #006D5B;
-            --md-sys-color-on-success: #FFFFFF;
-            --md-sys-color-success-container: #A3F2DB;
-            --md-sys-color-on-success-container: #00201A;
-            --md-sys-color-surface: #FFF8F7;
-            --md-sys-color-surface-container-lowest: #FFFFFF;
-            --md-sys-color-surface-container-low: #FFF0F2;
-            --md-sys-color-surface-container: #FEECEF;
-            --md-sys-color-surface-container-high: #FCE6EA;
-            --md-sys-color-surface-container-highest: #F9DFE4;
-            --md-sys-color-on-surface: #3A1924;
-            --md-sys-color-on-surface-variant: #7B5462;
-            --md-sys-color-outline: #8C717A;
-            --md-sys-color-outline-variant: #E0CDD3;
-
-            /* 向后兼容映射 */
-            --primary: var(--md-sys-color-primary);
-            --primary-light: var(--md-sys-color-primary-container);
-            --success: var(--md-sys-color-success);
-            --success-light: var(--md-sys-color-success-container);
-            --danger: var(--md-sys-color-error);
-            --danger-light: var(--md-sys-color-error-container);
-            --bg-body: var(--md-sys-color-surface);
-            --bg-card: var(--md-sys-color-surface-container-lowest);
-            --bg-input: var(--md-sys-color-surface-container-high);
-            --text-main: var(--md-sys-color-on-surface);
-            --text-sub: var(--md-sys-color-on-surface-variant);
-            --text-inverse: var(--md-sys-color-on-primary);
-        }
-
-        [data-mode="child"][data-theme="boy"] {
-            /* M3 Expressive Deep Space & Galactic Blue */
-            --md-sys-color-primary: #00A6FB;
-            --md-sys-color-on-primary: #003353;
-            --md-sys-color-primary-container: #004B73;
-            --md-sys-color-on-primary-container: #CCE5FF;
-            --md-sys-color-secondary: #8ECAE6;
-            --md-sys-color-on-secondary: #00344D;
-            --md-sys-color-secondary-container: #1C3F5E;
-            --md-sys-color-on-secondary-container: #D1E5F5;
-            --md-sys-color-tertiary: #A2E833;
-            --md-sys-color-on-tertiary: #203600;
-            --md-sys-color-tertiary-container: #335300;
-            --md-sys-color-on-tertiary-container: #BEFF59;
-            --md-sys-color-error: #FF8A80;
-            --md-sys-color-on-error: #68000B;
-            --md-sys-color-error-container: #8C1D18;
-            --md-sys-color-on-error-container: #FFDAD6;
-            --md-sys-color-success: #26A669;
-            --md-sys-color-on-success: #00391F;
-            --md-sys-color-success-container: #00522F;
-            --md-sys-color-on-success-container: #82F5B6;
-            --md-sys-color-surface: #0D111A;
-            --md-sys-color-surface-container-lowest: #080B12;
-            --md-sys-color-surface-container-low: #151B27;
-            --md-sys-color-surface-container: #1C2333;
-            --md-sys-color-surface-container-high: #242C3F;
-            --md-sys-color-surface-container-highest: #2D374E;
-            --md-sys-color-on-surface: #E3E8F5;
-            --md-sys-color-on-surface-variant: #97A3C2;
-            --md-sys-color-outline: #637294;
-            --md-sys-color-outline-variant: #36425C;
-
-            /* 向后兼容映射 */
-            --primary: var(--md-sys-color-primary);
-            --primary-light: var(--md-sys-color-primary-container);
-            --success: var(--md-sys-color-success);
-            --success-light: var(--md-sys-color-success-container);
-            --danger: var(--md-sys-color-error);
-            --danger-light: var(--md-sys-color-error-container);
-            --bg-body: var(--md-sys-color-surface);
-            --bg-card: var(--md-sys-color-surface-container-low);
-            --bg-input: var(--md-sys-color-surface-container-high);
-            --text-main: var(--md-sys-color-on-surface);
-            --text-sub: var(--md-sys-color-on-surface-variant);
-            --text-inverse: var(--md-sys-color-on-primary);
-        }
-
-
-
-        /* 儿童模式下隐藏复杂的按钮和统计 */
-
-        [data-mode="child"] .btn-delete,
-
-        [data-mode="child"] .btn-delete-hist,
-
-
-
-        [data-mode="child"] .nav-bar .btn-icon:not(.btn-child-toggle):not(.btn-quiz-exit):not(.btn-back-home):not(.btn-theme-toggle),
-
-        [data-mode="child"] #import-export-area,
-
-        [data-mode="child"] .btn-float {
-
-            display: none !important;
-
-        }
-
-
-
-        /* 儿童模式特有的大按钮 */
-
-        [data-mode="child"] .option-row {
-
-            padding: 20px;
-
-            margin-bottom: 15px;
-
-            background: var(--bg-card);
-
-            border: 3px solid var(--bg-input);
-
-            transition: transform 0.1s;
-
-        }
-
-        [data-mode="child"] .option-row:active {
-            transform: scale(0.95);
-        }
-
-        [data-mode="child"] .option-circle {
-            width: 40px;
-            height: 40px;
-            font-size: 20px;
-            border-width: 3px;
-        }
-
-        /* 答对动画 */
-        @keyframes bounceIn {
-            0% {
-                transform: scale(0.3);
-                opacity: 0;
-            }
-
-            50% {
-                transform: scale(1.05);
-            }
-
-            70% {
-                transform: scale(0.9);
-            }
-
-            100% {
-                transform: scale(1);
-                opacity: 1;
-            }
-        }
-
-        .child-feedback-modal {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(255, 255, 255, 0.9);
-            z-index: 999;
-            display: none;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            animation: fadeIn 0.3s;
-        }
-
-        [data-theme="boy"] .child-feedback-modal {
-            background: rgba(26, 27, 47, 0.9);
-        }
-
-        .child-star {
-            font-size: 100px;
-            animation: bounceIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-        }
-
-        /* 摇晃动画（答错） */
-        @keyframes shake {
-
-            0%,
-            100% {
-                transform: translateX(0);
-            }
-
-            25% {
-                transform: translateX(-10px);
-            }
-
-            75% {
-                transform: translateX(10px);
-            }
-        }
-
-        .shake-it {
-            animation: shake 0.4s;
-            border-color: var(--danger) !important;
-            color: var(--danger);
-        }
-
-        [data-mode="child"] .option-row.child-correct {
-            background: var(--success-light);
-            border-color: var(--success);
-        }
-
-        /* 语音按钮 */
-        .btn-tts {
-            display: none;
-            /* 默认隐藏 */
-            background: #E0F7FA;
-            color: #00BCD4;
-            border: none;
-            border-radius: 50%;
-            width: 40px;
-            height: 40px;
-            align-items: center;
-            justify-content: center;
-            margin-left: 10px;
-            flex-shrink: 0;
-        }
-
-        [data-mode="child"] .btn-tts {
-            display: flex;
-        }
-
-/* 键盘无障碍焦点 */
+/* ==========================================================================
+   Google Material Design 3 (Material You) Design System
+   Bingo Quiz Modern M3 Overhaul
+   ========================================================================== */
+
+:root {
+    /* M3 Baseline: Botanical Sage & Deep Lake Teal */
+    --md-sys-color-primary: #006A60;
+    --md-sys-color-on-primary: #FFFFFF;
+    --md-sys-color-primary-container: #88F4E4;
+    --md-sys-color-on-primary-container: #00201D;
+    --md-sys-color-secondary: #4A635D;
+    --md-sys-color-on-secondary: #FFFFFF;
+    --md-sys-color-secondary-container: #CCE8E0;
+    --md-sys-color-on-secondary-container: #05201B;
+    --md-sys-color-tertiary: #456179;
+    --md-sys-color-on-tertiary: #FFFFFF;
+    --md-sys-color-tertiary-container: #CCE5FF;
+    --md-sys-color-on-tertiary-container: #001E31;
+
+    /* Semantic Feedback Colors */
+    --md-sys-color-error: #BA1A1A;
+    --md-sys-color-on-error: #FFFFFF;
+    --md-sys-color-error-container: #FFDAD6;
+    --md-sys-color-on-error-container: #410002;
+    --md-sys-color-success: #1E6B37;
+    --md-sys-color-on-success: #FFFFFF;
+    --md-sys-color-success-container: #C3EED0;
+    --md-sys-color-on-success-container: #00210B;
+
+    /* Surface & Container 5-tier elevation scale */
+    --md-sys-color-surface: #F4FBF7;
+    --md-sys-color-surface-dim: #D7DFDB;
+    --md-sys-color-surface-bright: #F4FBF7;
+    --md-sys-color-surface-container-lowest: #FFFFFF;
+    --md-sys-color-surface-container-low: #EEF5F1;
+    --md-sys-color-surface-container: #E8EFEB;
+    --md-sys-color-surface-container-high: #E2E9E5;
+    --md-sys-color-surface-container-highest: #DCE4E0;
+
+    --md-sys-color-on-surface: #161D1A;
+    --md-sys-color-on-surface-variant: #3F4945;
+    --md-sys-color-outline: #6F7975;
+    --md-sys-color-outline-variant: #BFC9C4;
+    --md-sys-color-inverse-surface: #2B322F;
+    --md-sys-color-inverse-on-surface: #ECF2EE;
+    --md-sys-color-inverse-primary: #53DBC8;
+
+    /* M3 Shape Tokens */
+    --md-sys-shape-corner-none: 0px;
+    --md-sys-shape-corner-xs: 4px;
+    --md-sys-shape-corner-s: 8px;
+    --md-sys-shape-corner-m: 12px;
+    --md-sys-shape-corner-l: 16px;
+    --md-sys-shape-corner-xl: 28px;
+    --md-sys-shape-corner-full: 9999px;
+
+    /* M3 Elevation Tokens */
+    --md-sys-elevation-level0: none;
+    --md-sys-elevation-level1: 0 1px 3px 1px rgba(0, 0, 0, 0.07), 0 1px 2px 0 rgba(0, 0, 0, 0.10);
+    --md-sys-elevation-level2: 0 2px 6px 2px rgba(0, 0, 0, 0.07), 0 1px 2px 0 rgba(0, 0, 0, 0.12);
+    --md-sys-elevation-level3: 0 4px 8px 3px rgba(0, 0, 0, 0.08), 0 1px 3px 0 rgba(0, 0, 0, 0.14);
+    --md-sys-elevation-level4: 0 6px 10px 4px rgba(0, 0, 0, 0.08), 0 2px 3px 0 rgba(0, 0, 0, 0.14);
+    --md-sys-elevation-level5: 0 8px 12px 6px rgba(0, 0, 0, 0.09), 0 4px 4px 0 rgba(0, 0, 0, 0.15);
+
+    /* M3 State Layers */
+    --md-sys-state-hover: rgba(0, 106, 96, 0.08);
+    --md-sys-state-focus: rgba(0, 106, 96, 0.12);
+    --md-sys-state-pressed: rgba(0, 106, 96, 0.14);
+    --md-sys-state-dragged: rgba(0, 106, 96, 0.16);
+
+    /* M3 Typography */
+    --md-sys-typescale-font: 'Google Sans', 'Roboto', -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+
+    /* Motion Curves */
+    --md-sys-motion-standard: cubic-bezier(0.2, 0, 0, 1);
+    --md-sys-motion-emphasized: cubic-bezier(0.2, 0, 0, 1);
+    --md-sys-motion-decelerate: cubic-bezier(0.0, 0, 0.2, 1);
+    --md-sys-motion-accelerate: cubic-bezier(0.4, 0, 1, 1);
+
+    /* 向后兼容映射层 */
+    --primary: var(--md-sys-color-primary);
+    --primary-light: var(--md-sys-color-primary-container);
+    --success: var(--md-sys-color-success);
+    --success-light: var(--md-sys-color-success-container);
+    --danger: var(--md-sys-color-error);
+    --danger-light: var(--md-sys-color-error-container);
+    --bg-body: var(--md-sys-color-surface);
+    --bg-card: var(--md-sys-color-surface-container-low);
+    --bg-input: var(--md-sys-color-surface-container-highest);
+    --text-main: var(--md-sys-color-on-surface);
+    --text-sub: var(--md-sys-color-on-surface-variant);
+    --text-inverse: var(--md-sys-color-on-primary);
+    --shadow: var(--md-sys-elevation-level1);
+    --radius-l: var(--md-sys-shape-corner-l);
+    --safe-area-bottom: env(safe-area-inset-bottom);
+}
+
+/* ==========================================================================
+   Themes: Dark Scheme & Expressive Child Schemes
+   ========================================================================== */
+
+[data-theme="everforest"] {
+    /* M3 Dark Scheme: Basalt Slate & Luminous Mint */
+    --md-sys-color-primary: #53DBC8;
+    --md-sys-color-on-primary: #003731;
+    --md-sys-color-primary-container: #005047;
+    --md-sys-color-on-primary-container: #72F8E4;
+    --md-sys-color-secondary: #B1CCC4;
+    --md-sys-color-on-secondary: #1C352F;
+    --md-sys-color-secondary-container: #334B45;
+    --md-sys-color-on-secondary-container: #CDE8E0;
+    --md-sys-color-tertiary: #AEC9E6;
+    --md-sys-color-on-tertiary: #13334A;
+    --md-sys-color-tertiary-container: #2D4A61;
+    --md-sys-color-on-tertiary-container: #CCE5FF;
+    --md-sys-color-error: #FFB4AB;
+    --md-sys-color-on-error: #690005;
+    --md-sys-color-error-container: #93000A;
+    --md-sys-color-on-error-container: #FFDAD6;
+    --md-sys-color-success: #86D994;
+    --md-sys-color-on-success: #003918;
+    --md-sys-color-success-container: #0A5328;
+    --md-sys-color-on-success-container: #B1F5C0;
+    
+    --md-sys-color-surface: #101413;
+    --md-sys-color-surface-dim: #101413;
+    --md-sys-color-surface-bright: #363B39;
+    --md-sys-color-surface-container-lowest: #0B0F0E;
+    --md-sys-color-surface-container-low: #181D1B;
+    --md-sys-color-surface-container: #1C211F;
+    --md-sys-color-surface-container-high: #272C2A;
+    --md-sys-color-surface-container-highest: #323835;
+
+    --md-sys-color-on-surface: #DEE4E0;
+    --md-sys-color-on-surface-variant: #BFC9C4;
+    --md-sys-color-outline: #89938E;
+    --md-sys-color-outline-variant: #3F4945;
+    --md-sys-color-inverse-surface: #DEE4E0;
+    --md-sys-color-inverse-on-surface: #2B322F;
+    --md-sys-color-inverse-primary: #006A60;
+
+    --md-sys-elevation-level1: 0 1px 3px 1px rgba(0, 0, 0, 0.25), 0 1px 2px 0 rgba(0, 0, 0, 0.35);
+    --md-sys-elevation-level2: 0 2px 6px 2px rgba(0, 0, 0, 0.28), 0 1px 2px 0 rgba(0, 0, 0, 0.38);
+    --md-sys-elevation-level3: 0 4px 8px 3px rgba(0, 0, 0, 0.32), 0 1px 3px 0 rgba(0, 0, 0, 0.42);
+    --md-sys-elevation-level4: 0 6px 10px 4px rgba(0, 0, 0, 0.35), 0 2px 3px 0 rgba(0, 0, 0, 0.45);
+    --md-sys-elevation-level5: 0 8px 12px 6px rgba(0, 0, 0, 0.40), 0 4px 4px 0 rgba(0, 0, 0, 0.50);
+
+    --md-sys-state-hover: rgba(83, 219, 200, 0.10);
+    --md-sys-state-focus: rgba(83, 219, 200, 0.14);
+    --md-sys-state-pressed: rgba(83, 219, 200, 0.16);
+    --shadow: var(--md-sys-elevation-level1);
+}
+
+[data-mode="child"] {
+    --radius-l: var(--md-sys-shape-corner-xl);
+    font-family: -apple-system, BlinkMacSystemFont, "Google Sans", "Comic Sans MS", "YouYuan", "Chalkboard SE", sans-serif;
+}
+
+[data-mode="child"][data-theme="girl"] {
+    /* M3 Expressive Berry & Strawberry Coral */
+    --md-sys-color-primary: #9B4061;
+    --md-sys-color-on-primary: #FFFFFF;
+    --md-sys-color-primary-container: #FFD9E2;
+    --md-sys-color-on-primary-container: #3E001D;
+    --md-sys-color-secondary: #74565F;
+    --md-sys-color-on-secondary: #FFFFFF;
+    --md-sys-color-secondary-container: #FFD9E2;
+    --md-sys-color-on-secondary-container: #2B151C;
+    --md-sys-color-tertiary: #7C5635;
+    --md-sys-color-on-tertiary: #FFFFFF;
+    --md-sys-color-tertiary-container: #FFDCC1;
+    --md-sys-color-on-tertiary-container: #2E1500;
+    --md-sys-color-error: #BA1A1A;
+    --md-sys-color-on-error: #FFFFFF;
+    --md-sys-color-error-container: #FFDAD6;
+    --md-sys-color-on-error-container: #410002;
+    --md-sys-color-success: #006D5B;
+    --md-sys-color-on-success: #FFFFFF;
+    --md-sys-color-success-container: #A3F2DB;
+    --md-sys-color-on-success-container: #00201A;
+    --md-sys-color-surface: #FFF8F7;
+    --md-sys-color-surface-dim: #F5EAE9;
+    --md-sys-color-surface-bright: #FFF8F7;
+    --md-sys-color-surface-container-lowest: #FFFFFF;
+    --md-sys-color-surface-container-low: #FFF0F2;
+    --md-sys-color-surface-container: #FEECEF;
+    --md-sys-color-surface-container-high: #FCE6EA;
+    --md-sys-color-surface-container-highest: #F9DFE4;
+    --md-sys-color-on-surface: #3A1924;
+    --md-sys-color-on-surface-variant: #7B5462;
+    --md-sys-color-outline: #8C717A;
+    --md-sys-color-outline-variant: #E0CDD3;
+}
+
+[data-mode="child"][data-theme="boy"] {
+    /* M3 Expressive Deep Space & Galactic Blue */
+    --md-sys-color-primary: #00A6FB;
+    --md-sys-color-on-primary: #003353;
+    --md-sys-color-primary-container: #004B73;
+    --md-sys-color-on-primary-container: #CCE5FF;
+    --md-sys-color-secondary: #8ECAE6;
+    --md-sys-color-on-secondary: #00344D;
+    --md-sys-color-secondary-container: #1C3F5E;
+    --md-sys-color-on-secondary-container: #D1E5F5;
+    --md-sys-color-tertiary: #A2E833;
+    --md-sys-color-on-tertiary: #203600;
+    --md-sys-color-tertiary-container: #335300;
+    --md-sys-color-on-tertiary-container: #BEFF59;
+    --md-sys-color-error: #FF8A80;
+    --md-sys-color-on-error: #68000B;
+    --md-sys-color-error-container: #8C1D18;
+    --md-sys-color-on-error-container: #FFDAD6;
+    --md-sys-color-success: #26A669;
+    --md-sys-color-on-success: #00391F;
+    --md-sys-color-success-container: #00522F;
+    --md-sys-color-on-success-container: #82F5B6;
+    --md-sys-color-surface: #0D111A;
+    --md-sys-color-surface-dim: #0D111A;
+    --md-sys-color-surface-bright: #252D3F;
+    --md-sys-color-surface-container-lowest: #080B12;
+    --md-sys-color-surface-container-low: #151B27;
+    --md-sys-color-surface-container: #1C2333;
+    --md-sys-color-surface-container-high: #242C3F;
+    --md-sys-color-surface-container-highest: #2D374E;
+    --md-sys-color-on-surface: #E3E8F5;
+    --md-sys-color-on-surface-variant: #97A3C2;
+    --md-sys-color-outline: #637294;
+    --md-sys-color-outline-variant: #36425C;
+}
+
+/* ==========================================================================
+   Base Layout & Typography Reset
+   ========================================================================== */
+
+html {
+    overscroll-behavior-x: contain;
+}
+
+* {
+    box-sizing: border-box;
+    -webkit-tap-highlight-color: transparent;
+    outline: none;
+}
+
+body {
+    margin: 0;
+    font-family: var(--md-sys-typescale-font);
+    background: var(--md-sys-color-surface);
+    color: var(--md-sys-color-on-surface);
+    padding-bottom: calc(84px + var(--safe-area-bottom));
+    transition: background 0.25s var(--md-sys-motion-standard), color 0.25s var(--md-sys-motion-standard);
+    touch-action: pan-y;
+    overscroll-behavior-x: contain;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+.container {
+    max-width: 840px;
+    margin: 0 auto;
+    padding: 0 16px;
+}
+
+/* Typography Hierarchy Helpers */
+.m3-title-large {
+    font-size: 22px;
+    font-weight: 600;
+    line-height: 28px;
+    letter-spacing: 0px;
+}
+
+.m3-title-medium {
+    font-size: 16px;
+    font-weight: 600;
+    line-height: 24px;
+    letter-spacing: 0.15px;
+}
+
+.m3-body-large {
+    font-size: 16px;
+    font-weight: 400;
+    line-height: 24px;
+    letter-spacing: 0.5px;
+}
+
+.m3-body-medium {
+    font-size: 14px;
+    font-weight: 400;
+    line-height: 20px;
+    letter-spacing: 0.25px;
+}
+
+.m3-label-large {
+    font-size: 14px;
+    font-weight: 600;
+    line-height: 20px;
+    letter-spacing: 0.1px;
+}
+
+.m3-label-medium {
+    font-size: 12px;
+    font-weight: 600;
+    line-height: 16px;
+    letter-spacing: 0.5px;
+}
+
+/* ==========================================================================
+   M3 Top App Bar
+   ========================================================================== */
+
+.nav-bar,
+.m3-top-app-bar {
+    height: 64px;
+    padding: calc(10px + env(safe-area-inset-top)) 16px 10px 16px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: var(--md-sys-color-surface);
+    position: sticky;
+    top: 0;
+    z-index: 90;
+    transition: background 0.25s var(--md-sys-motion-standard), box-shadow 0.25s var(--md-sys-motion-standard);
+}
+
+.nav-bar.scrolled,
+.m3-top-app-bar.scrolled {
+    background: var(--md-sys-color-surface-container);
+    box-shadow: var(--md-sys-elevation-level2);
+}
+
+.nav-title {
+    font-size: 22px;
+    font-weight: 700;
+    letter-spacing: -0.2px;
+    color: var(--md-sys-color-on-surface);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.bingo-badge,
+.m3-badge {
+    background: var(--md-sys-color-primary-container);
+    color: var(--md-sys-color-on-primary-container);
+    border: 1px solid var(--md-sys-color-outline-variant);
+    padding: 3px 10px;
+    border-radius: var(--md-sys-shape-corner-full);
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.4px;
+    vertical-align: middle;
+    display: inline-flex;
+    align-items: center;
+    box-shadow: var(--md-sys-elevation-level1);
+}
+
+/* M3 Icon Buttons with State Layers & Touch Targets */
+.nav-bar .btn-icon,
+.m3-icon-btn {
+    width: 40px;
+    height: 40px;
+    min-width: 40px;
+    padding: 0;
+    border-radius: var(--md-sys-shape-corner-full);
+    background: transparent;
+    border: none;
+    color: var(--md-sys-color-on-surface-variant);
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: background-color 0.2s ease, transform 0.15s ease, color 0.2s ease;
+}
+
+/* 48dp Accessibility Touch Target */
+.nav-bar .btn-icon::after,
+.m3-icon-btn::after {
+    content: '';
+    position: absolute;
+    top: -4px;
+    left: -4px;
+    right: -4px;
+    bottom: -4px;
+}
+
+.nav-bar .btn-icon:hover,
+.m3-icon-btn:hover {
+    background: var(--md-sys-color-surface-container-highest);
+    color: var(--md-sys-color-on-surface);
+}
+
+.nav-bar .btn-icon:active,
+.m3-icon-btn:active {
+    transform: scale(0.92);
+}
+
+.nav-bar .btn-icon svg,
+.m3-icon-btn svg {
+    width: 22px;
+    height: 22px;
+    stroke-width: 2.2;
+}
+
+.nav-bar .btn-icon.btn-delete {
+    color: var(--md-sys-color-error);
+}
+
+.nav-bar .btn-icon.btn-delete:hover {
+    background: var(--md-sys-color-error-container);
+    color: var(--md-sys-color-error);
+}
+
+/* ==========================================================================
+   M3 Cards (Elevated / Outlined / Filled)
+   ========================================================================== */
+
+.m3-card,
+.ios-card {
+    border-radius: var(--md-sys-shape-corner-l);
+    padding: 20px;
+    margin-bottom: 16px;
+    position: relative;
+    box-sizing: border-box;
+    transition: transform 0.2s var(--md-sys-motion-standard), box-shadow 0.2s var(--md-sys-motion-standard), border-color 0.2s ease;
+}
+
+/* Elevated Card (Primary default) */
+.m3-card--elevated,
+.ios-card {
+    background: var(--md-sys-color-surface-container-low);
+    border: 1px solid var(--md-sys-color-outline-variant);
+    box-shadow: var(--md-sys-elevation-level1);
+}
+
+.m3-card--elevated:hover,
+.ios-card:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--md-sys-elevation-level2);
+}
+
+/* Outlined Card */
+.m3-card--outlined {
+    background: var(--md-sys-color-surface);
+    border: 1.5px solid var(--md-sys-color-outline-variant);
+    box-shadow: none;
+}
+
+.m3-card--outlined:hover {
+    border-color: var(--md-sys-color-outline);
+}
+
+/* Filled Card */
+.m3-card--filled {
+    background: var(--md-sys-color-surface-container-highest);
+    border: none;
+    box-shadow: none;
+}
+
+/* ==========================================================================
+   M3 Button System
+   ========================================================================== */
+
+.btn,
+.m3-btn {
+    height: 44px;
+    padding: 0 22px;
+    border: none;
+    border-radius: var(--md-sys-shape-corner-full);
+    font-family: inherit;
+    font-size: 14px;
+    font-weight: 600;
+    letter-spacing: 0.15px;
+    cursor: pointer;
+    transition: transform 0.15s ease, box-shadow 0.2s ease, filter 0.2s ease, background 0.2s ease;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    text-decoration: none;
+    box-sizing: border-box;
+    position: relative;
+    user-select: none;
+}
+
+.btn:active,
+.m3-btn:active {
+    transform: scale(0.98);
+}
+
+/* M3 Filled Button */
+.btn-primary,
+.m3-btn--filled {
+    background: var(--md-sys-color-primary);
+    color: var(--md-sys-color-on-primary);
+    box-shadow: var(--md-sys-elevation-level1);
+}
+
+.btn-primary:hover,
+.m3-btn--filled:hover {
+    box-shadow: var(--md-sys-elevation-level2);
+    filter: brightness(1.08);
+}
+
+/* M3 Filled Tonal Button */
+.btn-ghost,
+.m3-btn--tonal {
+    background: var(--md-sys-color-secondary-container);
+    color: var(--md-sys-color-on-secondary-container);
+    border: 1px solid transparent;
+}
+
+.btn-ghost:hover,
+.m3-btn--tonal:hover {
+    background: var(--md-sys-color-surface-container-highest);
+    filter: brightness(1.04);
+}
+
+/* M3 Success Button */
+.btn-success,
+.m3-btn--success {
+    background: var(--md-sys-color-success);
+    color: var(--md-sys-color-on-success);
+    box-shadow: var(--md-sys-elevation-level1);
+}
+
+.btn-success:hover,
+.m3-btn--success:hover {
+    box-shadow: var(--md-sys-elevation-level2);
+    filter: brightness(1.08);
+}
+
+/* M3 Error / Destructive Button */
+.btn-danger,
+.m3-btn--error {
+    background: var(--md-sys-color-error-container);
+    color: var(--md-sys-color-on-error-container);
+    border: 1px solid var(--md-sys-color-outline-variant);
+}
+
+.btn-danger:hover,
+.m3-btn--error:hover {
+    background: var(--md-sys-color-error);
+    color: var(--md-sys-color-on-error);
+}
+
+/* M3 Outlined Button */
+.m3-btn--outlined {
+    background: transparent;
+    border: 1.5px solid var(--md-sys-color-outline);
+    color: var(--md-sys-color-primary);
+}
+
+.m3-btn--outlined:hover {
+    background: var(--md-sys-color-surface-container-highest);
+}
+
+/* M3 Text Button */
+.m3-btn--text {
+    background: transparent;
+    border: none;
+    color: var(--md-sys-color-primary);
+    padding: 0 12px;
+}
+
+.m3-btn--text:hover {
+    background: var(--md-sys-color-surface-container-highest);
+}
+
+/* M3 Floating Action Button (FAB) */
+.btn-float,
+.m3-fab {
+    position: fixed;
+    bottom: calc(24px + env(safe-area-inset-bottom));
+    right: 24px;
+    width: 56px;
+    height: 56px;
+    border-radius: var(--md-sys-shape-corner-l); /* M3 standard 16dp rounded corner */
+    background: var(--md-sys-color-primary-container);
+    color: var(--md-sys-color-on-primary-container);
+    border: 1px solid var(--md-sys-color-outline-variant);
+    font-size: 28px;
+    box-shadow: var(--md-sys-elevation-level3);
+    z-index: 100;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: transform 0.2s var(--md-sys-motion-standard), box-shadow 0.2s var(--md-sys-motion-standard), background 0.2s ease;
+}
+
+.btn-float:hover,
+.m3-fab:hover {
+    transform: scale(1.05);
+    box-shadow: var(--md-sys-elevation-level4);
+    background: var(--md-sys-color-primary);
+    color: var(--md-sys-color-on-primary);
+}
+
+.btn-float:active,
+.m3-fab:active {
+    transform: scale(0.95);
+}
+
+/* ==========================================================================
+   M3 Form Controls: Text Fields, Selects & Segmented Controls
+   ========================================================================== */
+
+.input-ghost,
+.m3-text-field {
+    height: 48px;
+    background: var(--md-sys-color-surface-container-highest);
+    color: var(--md-sys-color-on-surface);
+    border: 1.5px solid var(--md-sys-color-outline-variant);
+    border-radius: var(--md-sys-shape-corner-m);
+    font-family: inherit;
+    font-size: 16px;
+    font-weight: 600;
+    text-align: center;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease, background-color 0.2s ease;
+    width: 100%;
+    padding: 0 14px;
+    -moz-appearance: textfield;
+}
+
+.input-ghost::-webkit-outer-spin-button,
+.input-ghost::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+
+.input-ghost:focus,
+.m3-text-field:focus {
+    background: var(--md-sys-color-surface-container-lowest);
+    border-color: var(--md-sys-color-primary);
+    box-shadow: 0 0 0 3px var(--md-sys-color-primary-container);
+}
+
+/* M3 Outlined Select */
+select.btn-ghost,
+.m3-select {
+    appearance: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    height: 48px;
+    background-color: var(--md-sys-color-surface-container-highest);
+    color: var(--md-sys-color-on-surface);
+    padding-right: 36px !important;
+    padding-left: 16px;
+    border-radius: var(--md-sys-shape-corner-m);
+    border: 1.5px solid var(--md-sys-color-outline-variant);
+    font-family: inherit;
+    font-size: 14px;
+    font-weight: 600;
+    width: 100%;
+    cursor: pointer;
+    transition: border-color 0.2s ease, background-color 0.2s ease;
+    background-image: url('data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2220%22%20height%3D%2220%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22%236F7975%22%20stroke-width%3D%222.5%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpolyline%20points%3D%226%209%2012%2015%2018%209%22%3E%3C%2Fpolyline%3E%3C%2Fsvg%3E');
+    background-repeat: no-repeat;
+    background-position: right 14px center;
+    background-size: 16px;
+}
+
+select.btn-ghost:hover,
+.m3-select:hover {
+    background-color: var(--md-sys-color-surface-container-high);
+}
+
+select.btn-ghost:focus,
+.m3-select:focus {
+    border-color: var(--md-sys-color-primary);
+    box-shadow: 0 0 0 3px var(--md-sys-color-primary-container);
+}
+
+[data-theme="everforest"] select.btn-ghost,
+[data-theme="everforest"] .m3-select {
+    background-image: url('data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2220%22%20height%3D%2220%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22%2389938E%22%20stroke-width%3D%222.5%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpolyline%20points%3D%226%209%2012%2015%2018%209%22%3E%3C%2Fpolyline%3E%3C%2Fsvg%3E');
+}
+
+/* M3 Segmented Button Group */
+.m3-segmented-button {
+    display: flex;
+    width: 100%;
+    border: 1px solid var(--md-sys-color-outline-variant);
+    border-radius: var(--md-sys-shape-corner-full);
+    overflow: hidden;
+    background: var(--md-sys-color-surface-container-low);
+    padding: 2px;
+    gap: 2px;
+}
+
+.m3-segmented-button__btn {
+    flex: 1;
+    border: none;
+    background: transparent;
+    color: var(--md-sys-color-on-surface-variant);
+    font-size: 13px;
+    font-weight: 600;
+    padding: 7px 6px;
+    border-radius: var(--md-sys-shape-corner-full);
+    cursor: pointer;
+    transition: all 0.2s var(--md-sys-motion-standard);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    user-select: none;
+}
+
+.m3-segmented-button__btn:hover {
+    background: var(--md-sys-color-surface-container-high);
+    color: var(--md-sys-color-on-surface);
+}
+
+.m3-segmented-button__btn.active {
+    background: var(--md-sys-color-secondary-container);
+    color: var(--md-sys-color-on-secondary-container);
+    font-weight: 700;
+    box-shadow: var(--md-sys-elevation-level1);
+}
+
+/* M3 Linear Progress Bar */
+.m3-linear-progress {
+    width: 100%;
+    height: 8px;
+    border-radius: var(--md-sys-shape-corner-full);
+    background: var(--md-sys-color-surface-container-highest);
+    overflow: hidden;
+    position: relative;
+    margin: 12px 0 6px 0;
+}
+
+.m3-linear-progress__bar {
+    height: 100%;
+    background: linear-gradient(90deg, var(--md-sys-color-primary), var(--md-sys-color-secondary));
+    border-radius: var(--md-sys-shape-corner-full);
+    transition: width 0.4s var(--md-sys-motion-standard);
+}
+
+/* ==========================================================================
+   M3 List Items (DB List & History)
+   ========================================================================== */
+
+.db-list-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 18px 20px;
+    cursor: pointer;
+}
+
+.db-info h4 {
+    margin: 0 0 6px 0;
+    font-size: 17px;
+    font-weight: 600;
+    color: var(--md-sys-color-on-surface);
+}
+
+.db-info p {
+    margin: 0;
+    font-size: 13px;
+    color: var(--md-sys-color-on-surface-variant);
+}
+
+.history-item {
+    background: var(--md-sys-color-surface-container-highest);
+    padding: 14px 18px;
+    border-radius: var(--md-sys-shape-corner-m);
+    border: 1px solid var(--md-sys-color-outline-variant);
+    margin-bottom: 10px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    transition: background 0.2s ease, transform 0.15s ease;
+}
+
+.history-item:hover {
+    background: var(--md-sys-color-surface-container-high);
+    transform: translateX(2px);
+}
+
+.score-badge {
+    font-weight: 800;
+    font-size: 20px;
+    letter-spacing: -0.5px;
+}
+
+.score-high {
+    color: var(--md-sys-color-success);
+}
+
+.score-low {
+    color: var(--md-sys-color-error);
+}
+
+.btn-delete-hist {
+    background: var(--md-sys-color-error-container);
+    color: var(--md-sys-color-on-error-container);
+    border: none;
+    border-radius: var(--md-sys-shape-corner-full);
+    width: 28px;
+    height: 28px;
+    line-height: 28px;
+    text-align: center;
+    cursor: pointer;
+    font-weight: 700;
+    margin-left: 12px;
+    flex-shrink: 0;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    transition: transform 0.15s ease, background 0.2s ease;
+}
+
+.btn-delete-hist:hover {
+    background: var(--md-sys-color-error);
+    color: var(--md-sys-color-on-error);
+    transform: scale(1.08);
+}
+
+.btn-mastered {
+    padding: 4px 12px;
+    font-size: 12px;
+    font-weight: 600;
+    border-radius: var(--md-sys-shape-corner-s);
+    background: var(--md-sys-color-success-container);
+    color: var(--md-sys-color-on-success-container);
+    border: 1px solid var(--md-sys-color-success);
+    cursor: pointer;
+    flex-shrink: 0;
+    transition: filter 0.2s;
+}
+
+.btn-mastered:hover {
+    filter: brightness(1.08);
+}
+
+/* ==========================================================================
+   M3 Quiz Questions & Interactive Option Tiles
+   ========================================================================== */
+
+.option-row {
+    padding: 15px 18px;
+    background: var(--md-sys-color-surface-container-low);
+    border-radius: var(--md-sys-shape-corner-m);
+    margin-bottom: 10px;
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+    border: 1.5px solid var(--md-sys-color-outline-variant);
+    transition: background 0.2s ease, border-color 0.2s ease, transform 0.15s ease, box-shadow 0.2s ease;
+    color: var(--md-sys-color-on-surface);
+    position: relative;
+    overflow: hidden;
+}
+
+.option-row:hover {
+    background: var(--md-sys-color-surface-container);
+    border-color: var(--md-sys-color-outline);
+}
+
+.option-row:active {
+    transform: scale(0.99);
+}
+
+.option-row.selected {
+    background: var(--md-sys-color-primary-container);
+    border-color: var(--md-sys-color-primary);
+    color: var(--md-sys-color-on-primary-container);
+    font-weight: 600;
+    box-shadow: var(--md-sys-elevation-level1);
+}
+
+/* Authentic M3 Radio Indicator Circle */
+.option-circle {
+    width: 26px;
+    height: 26px;
+    border-radius: var(--md-sys-shape-corner-full);
+    border: 2px solid var(--md-sys-color-outline);
+    margin-right: 14px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 13px;
+    font-weight: 700;
+    flex-shrink: 0;
+    transition: background 0.2s ease, border-color 0.2s ease, color 0.2s ease;
+    color: var(--md-sys-color-on-surface-variant);
+}
+
+.selected .option-circle {
+    background: var(--md-sys-color-primary);
+    border-color: var(--md-sys-color-primary);
+    color: var(--md-sys-color-on-primary);
+}
+
+/* Quiz Review Mode States */
+.ios-card.correct,
+.m3-card.correct {
+    border: 2px solid var(--md-sys-color-success);
+}
+
+.ios-card.wrong,
+.m3-card.wrong {
+    border: 2px solid var(--md-sys-color-error);
+}
+
+.review-mode .selected .option-circle {
+    color: white;
+}
+
+.review-mode .ios-card.correct .selected .option-circle,
+.review-mode .m3-card.correct .selected .option-circle {
+    background: var(--md-sys-color-success);
+    border-color: var(--md-sys-color-success);
+}
+
+.review-mode .ios-card.wrong .selected .option-circle,
+.review-mode .m3-card.wrong .selected .option-circle {
+    background: var(--md-sys-color-error);
+    border-color: var(--md-sys-color-error);
+}
+
+.review-mode .option-row.correct-answer {
+    background: var(--md-sys-color-success-container);
+    border: 2px solid var(--md-sys-color-success);
+    color: var(--md-sys-color-on-success-container);
+}
+
+/* 偷偷看一眼按钮与解析卡片 */
+.btn-peek {
+    background: transparent;
+    border: 1px dashed var(--md-sys-color-outline);
+    color: var(--md-sys-color-on-surface-variant);
+    padding: 6px 12px;
+    font-size: 13px;
+    font-weight: 600;
+    border-radius: var(--md-sys-shape-corner-full);
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.btn-peek:hover {
+    background: var(--md-sys-color-surface-container-highest);
+    border-style: solid;
+    color: var(--md-sys-color-primary);
+}
+
+.analysis-box {
+    margin-top: 14px;
+    padding: 14px;
+    background: var(--md-sys-color-primary-container);
+    color: var(--md-sys-color-on-primary-container);
+    border-radius: var(--md-sys-shape-corner-m);
+    font-size: 14px;
+    border-left: 4px solid var(--md-sys-color-primary);
+    animation: fadeIn 0.3s;
+}
+
+/* ==========================================================================
+   M3 Dialogs (Modals)
+   ========================================================================== */
+
+.modal-mask {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.45);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    z-index: 200;
+    display: none;
+    align-items: center;
+    justify-content: center;
+}
+
+.modal-box,
+.m3-dialog {
+    background: var(--md-sys-color-surface-container-high);
+    color: var(--md-sys-color-on-surface);
+    width: 90%;
+    max-width: 440px;
+    border-radius: var(--md-sys-shape-corner-xl); /* M3 standard 28dp */
+    padding: 26px;
+    border: 1px solid var(--md-sys-color-outline-variant);
+    box-shadow: var(--md-sys-elevation-level3);
+    animation: popIn 0.25s var(--md-sys-motion-standard);
+    box-sizing: border-box;
+}
+
+.m3-dialog__headline {
+    margin: 0 0 12px 0;
+    font-size: 22px;
+    font-weight: 600;
+    color: var(--md-sys-color-on-surface);
+}
+
+.m3-dialog__actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 8px;
+    margin-top: 24px;
+}
+
+@keyframes popIn {
+    from {
+        transform: scale(0.92);
+        opacity: 0;
+    }
+    to {
+        transform: scale(1);
+        opacity: 1;
+    }
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(-5px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Loading */
+.loader-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: var(--bg-body);
+    z-index: 999;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    display: none;
+}
+
+.spinner {
+    width: 44px;
+    height: 44px;
+    border: 4px solid var(--md-sys-color-primary-container);
+    border-top-color: var(--md-sys-color-primary);
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+#sheet-selection-container label {
+    display: block;
+    padding: 10px;
+    border-radius: 8px;
+    cursor: pointer;
+}
+
+#sheet-selection-container label:hover {
+    background: var(--bg-input);
+}
+
+#sheet-selection-container input {
+    margin-right: 10px;
+}
+
+#view-quiz .nav-bar {
+    background: rgba(244, 251, 247, 0.88);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border-bottom: 1px solid var(--md-sys-color-outline-variant);
+    padding: 12px 16px;
+    padding-top: calc(12px + env(safe-area-inset-top));
+}
+
+[data-theme="everforest"] #view-quiz .nav-bar {
+    background: rgba(16, 20, 19, 0.88);
+    border-bottom-color: var(--md-sys-color-outline-variant);
+}
+
+[data-mode="child"][data-theme="girl"] #view-quiz .nav-bar {
+    background: rgba(255, 248, 247, 0.88);
+    border-bottom-color: var(--md-sys-color-outline-variant);
+}
+
+[data-mode="child"][data-theme="boy"] #view-quiz .nav-bar {
+    background: rgba(13, 17, 26, 0.88);
+    border-bottom-color: var(--md-sys-color-outline-variant);
+}
+
+/* ==========================================================================
+   M3 Ripple State Feedback
+   ========================================================================== */
+
+.m3-ripple {
+    position: relative;
+    overflow: hidden;
+}
+
+.m3-ripple-wave {
+    position: absolute;
+    border-radius: 50%;
+    background: currentColor;
+    opacity: 0.15;
+    pointer-events: none;
+    transform: scale(0);
+    animation: m3Ripple 0.5s var(--md-sys-motion-standard);
+}
+
+@keyframes m3Ripple {
+    to {
+        transform: scale(4);
+        opacity: 0;
+    }
+}
+
+/* ==========================================================================
+   Child Mode Helpers
+   ========================================================================== */
+
+[data-mode="child"] .btn-delete,
+[data-mode="child"] .btn-delete-hist,
+[data-mode="child"] .nav-bar .btn-icon:not(.btn-child-toggle):not(.btn-quiz-exit):not(.btn-back-home):not(.btn-theme-toggle),
+[data-mode="child"] #import-export-area,
+[data-mode="child"] .btn-float {
+    display: none !important;
+}
+
+[data-mode="child"] .option-row {
+    padding: 20px;
+    margin-bottom: 15px;
+    background: var(--bg-card);
+    border: 3px solid var(--bg-input);
+    transition: transform 0.1s;
+}
+
+[data-mode="child"] .option-row:active {
+    transform: scale(0.95);
+}
+
+[data-mode="child"] .option-circle {
+    width: 40px;
+    height: 40px;
+    font-size: 20px;
+    border-width: 3px;
+}
+
+@keyframes bounceIn {
+    0% { transform: scale(0.3); opacity: 0; }
+    50% { transform: scale(1.05); }
+    70% { transform: scale(0.9); }
+    100% { transform: scale(1); opacity: 1; }
+}
+
+.child-feedback-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(255, 255, 255, 0.9);
+    z-index: 999;
+    display: none;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    animation: fadeIn 0.3s;
+}
+
+[data-theme="boy"] .child-feedback-modal {
+    background: rgba(26, 27, 47, 0.9);
+}
+
+.child-star {
+    font-size: 100px;
+    animation: bounceIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+@keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    25% { transform: translateX(-10px); }
+    75% { transform: translateX(10px); }
+}
+
+.shake-it {
+    animation: shake 0.4s;
+    border-color: var(--danger) !important;
+    color: var(--danger);
+}
+
+[data-mode="child"] .option-row.child-correct {
+    background: var(--success-light);
+    border-color: var(--success);
+}
+
 .option-row:focus-visible {
     outline: 3px solid var(--primary);
     outline-offset: 2px;
 }
+
 
 /* --- 海鲜萌宠伴学系统样式 --- */
 .child-pet-home-badge {
@@ -2339,22 +2518,36 @@
     animation: bounceIn 0.6s;
 }
 
-/* --- Material Design 3 Bottom App Bar & FAB Area --- */
+
+/* ==========================================================================
+   M3 Bottom App Bar / Action Bar & Floating Submission Controls
+   ========================================================================== */
+
 #quiz-fab-area {
     position: fixed;
     bottom: 0;
     left: 0;
     width: 100%;
-    padding: 14px 20px calc(14px + env(safe-area-inset-bottom)) 20px;
+    padding: 12px 16px calc(12px + env(safe-area-inset-bottom)) 16px;
     background: rgba(244, 251, 247, 0.88);
     backdrop-filter: blur(16px);
     -webkit-backdrop-filter: blur(16px);
     border-top: 1px solid var(--md-sys-color-outline-variant);
     display: flex;
+    justify-content: center;
     gap: 12px;
     z-index: 90;
     box-sizing: border-box;
-    box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.04);
+    box-shadow: 0 -2px 12px rgba(0, 0, 0, 0.05);
+}
+
+#quiz-fab-area .btn {
+    max-width: 600px;
+    width: 100%;
+    height: 48px;
+    font-size: 16px;
+    border-radius: var(--md-sys-shape-corner-full);
+    box-shadow: var(--md-sys-elevation-level2);
 }
 
 [data-theme="everforest"] #quiz-fab-area {
@@ -2398,3 +2591,6 @@
     transform: scale(0.92);
 }
 
+[data-mode="child"] .btn-tts {
+    display: flex;
+}

@@ -36,7 +36,77 @@
 
 
 // --- 初始化 ---
+        
+        // --- Material Design 3 (M3) 交互系统 ---
+        function initM3Ripple() {
+            document.addEventListener('pointerdown', function (e) {
+                const target = e.target.closest('.m3-ripple, .btn, .m3-btn, .option-row, .db-list-item, .history-item');
+                if (!target || target.disabled || target.classList.contains('disabled')) return;
+
+                const rect = target.getBoundingClientRect();
+                const size = Math.max(rect.width, rect.height) * 2;
+                const x = e.clientX - rect.left - size / 2;
+                const y = e.clientY - rect.top - size / 2;
+
+                const wave = document.createElement('span');
+                wave.className = 'm3-ripple-wave';
+                wave.style.width = `${size}px`;
+                wave.style.height = `${size}px`;
+                wave.style.left = `${x}px`;
+                wave.style.top = `${y}px`;
+
+                target.appendChild(wave);
+                setTimeout(() => {
+                    if (wave.parentNode) wave.parentNode.removeChild(wave);
+                }, 550);
+            });
+        }
+
+        function initTopAppBarScroll() {
+            window.addEventListener('scroll', function () {
+                const scrolled = window.scrollY > 8;
+                document.querySelectorAll('.m3-top-app-bar, .nav-bar').forEach(bar => {
+                    bar.classList.toggle('scrolled', scrolled);
+                });
+            }, { passive: true });
+        }
+
+        function initSegmentedButtons() {
+            document.addEventListener('click', function (e) {
+                const btn = e.target.closest('.m3-segmented-button__btn');
+                if (!btn) return;
+                const group = btn.closest('.m3-segmented-button');
+                if (!group) return;
+                const targetSelectId = group.getAttribute('data-for');
+                const select = targetSelectId ? document.getElementById(targetSelectId) : null;
+                const val = btn.getAttribute('data-val');
+
+                group.querySelectorAll('.m3-segmented-button__btn').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+
+                if (select) {
+                    select.value = val;
+                    select.dispatchEvent(new Event('change', { bubbles: true }));
+                }
+            });
+        }
+
+        function syncSegmentedButtons() {
+            document.querySelectorAll('.m3-segmented-button').forEach(group => {
+                const targetSelectId = group.getAttribute('data-for');
+                const select = targetSelectId ? document.getElementById(targetSelectId) : null;
+                if (!select) return;
+                const currentVal = select.value;
+                group.querySelectorAll('.m3-segmented-button__btn').forEach(btn => {
+                    btn.classList.toggle('active', btn.getAttribute('data-val') === currentVal);
+                });
+            });
+        }
+
         window.onload = function () {
+            initM3Ripple();
+            initTopAppBarScroll();
+            initSegmentedButtons();
             initTheme();
 
             const currentHash = window.location.hash;
