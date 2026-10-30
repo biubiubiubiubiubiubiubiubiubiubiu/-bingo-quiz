@@ -357,6 +357,7 @@ body {
 
 /* M3 Icon Buttons with State Layers & Touch Targets */
 .nav-bar .btn-icon,
+.btn.m3-icon-btn,
 .m3-icon-btn {
     width: 40px;
     height: 40px;
@@ -543,6 +544,49 @@ body {
 .m3-btn--error:hover {
     background: var(--md-sys-color-error);
     color: var(--md-sys-color-on-error);
+}
+
+/* M3 Sequential Practice Reset Button */
+.btn.m3-btn-reset-prog,
+.m3-btn-reset-prog {
+    height: 48px;
+    padding: 0 16px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    border-radius: var(--md-sys-shape-corner-m);
+    background-color: var(--md-sys-color-surface-container-highest);
+    color: var(--md-sys-color-error);
+    border: 1.5px solid var(--md-sys-color-outline-variant);
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    flex-shrink: 0;
+    transition: background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease, transform 0.15s ease;
+    box-sizing: border-box;
+    user-select: none;
+}
+
+.btn.m3-btn-reset-prog:hover,
+.m3-btn-reset-prog:hover {
+    background-color: var(--md-sys-color-error-container);
+    color: var(--md-sys-color-error);
+    border-color: var(--md-sys-color-error);
+}
+
+.btn.m3-btn-reset-prog:active,
+.m3-btn-reset-prog:active {
+    transform: scale(0.96);
+    background-color: var(--md-sys-color-error);
+    color: var(--md-sys-color-on-error);
+}
+
+.m3-btn-reset-prog svg {
+    width: 18px;
+    height: 18px;
+    stroke-width: 2.2;
+    flex-shrink: 0;
 }
 
 /* M3 Outlined Button */

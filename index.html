@@ -191,18 +191,19 @@
             </div>
 
             <div style="display:flex; gap:10px; align-items:center; margin-bottom: 12px;">
-                <button class="btn btn-ghost m3-icon-btn m3-ripple" onclick="resetProgress()" title="重置进度到1"
-                    style="color: var(--md-sys-color-error); flex-shrink: 0;">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
-                        stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-                        <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 12" />
-                        <path d="M3 5v7h7" />
-                    </svg>
-                </button>
                 <div style="flex-grow: 1;">
                     <input type="number" id="sequence-start-input" class="input-ghost m3-text-field" onclick="this.select()"
                         onchange="manualUpdateProgress()" placeholder="起始序号">
                 </div>
+                <button type="button" class="btn m3-btn-reset-prog m3-ripple" onclick="resetProgress()" title="重置进度到第 1 根"
+                    aria-label="重置进度">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
+                        stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 12" />
+                        <path d="M3 5v7h7" />
+                    </svg>
+                    <span>重置</span>
+                </button>
             </div>
 
             <div class="m3-segmented-button" data-for="sequence-count" style="margin-bottom: 12px;">
