@@ -2752,15 +2752,15 @@ function updatePetWidgets() {
         homeBadge.style.display = 'flex';
     }
 
-    // 2. 答题界面伴学挂件
+    // 2. 答题界面伴学胶囊挂件 (内置于标题栏居中)
     const quizWidget = document.getElementById('child-pet-quiz-widget');
     if (quizWidget) {
         quizWidget.innerHTML = `
             <div class="pet-quiz-avatar" onclick="speakPetQuote()" title="轻触听我说说话！">${activeForm.avatar}</div>
-            <div class="pet-quiz-name">${activeForm.title} (Lv.${lvlInfo.level})</div>
-            <button class="btn btn-ghost" onclick="togglePetSound(event)" title="声音开关" style="font-size:13px; padding:2px 4px; border:none; background:transparent; cursor:pointer; opacity:0.8;">${PetSound.isEnabled() ? '🔊' : '🔇'}</button>
+            <div class="pet-quiz-name" title="${activeForm.title} (Lv.${lvlInfo.level})">${activeForm.title} · Lv.${lvlInfo.level}</div>
+            <button class="btn btn-ghost pet-quiz-sound-btn" onclick="togglePetSound(event)" title="声音开关">${PetSound.isEnabled() ? '🔊' : '🔇'}</button>
         `;
-        quizWidget.style.display = 'flex';
+        quizWidget.style.display = 'inline-flex';
     }
 
     // 3. 漫游伴学精灵同步

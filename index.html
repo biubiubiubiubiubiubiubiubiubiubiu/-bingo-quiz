@@ -261,25 +261,30 @@
     <!-- VIEW 3: 答题/回看界面 -->
     <div id="view-quiz" style="display:none;">
         <div class="nav-bar">
-            <div style="font-size:14px; font-weight:bold; color:var(--text-sub);" id="quiz-progress-text">1/20</div>
-            <div style="font-size:16px; font-weight:bold; color:var(--primary);" id="quiz-timer"></div>
-            <button class="btn btn-ghost btn-icon btn-theme-toggle" onclick="toggleTheme()" title="切换主题">
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                    stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                    <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
-                </svg>
-            </button>
-            <button class="btn btn-ghost btn-icon btn-quiz-exit" onclick="handleQuizExit()" title="退出">
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                    stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                    <line x1="18" y1="6" x2="6" y2="18"></line>
-                    <line x1="6" y1="6" x2="18" y2="18"></line>
-                </svg>
-            </button>
-        </div>
+            <div style="display:flex; align-items:center; gap:8px; flex-shrink:0;">
+                <div style="font-size:14px; font-weight:bold; color:var(--text-sub);" id="quiz-progress-text">1/20</div>
+                <div style="font-size:15px; font-weight:bold; color:var(--primary);" id="quiz-timer"></div>
+            </div>
 
-        <!-- 儿童模式海鲜萌宠答题伴学小组件 -->
-        <div id="child-pet-quiz-widget" class="child-pet-quiz-widget" style="display:none;" onclick="speakPetQuote()"></div>
+            <!-- 儿童模式海鲜萌宠答题伴学小组件 (内置于标题栏居中) -->
+            <div id="child-pet-quiz-widget" class="child-pet-quiz-widget" style="display:none;" onclick="speakPetQuote()" title="轻触听我说说话！"></div>
+
+            <div style="display:flex; align-items:center; gap:4px; flex-shrink:0;">
+                <button class="btn btn-ghost btn-icon btn-theme-toggle" onclick="toggleTheme()" title="切换主题">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                        stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+                    </svg>
+                </button>
+                <button class="btn btn-ghost btn-icon btn-quiz-exit" onclick="handleQuizExit()" title="退出">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                        stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                        <line x1="18" y1="6" x2="6" y2="18"></line>
+                        <line x1="6" y1="6" x2="18" y2="18"></line>
+                    </svg>
+                </button>
+            </div>
+        </div>
 
         <div class="container" style="padding: 0 16px calc(100px + env(safe-area-inset-bottom)) 16px;">
             <div id="quiz-container"></div>

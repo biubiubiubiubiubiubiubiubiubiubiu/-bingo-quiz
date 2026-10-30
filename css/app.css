@@ -1184,39 +1184,91 @@
     transition: width 0.5s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-/* 答题伴学小挂件 */
+/* 答题界面顶部伴学胶囊挂件 (内置于标题栏，紧凑轻量适配手机) */
 .child-pet-quiz-widget {
-    position: fixed;
-    top: 72px;
-    right: 15px;
-    background: rgba(255, 255, 255, 0.96);
-    border: 2px solid #FF70A6;
-    border-radius: 25px;
-    padding: 4px 12px 4px 6px;
-    display: flex;
+    position: static;
+    background: rgba(255, 255, 255, 0.92);
+    border: 1.5px solid #FF70A6;
+    border-radius: 16px;
+    padding: 2px 8px 2px 5px;
+    height: 32px;
+    box-sizing: border-box;
+    display: inline-flex;
     align-items: center;
-    gap: 6px;
-    box-shadow: 0 4px 15px rgba(0,0,0,0.12);
-    z-index: 85;
+    gap: 5px;
+    box-shadow: 0 2px 8px rgba(255, 112, 166, 0.15);
     cursor: pointer;
-    animation: fadeIn 0.4s;
+    user-select: none;
+    -webkit-user-select: none;
+    transition: transform 0.15s ease, background-color 0.2s ease, border-color 0.2s ease;
+    max-width: 170px;
+    flex-shrink: 1;
     backdrop-filter: blur(8px);
 }
 
+.child-pet-quiz-widget:active {
+    transform: scale(0.96);
+}
+
 [data-theme="boy"] .child-pet-quiz-widget {
-    background: rgba(30, 40, 60, 0.95);
+    background: rgba(26, 36, 52, 0.92);
     border-color: #70C1B3;
+    box-shadow: 0 2px 8px rgba(112, 193, 179, 0.2);
 }
 
 .pet-quiz-avatar {
-    font-size: 26px;
+    font-size: 19px;
     line-height: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
 }
 
 .pet-quiz-name {
-    font-size: 12px;
-    font-weight: bold;
+    font-size: 11px;
+    font-weight: 700;
     color: var(--text-main);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    line-height: 1.2;
+}
+
+.pet-quiz-sound-btn {
+    font-size: 13px;
+    padding: 0 2px;
+    border: none;
+    background: transparent;
+    cursor: pointer;
+    opacity: 0.85;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    transition: opacity 0.2s;
+}
+
+.pet-quiz-sound-btn:hover {
+    opacity: 1;
+}
+
+@media (max-width: 480px) {
+    #view-quiz .nav-bar {
+        padding-left: 12px;
+        padding-right: 12px;
+    }
+    .child-pet-quiz-widget {
+        max-width: 140px;
+        gap: 4px;
+        padding: 2px 6px 2px 4px;
+    }
+    .pet-quiz-avatar {
+        font-size: 17px;
+    }
+    .pet-quiz-name {
+        font-size: 10px;
+    }
 }
 
 /* 弹跳与旋转动画 */
