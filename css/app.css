@@ -1147,6 +1147,54 @@
     transition: left 1.5s cubic-bezier(0.4, 0, 0.2, 1), top 0.4s ease-out !important;
 }
 
+/* 仿生日常活动精准动力学曲线 */
+.roaming-pet-container.motion-crab-step {
+    transition: left 0.95s cubic-bezier(0.25, 1, 0.5, 1), top 0.25s ease-out !important;
+}
+
+.roaming-pet-container.motion-fish-swim {
+    transition: left 2.6s cubic-bezier(0.35, 0, 0.25, 1), top 2.6s cubic-bezier(0.35, 0, 0.25, 1) !important;
+}
+
+.roaming-pet-container.motion-shrimp-pop {
+    transition: left 0.38s cubic-bezier(0.12, 0.88, 0.25, 1.25), top 0.38s cubic-bezier(0.12, 0.88, 0.25, 1.25) !important;
+}
+
+.roaming-pet-container.motion-shrimp-float {
+    transition: left 1.8s cubic-bezier(0.25, 1, 0.5, 1), top 1.8s cubic-bezier(0.25, 1, 0.5, 1) !important;
+}
+
+.roaming-pet-container.motion-octopus-jet {
+    transition: left 0.42s cubic-bezier(0.2, 0.9, 0.3, 1), top 0.42s cubic-bezier(0.2, 0.9, 0.3, 1) !important;
+}
+
+.roaming-pet-container.motion-octopus-glide {
+    transition: left 2.2s cubic-bezier(0.25, 1, 0.5, 1), top 2.2s cubic-bezier(0.25, 1, 0.5, 1) !important;
+}
+
+/* 螃蟹主动横行小碎步高频走动 */
+@keyframes crabStepActive {
+    0%, 100% { transform: translateY(0) rotate(0deg); }
+    25% { transform: translateY(-4px) rotate(-6deg); }
+    50% { transform: translateY(0) rotate(1deg); }
+    75% { transform: translateY(-4px) rotate(6deg); }
+}
+
+.roaming-pet-body.crab-stepping {
+    animation: crabStepActive 0.32s ease-in-out infinite !important;
+}
+
+/* 鱼类巡游波动动画 */
+@keyframes fishCruisingMotion {
+    0%, 100% { transform: translateY(0px) rotate(0deg) scale(1, 1); }
+    30% { transform: translateY(-4px) rotate(-5deg) scale(1.05, 0.95); }
+    70% { transform: translateY(4px) rotate(5deg) scale(0.95, 1.05); }
+}
+
+.roaming-pet-body.fish-cruising {
+    animation: fishCruisingMotion 1.4s ease-in-out infinite !important;
+}
+
 .roaming-pet-container.dragging {
     transition: none !important;
 }
