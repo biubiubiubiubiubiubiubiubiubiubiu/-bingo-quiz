@@ -1170,32 +1170,32 @@
     transition: left 1.5s cubic-bezier(0.4, 0, 0.2, 1), top 0.4s ease-out !important;
 }
 
-/* 仿生日常活动精准动力学曲线 */
+/* 仿生日常活动精准动力学曲线 (舒缓悠然水族流体) */
 .roaming-pet-container.motion-crab-step {
-    transition: left 0.95s cubic-bezier(0.25, 1, 0.5, 1), top 0.25s ease-out !important;
+    transition: left 1.4s cubic-bezier(0.33, 1, 0.68, 1), top 0.3s ease-out !important;
 }
 
 .roaming-pet-container.motion-fish-swim {
-    transition: left 2.6s cubic-bezier(0.35, 0, 0.25, 1), top 2.6s cubic-bezier(0.35, 0, 0.25, 1) !important;
+    transition: left 4.2s cubic-bezier(0.22, 0.61, 0.36, 1), top 4.2s cubic-bezier(0.22, 0.61, 0.36, 1) !important;
 }
 
 .roaming-pet-container.motion-shrimp-pop {
-    transition: left 0.38s cubic-bezier(0.12, 0.88, 0.25, 1.25), top 0.38s cubic-bezier(0.12, 0.88, 0.25, 1.25) !important;
+    transition: left 0.45s cubic-bezier(0.12, 0.88, 0.25, 1.25), top 0.45s cubic-bezier(0.12, 0.88, 0.25, 1.25) !important;
 }
 
 .roaming-pet-container.motion-shrimp-float {
-    transition: left 1.8s cubic-bezier(0.25, 1, 0.5, 1), top 1.8s cubic-bezier(0.25, 1, 0.5, 1) !important;
+    transition: left 3.0s cubic-bezier(0.25, 1, 0.4, 1), top 3.0s cubic-bezier(0.25, 1, 0.4, 1) !important;
 }
 
 .roaming-pet-container.motion-octopus-jet {
-    transition: left 0.42s cubic-bezier(0.2, 0.9, 0.3, 1), top 0.42s cubic-bezier(0.2, 0.9, 0.3, 1) !important;
+    transition: left 0.55s cubic-bezier(0.2, 0.9, 0.3, 1), top 0.55s cubic-bezier(0.2, 0.9, 0.3, 1) !important;
 }
 
 .roaming-pet-container.motion-octopus-glide {
-    transition: left 2.2s cubic-bezier(0.25, 1, 0.5, 1), top 2.2s cubic-bezier(0.25, 1, 0.5, 1) !important;
+    transition: left 3.8s cubic-bezier(0.18, 0.9, 0.3, 1), top 3.8s cubic-bezier(0.18, 0.9, 0.3, 1) !important;
 }
 
-/* 螃蟹主动横行小碎步高频走动 */
+/* 螃蟹主动横行小碎步走动 (节奏放缓憨态可掬) */
 @keyframes crabStepActive {
     0%, 100% { transform: translateY(0) rotate(0deg); }
     25% { transform: translateY(-4px) rotate(-6deg); }
@@ -1204,12 +1204,12 @@
 }
 
 .roaming-pet-body.crab-stepping {
-    animation: crabStepActive 0.32s ease-in-out infinite !important;
+    animation: crabStepActive 0.48s ease-in-out infinite !important;
 }
 
-/* 螃蟹沿玻璃壁垂直攀爬动力学 */
+/* 螃蟹沿玻璃壁垂直攀爬动力学 (3.5s一步一脚印稳步攀爬) */
 .roaming-pet-container.motion-crab-climb {
-    transition: left 0.4s ease-out, top 1.6s cubic-bezier(0.25, 1, 0.5, 1) !important;
+    transition: left 0.5s ease-out, top 3.5s cubic-bezier(0.25, 1, 0.5, 1) !important;
 }
 
 @keyframes crabClimbWall {
@@ -1220,7 +1220,7 @@
 }
 
 .roaming-pet-body.crab-climbing {
-    animation: crabClimbWall 0.36s ease-in-out infinite !important;
+    animation: crabClimbWall 0.52s ease-in-out infinite !important;
 }
 
 /* 答题区伴学漫游微透，绝不遮挡题目 */
@@ -1228,15 +1228,15 @@
     opacity: 0.88;
 }
 
-/* 鱼类巡游波动动画 */
+/* 鱼类巡游波动动画 (更舒展的波浪) */
 @keyframes fishCruisingMotion {
     0%, 100% { transform: translateY(0px) rotate(0deg) scale(1, 1); }
-    30% { transform: translateY(-4px) rotate(-5deg) scale(1.05, 0.95); }
-    70% { transform: translateY(4px) rotate(5deg) scale(0.95, 1.05); }
+    30% { transform: translateY(-4px) rotate(-4deg) scale(1.04, 0.96); }
+    70% { transform: translateY(4px) rotate(4deg) scale(0.96, 1.04); }
 }
 
 .roaming-pet-body.fish-cruising {
-    animation: fishCruisingMotion 1.4s ease-in-out infinite !important;
+    animation: fishCruisingMotion 2.2s ease-in-out infinite !important;
 }
 
 .roaming-pet-container.dragging {
@@ -1257,7 +1257,7 @@
     justify-content: center;
     cursor: grab;
     border-radius: 50%;
-    animation: petFloat 3.2s ease-in-out infinite;
+    animation: petFloat 3.8s ease-in-out infinite;
     transition: transform 0.25s ease-out;
 }
 
@@ -1270,7 +1270,7 @@
     line-height: 1;
     z-index: 2;
     filter: drop-shadow(0 4px 10px rgba(0, 0, 0, 0.2));
-    transition: transform 0.3s ease;
+    transition: transform 1.2s cubic-bezier(0.22, 0.61, 0.36, 1);
 }
 
 .roaming-pet-body.flip-left .roaming-pet-avatar {

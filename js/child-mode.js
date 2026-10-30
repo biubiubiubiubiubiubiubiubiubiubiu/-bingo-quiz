@@ -181,7 +181,7 @@ const PetSound = {
                 osc.type = 'triangle';
                 osc.frequency.setValueAtTime(850 + Math.random() * 200, now + delay);
                 osc.frequency.exponentialRampToValueAtTime(320, now + delay + 0.025);
-                gain.gain.setValueAtTime(0.08, now + delay);
+                gain.gain.setValueAtTime(0.06, now + delay);
                 gain.gain.exponentialRampToValueAtTime(0.002, now + delay + 0.025);
                 osc.connect(gain);
                 gain.connect(ctx.destination);
@@ -202,7 +202,7 @@ const PetSound = {
             const gain = ctx.createGain();
             osc.type = 'sine';
             osc.frequency.setValueAtTime(1760 + (Math.random() - 0.5) * 120, now);
-            gain.gain.setValueAtTime(0.09, now);
+            gain.gain.setValueAtTime(0.065, now);
             gain.gain.exponentialRampToValueAtTime(0.001, now + 0.045);
             osc.connect(gain);
             gain.connect(ctx.destination);
@@ -268,7 +268,7 @@ const PetSound = {
             osc.frequency.setValueAtTime(260, now);
             osc.frequency.exponentialRampToValueAtTime(480, now + 0.12);
             osc.frequency.exponentialRampToValueAtTime(240, now + 0.22);
-            gain.gain.setValueAtTime(0.09, now);
+            gain.gain.setValueAtTime(0.06, now);
             gain.gain.exponentialRampToValueAtTime(0.002, now + 0.22);
             osc.connect(gain);
             gain.connect(ctx.destination);
@@ -333,7 +333,7 @@ const PetSound = {
             osc.type = 'sine';
             osc.frequency.setValueAtTime(840, now);
             osc.frequency.exponentialRampToValueAtTime(620, now + 0.22);
-            gain.gain.setValueAtTime(0.07, now);
+            gain.gain.setValueAtTime(0.05, now);
             gain.gain.exponentialRampToValueAtTime(0.002, now + 0.22);
             osc.connect(gain);
             gain.connect(ctx.destination);
@@ -1225,8 +1225,8 @@ class RoamingPetEngine {
                 setTimeout(() => {
                     if (this.container) this.container.classList.remove('motion-crab-climb', 'motion-crab-step');
                     if (this.body) this.body.classList.remove('crab-climbing', 'crab-stepping');
-                }, isWall ? 1500 : 900);
-                nextDelay = 2200 + Math.random() * 800;
+                }, isWall ? 3400 : 1350);
+                nextDelay = 8000 + Math.random() * 4000;
 
             } else if (pet.type === 'shrimp') {
                 if (this.container) this.container.classList.add('motion-shrimp-pop');
@@ -1243,8 +1243,8 @@ class RoamingPetEngine {
                 setTimeout(() => {
                     if (this.container) this.container.classList.remove('motion-shrimp-pop');
                     if (this.body) this.body.classList.remove('shrimp-snap');
-                }, 400);
-                nextDelay = 3200 + Math.random() * 800;
+                }, 450);
+                nextDelay = 8000 + Math.random() * 4000;
 
             } else if (pet.type === 'octopus') {
                 if (this.container) this.container.classList.add('motion-octopus-glide');
@@ -1261,8 +1261,8 @@ class RoamingPetEngine {
                 setTimeout(() => {
                     if (this.container) this.container.classList.remove('motion-octopus-glide');
                     if (this.body) this.body.classList.remove('octopus-dash');
-                }, 2100);
-                nextDelay = 3500 + Math.random() * 800;
+                }, 3600);
+                nextDelay = 8000 + Math.random() * 4000;
 
             } else {
                 // fish
@@ -1276,8 +1276,8 @@ class RoamingPetEngine {
                 setTimeout(() => {
                     if (this.container) this.container.classList.remove('motion-fish-swim');
                     if (this.body) this.body.classList.remove('fish-cruising');
-                }, 2400);
-                nextDelay = 2800 + Math.random() * 600;
+                }, 4000);
+                nextDelay = 8000 + Math.random() * 4000;
             }
 
         } else {
@@ -1309,8 +1309,8 @@ class RoamingPetEngine {
                     setTimeout(() => {
                         if (this.container) this.container.classList.remove('motion-crab-climb');
                         if (this.body) this.body.classList.remove('crab-climbing');
-                    }, 1500);
-                    nextDelay = 2400 + Math.random() * 600;
+                    }, 3400);
+                    nextDelay = 5500 + Math.random() * 3000;
 
                 } else if (!isNearFloor && (isNearLeftWall || isNearRightWall)) {
                     // 若在高处壁面，顺着墙壁爬下海底沙滩
@@ -1325,13 +1325,13 @@ class RoamingPetEngine {
                     setTimeout(() => {
                         if (this.container) this.container.classList.remove('motion-crab-climb');
                         if (this.body) this.body.classList.remove('crab-climbing');
-                    }, 1500);
-                    nextDelay = 2200 + Math.random() * 600;
+                    }, 3400);
+                    nextDelay = 5500 + Math.random() * 3000;
 
                 } else {
                     // 底栖沙滩层正常横行小碎步
                     if (!this.crabDirection) this.crabDirection = (Math.random() > 0.5 ? 1 : -1);
-                    let stepDist = (38 + Math.random() * 48) * this.crabDirection;
+                    let stepDist = (22 + Math.random() * 26) * this.crabDirection;
                     let targetX = this.x + stepDist;
 
                     if (targetX < minX) {
@@ -1369,9 +1369,9 @@ class RoamingPetEngine {
                                 setTimeout(() => { if (this.body) this.body.classList.remove('crab-pinch'); }, 450);
                             }
                         }
-                    }, 850);
+                    }, 1350);
 
-                    nextDelay = 1650 + Math.random() * 550;
+                    nextDelay = 5500 + Math.random() * 3000;
                 }
 
             } else if (pet.type === 'shrimp') {
@@ -1404,7 +1404,7 @@ class RoamingPetEngine {
                 this.y = leapY;
                 this.applyPosition();
 
-                // 0.38s 后如羽毛般慢速随水流飘沉
+                // 0.45s 后如羽毛般慢速随水流飘沉
                 setTimeout(() => {
                     if (this.container) {
                         this.container.classList.remove('motion-shrimp-pop');
@@ -1416,10 +1416,10 @@ class RoamingPetEngine {
 
                     setTimeout(() => {
                         if (this.container) this.container.classList.remove('motion-shrimp-float');
-                    }, 1700);
-                }, 380);
+                    }, 3000);
+                }, 450);
 
-                nextDelay = 2900 + Math.random() * 700;
+                nextDelay = 6000 + Math.random() * 3500;
 
             } else if (pet.type === 'octopus') {
                 // 🐙 3. 皮皮章：全屏斜向漏斗喷流 + 触手舒展滑翔 (Full-screen Pulse Jet & Glide)
@@ -1457,10 +1457,10 @@ class RoamingPetEngine {
 
                     setTimeout(() => {
                         if (this.container) this.container.classList.remove('motion-octopus-glide');
-                    }, 2100);
-                }, 420);
+                    }, 3800);
+                }, 550);
 
-                nextDelay = 3400 + Math.random() * 800;
+                nextDelay = 6500 + Math.random() * 4000;
 
             } else {
                 // 🐟 4. 小泡鱼：全屏流线正弦游弋与动态俯仰 (Full-screen Streamlined Cruising)
@@ -1472,7 +1472,7 @@ class RoamingPetEngine {
                     this.body.classList.toggle('flip-left', isMovingLeft);
                     this.body.classList.add('fish-cruising');
                     const dy = targetY - this.y;
-                    const pitchDeg = Math.max(-16, Math.min(16, Math.round(dy / 7)));
+                    const pitchDeg = Math.max(-14, Math.min(14, Math.round(dy / 10)));
                     if (this.avatarEl) {
                         this.avatarEl.style.transform = (isMovingLeft ? 'scaleX(-1) ' : '') + `rotate(${pitchDeg}deg)`;
                     }
@@ -1492,9 +1492,9 @@ class RoamingPetEngine {
                     if (this.avatarEl) {
                         this.avatarEl.style.transform = isMovingLeft ? 'scaleX(-1)' : 'none';
                     }
-                }, 2500);
+                }, 4100);
 
-                nextDelay = 2700 + Math.random() * 600;
+                nextDelay = 5500 + Math.random() * 3500;
             }
         }
 
