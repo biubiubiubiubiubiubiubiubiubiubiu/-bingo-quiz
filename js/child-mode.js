@@ -1385,6 +1385,7 @@ class RoamingPetEngine {
 
         this.wanderTimer = null;
         this.sleepTimer = null;
+        this.autoWakeTimer = null;
         this.speechTimer = null;
         this.bubbleTimer = null;
         this.lastIdleBanterCheck = Date.now();
@@ -1498,6 +1499,23 @@ class RoamingPetEngine {
         };
 
         this.body.addEventListener('pointerdown', onPointerDown);
+
+        // 鼠标悬停即刻唤醒 (Hover Wake-up)
+        const onPointerEnter = () => {
+            if (!isChildMode || this.isDragging) return;
+            if (this.isSleeping) {
+                this.wakeUp(true); // true = 由鼠标悬停轻柔唤醒
+            }
+        };
+
+        if (this.body) {
+            this.body.addEventListener('pointerenter', onPointerEnter);
+            this.body.addEventListener('mouseenter', onPointerEnter);
+        }
+        if (this.container) {
+            this.container.addEventListener('pointerenter', onPointerEnter);
+            this.container.addEventListener('mouseenter', onPointerEnter);
+        }
 
         // 答题界面近距离智能仿生避让 (Proximity Dodge)
         const onPassivePointerMove = (e) => {
@@ -2180,8 +2198,9 @@ class RoamingPetEngine {
     // 怠速打盹检测 (45秒未操作入眠)
     resetSleepTimer() {
         if (this.sleepTimer) clearTimeout(this.sleepTimer);
+        if (this.autoWakeTimer) clearTimeout(this.autoWakeTimer);
         this.sleepTimer = setTimeout(() => {
-            if (isChildMode && !this.isDragging) {
+            if (isChildMode && !this.isDragging && !this.isSleeping) {
                 this.goToSleep();
             }
         }, 45000);
@@ -2192,14 +2211,48 @@ class RoamingPetEngine {
         if (this.sleepEl) this.sleepEl.style.display = 'block';
         if (this.body) this.body.style.filter = 'brightness(0.9)';
         PetSound.petSnore();
+
+        // 自动小憩苏醒定时器 (打盹 12~20 秒后自然伸懒腰醒来)
+        if (this.autoWakeTimer) clearTimeout(this.autoWakeTimer);
+        const napDuration = 12000 + Math.random() * 8000;
+        this.autoWakeTimer = setTimeout(() => {
+            if (this.isSleeping && isChildMode && !this.isDragging) {
+                this.wakeUp(false, true); // false=非悬浮, true=自动自然苏醒
+            }
+        }, napDuration);
     }
 
-    wakeUp() {
+    wakeUp(byHover = false, isAuto = false) {
+        if (this.autoWakeTimer) clearTimeout(this.autoWakeTimer);
         if (this.isSleeping) {
             this.isSleeping = false;
             if (this.sleepEl) this.sleepEl.style.display = 'none';
-            if (this.body) this.body.style.filter = 'none';
+            if (this.body) {
+                this.body.style.filter = 'none';
+                this.body.classList.remove('pet-bounce');
+                void this.body.offsetWidth;
+                this.body.classList.add('pet-bounce');
+                setTimeout(() => { if (this.body) this.body.classList.remove('pet-bounce'); }, 500);
+            }
             PetSound.petWake();
+
+            const pet = getPetData();
+            if (byHover) {
+                // 鼠标悬停唤醒台词互动
+                const hoverGreetings = [
+                    '呼啊~ 揉揉眼睛，你来找我玩啦！👀',
+                    '伸个大懒腰，小主人你在看我吗？☀️',
+                    '被你轻轻碰醒啦，今天也超开心！✨',
+                    '打了个小盹，瞬间精神百倍！🚀'
+                ];
+                const greet = hoverGreetings[Math.floor(Math.random() * hoverGreetings.length)];
+                this.say(greet, 3600);
+                PetVoice.speak(greet, pet.type);
+            } else if (isAuto) {
+                // 自动自然醒来，吐个小泡泡
+                PetSound.bubble();
+            }
+
             this.stepAutonomousRoutine();
         }
         this.resetSleepTimer();
