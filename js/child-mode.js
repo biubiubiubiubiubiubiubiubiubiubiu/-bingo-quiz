@@ -127,6 +127,86 @@ const PetSound = {
                 osc.stop(now + idx * 0.08 + 0.22);
             });
         } catch (e) {}
+    },
+    // 机灵蟹大螯双剪音 (咔嚓！咔嚓！)
+    crabSnip() {
+        const ctx = this.getCtx();
+        if (!ctx) return;
+        try {
+            const now = ctx.currentTime;
+            [0, 0.075].forEach((delay) => {
+                const osc = ctx.createOscillator();
+                const gain = ctx.createGain();
+                osc.type = 'square';
+                osc.frequency.setValueAtTime(1400, now + delay);
+                osc.frequency.exponentialRampToValueAtTime(320, now + delay + 0.035);
+                gain.gain.setValueAtTime(0.22, now + delay);
+                gain.gain.exponentialRampToValueAtTime(0.01, now + delay + 0.035);
+                osc.connect(gain);
+                gain.connect(ctx.destination);
+                osc.start(now + delay);
+                osc.stop(now + delay + 0.04);
+            });
+        } catch (e) {}
+    },
+    // 跳跳虾弓腰弹射音 (反冲弹簧破水)
+    shrimpSnap() {
+        const ctx = this.getCtx();
+        if (!ctx) return;
+        try {
+            const now = ctx.currentTime;
+            const osc = ctx.createOscillator();
+            const gain = ctx.createGain();
+            osc.type = 'sawtooth';
+            osc.frequency.setValueAtTime(260, now);
+            osc.frequency.exponentialRampToValueAtTime(1600, now + 0.05);
+            osc.frequency.exponentialRampToValueAtTime(420, now + 0.14);
+            gain.gain.setValueAtTime(0.26, now);
+            gain.gain.exponentialRampToValueAtTime(0.01, now + 0.14);
+            osc.connect(gain);
+            gain.connect(ctx.destination);
+            osc.start(now);
+            osc.stop(now + 0.15);
+        } catch (e) {}
+    },
+    // 皮皮章漏斗水流喷射/喷墨音 (扑哧——)
+    octopusJet() {
+        const ctx = this.getCtx();
+        if (!ctx) return;
+        try {
+            const now = ctx.currentTime;
+            const osc = ctx.createOscillator();
+            const gain = ctx.createGain();
+            osc.type = 'sine';
+            osc.frequency.setValueAtTime(320, now);
+            osc.frequency.exponentialRampToValueAtTime(90, now + 0.22);
+            gain.gain.setValueAtTime(0.3, now);
+            gain.gain.exponentialRampToValueAtTime(0.005, now + 0.22);
+            osc.connect(gain);
+            gain.connect(ctx.destination);
+            osc.start(now);
+            osc.stop(now + 0.22);
+        } catch (e) {}
+    },
+    // 小泡鱼摆尾滑水音 (水波划过)
+    fishDart() {
+        const ctx = this.getCtx();
+        if (!ctx) return;
+        try {
+            const now = ctx.currentTime;
+            const osc = ctx.createOscillator();
+            const gain = ctx.createGain();
+            osc.type = 'sine';
+            osc.frequency.setValueAtTime(320, now);
+            osc.frequency.exponentialRampToValueAtTime(750, now + 0.08);
+            osc.frequency.exponentialRampToValueAtTime(300, now + 0.18);
+            gain.gain.setValueAtTime(0.2, now);
+            gain.gain.exponentialRampToValueAtTime(0.01, now + 0.18);
+            osc.connect(gain);
+            gain.connect(ctx.destination);
+            osc.start(now);
+            osc.stop(now + 0.18);
+        } catch (e) {}
     }
 };
 
@@ -440,11 +520,16 @@ class RoamingPetEngine {
         this.tagEl = document.getElementById('roaming-pet-tag');
         this.sleepEl = document.getElementById('roaming-pet-sleep-badge');
 
-        // 默认初始位置：右下角安全活动区
+        // 默认初始位置：根据生物习性决定初始水层
         const w = window.innerWidth;
         const h = window.innerHeight;
+        const pet = getPetData();
         this.x = Math.max(20, w - 90);
-        this.y = Math.max(120, h - 180);
+        if (pet.type === 'crab') {
+            this.y = h - 85; // 螃蟹底栖沙滩层
+        } else {
+            this.y = Math.max(120, h - 180);
+        }
         this.applyPosition();
 
         this.bindEvents();
@@ -501,8 +586,26 @@ class RoamingPetEngine {
             if (!this.hasMoved) {
                 this.poke();
             } else {
+                const pet = getPetData();
+                const h = window.innerHeight;
                 // 若靠近边缘，执行平滑贴边吸附
                 this.snapToEdgeIfNeeded();
+                // 真实重力沉底系统：若是机灵蟹且悬在高空且未吸附停泊，则受海洋重力自由落体沉回海底沙滩！
+                if (pet.type === 'crab' && !this.isDocked && this.y < h - 110) {
+                    this.container.classList.add('gravity-falling');
+                    this.y = h - 85;
+                    this.applyPosition();
+                    setTimeout(() => {
+                        if (this.container) this.container.classList.remove('gravity-falling');
+                        if (this.body) {
+                            this.body.classList.remove('pet-bounce');
+                            void this.body.offsetWidth;
+                            this.body.classList.add('pet-bounce');
+                            setTimeout(() => { if (this.body) this.body.classList.remove('pet-bounce'); }, 400);
+                        }
+                        PetSound.crabSnip();
+                    }, 720);
+                }
             }
             this.resetSleepTimer();
         };
@@ -540,7 +643,7 @@ class RoamingPetEngine {
         this.applyPosition();
     }
 
-    // 自由漫步游动循环
+    // 自由漫步游动循环 (按四大海鲜物种真实生物习性运动)
     startWanderLoop() {
         if (this.wanderTimer) clearInterval(this.wanderTimer);
         this.wanderTimer = setInterval(() => {
@@ -548,67 +651,271 @@ class RoamingPetEngine {
 
             const w = window.innerWidth;
             const h = window.innerHeight;
-            // 安全游动区域：屏幕下半部安全范围，避免遮挡中央题目
-            const minX = 20;
-            const maxX = w - 85;
-            const minY = Math.max(120, h * 0.45);
-            const maxY = h - 90;
+            const pet = getPetData();
 
-            const targetX = minX + Math.random() * (maxX - minX);
-            const targetY = minY + Math.random() * (maxY - minY);
+            if (pet.type === 'crab') {
+                // 1. 机灵蟹：海底沙滩横行小碎步 (Strictly Benthic Side-scuttle)
+                const minX = 20;
+                const maxX = w - 85;
+                const targetX = minX + Math.random() * (maxX - minX);
+                const targetY = h - (78 + Math.random() * 16); // 保持在屏幕底端沙滩层
 
-            // 朝向翻转
-            if (this.body) {
-                this.body.classList.toggle('flip-left', targetX < this.x);
+                if (this.body) {
+                    this.body.classList.toggle('flip-left', targetX < this.x);
+                }
+
+                if (this.container) {
+                    this.container.classList.add('motion-scuttle');
+                }
+
+                this.x = targetX;
+                this.y = targetY;
+                this.applyPosition();
+
+                setTimeout(() => {
+                    if (this.container) this.container.classList.remove('motion-scuttle');
+                }, 1500);
+
+            } else if (pet.type === 'shrimp') {
+                // 2. 跳跳虾：弓背虾退弹射 + 抛物线飘落 (Tail-flip Jet & Parabolic Glide)
+                const minX = 25;
+                const maxX = w - 85;
+                const direction = (this.x > w - 120) ? -1 : (this.x < 60 ? 1 : (Math.random() > 0.5 ? 1 : -1));
+                const leapX = Math.max(minX, Math.min(maxX, this.x + direction * (50 + Math.random() * 50)));
+                const leapY = Math.max(130, this.y - (45 + Math.random() * 45));
+
+                if (this.body) {
+                    this.body.classList.toggle('flip-left', leapX < this.x);
+                    this.body.classList.remove('shrimp-snap');
+                    void this.body.offsetWidth;
+                    this.body.classList.add('shrimp-snap');
+                    setTimeout(() => { if (this.body) this.body.classList.remove('shrimp-snap'); }, 750);
+                }
+
+                if (this.container) {
+                    this.container.classList.add('motion-burst');
+                }
+
+                PetSound.shrimpSnap();
+                this.x = leapX;
+                this.y = leapY;
+                this.applyPosition();
+
+                // 第二阶段：展开步足缓缓飘落
+                setTimeout(() => {
+                    if (this.container) {
+                        this.container.classList.remove('motion-burst');
+                        this.container.classList.add('motion-drift');
+                    }
+                    this.y = Math.min(h - 90, this.y + 40 + Math.random() * 30);
+                    this.applyPosition();
+
+                    setTimeout(() => {
+                        if (this.container) this.container.classList.remove('motion-drift');
+                    }, 1800);
+                }, 360);
+
+            } else if (pet.type === 'octopus') {
+                // 3. 皮皮章：漏斗喷水冲刺 + 触手舒展漂游 (Pulse-glide Propulsion)
+                const minX = 20;
+                const maxX = w - 85;
+                const targetX = minX + Math.random() * (maxX - minX);
+                const targetY = Math.max(130, Math.min(h - 90, h * 0.42 + Math.random() * (h * 0.45)));
+
+                if (this.body) {
+                    this.body.classList.toggle('flip-left', targetX < this.x);
+                    this.body.classList.remove('octopus-dash');
+                    void this.body.offsetWidth;
+                    this.body.classList.add('octopus-dash');
+                    setTimeout(() => { if (this.body) this.body.classList.remove('octopus-dash'); }, 700);
+                }
+
+                if (this.container) {
+                    this.container.classList.add('motion-burst');
+                }
+
+                PetSound.octopusJet();
+                // 阶段一：喷气爆发瞬移至中途
+                this.x = (this.x + targetX) / 2;
+                this.y = (this.y + targetY) / 2;
+                this.applyPosition();
+
+                // 阶段二：触手舒展，借惯性缓缓漂移至目的地
+                setTimeout(() => {
+                    if (this.container) {
+                        this.container.classList.remove('motion-burst');
+                        this.container.classList.add('motion-drift');
+                    }
+                    this.x = targetX;
+                    this.y = targetY;
+                    this.applyPosition();
+
+                    setTimeout(() => {
+                        if (this.container) this.container.classList.remove('motion-drift');
+                    }, 1800);
+                }, 380);
+
+            } else {
+                // 4. 小泡鱼：中水层平滑流线游弋与微俯仰 (Streamlined S-curve Swim)
+                const minX = 20;
+                const maxX = w - 85;
+                const minY = Math.max(120, h * 0.42);
+                const maxY = h - 90;
+
+                const targetX = minX + Math.random() * (maxX - minX);
+                const targetY = minY + Math.random() * (maxY - minY);
+
+                const isMovingLeft = targetX < this.x;
+                if (this.body) {
+                    this.body.classList.toggle('flip-left', isMovingLeft);
+                    // 动态游动俯仰角 (Pitch)
+                    const dy = targetY - this.y;
+                    const pitchDeg = Math.max(-12, Math.min(12, Math.round(dy / 8)));
+                    if (this.avatarEl) {
+                        this.avatarEl.style.transform = (isMovingLeft ? 'scaleX(-1) ' : '') + `rotate(${pitchDeg}deg)`;
+                    }
+                }
+
+                this.x = targetX;
+                this.y = targetY;
+                this.applyPosition();
+
+                // 游动完毕后归正平游角度
+                setTimeout(() => {
+                    if (this.avatarEl) {
+                        this.avatarEl.style.transform = isMovingLeft ? 'scaleX(-1)' : 'none';
+                    }
+                }, 1300);
             }
-
-            this.x = targetX;
-            this.y = targetY;
-            this.applyPosition();
-        }, 7000 + Math.random() * 3000);
+        }, 6500 + Math.random() * 2500);
     }
 
-    // 吐出小水泡粒子
+    // 吐出水泡粒子 (小泡鱼连珠泡，其他物种单泡)
     startBubbleParticles() {
         if (this.bubbleTimer) clearInterval(this.bubbleTimer);
         this.bubbleTimer = setInterval(() => {
             if (!isChildMode || this.isSleeping || !this.container || this.container.style.display === 'none') return;
-            const bubble = document.createElement('div');
-            bubble.innerText = '🫧';
-            bubble.style.position = 'absolute';
-            bubble.style.left = '50%';
-            bubble.style.top = '10px';
-            bubble.style.fontSize = `${14 + Math.random() * 10}px`;
-            bubble.style.pointerEvents = 'none';
-            bubble.style.zIndex = '5';
-            bubble.style.transition = 'all 1.4s ease-out';
-            bubble.style.opacity = '0.8';
-            this.container.appendChild(bubble);
+            const pet = getPetData();
 
-            setTimeout(() => {
-                bubble.style.transform = `translate(${(Math.random() - 0.5) * 40}px, -${35 + Math.random() * 30}px) scale(1.3)`;
-                bubble.style.opacity = '0';
-            }, 30);
+            // 小泡鱼吐连珠升腾泡 (2个依次升起)，其他海鲜吐单泡
+            const bubbleCount = pet.type === 'fish' ? 2 : 1;
+            for (let i = 0; i < bubbleCount; i++) {
+                setTimeout(() => {
+                    if (!this.container) return;
+                    const bubble = document.createElement('div');
+                    bubble.innerText = '🫧';
+                    bubble.style.position = 'absolute';
+                    bubble.style.left = `${45 + (Math.random() - 0.5) * 16}%`;
+                    bubble.style.top = '10px';
+                    bubble.style.fontSize = `${12 + Math.random() * 10}px`;
+                    bubble.style.pointerEvents = 'none';
+                    bubble.style.zIndex = '5';
+                    bubble.style.transition = 'all 1.4s ease-out';
+                    bubble.style.opacity = '0.85';
+                    this.container.appendChild(bubble);
 
-            setTimeout(() => {
-                if (bubble.parentNode) bubble.parentNode.removeChild(bubble);
-            }, 1500);
-        }, 4500);
+                    setTimeout(() => {
+                        bubble.style.transform = `translate(${(Math.random() - 0.5) * 35}px, -${35 + Math.random() * 30}px) scale(1.3)`;
+                        bubble.style.opacity = '0';
+                    }, 30);
+
+                    setTimeout(() => {
+                        if (bubble.parentNode) bubble.parentNode.removeChild(bubble);
+                    }, 1500);
+                }, i * 220);
+            }
+        }, 4200);
     }
 
-    // 戳戳与抚摸互动
+    // 戳戳与抚摸互动 (按海洋生物真实防卫本能应激)
     poke() {
         this.wakeUp();
-        PetSound.bubble();
+        const pet = getPetData();
+        const activeForm = getPetActiveForm(pet);
+        const petDef = SEAFOOD_PETS[pet.type] || SEAFOOD_PETS.fish;
 
-        // 360° 开心旋转或弹跳
-        if (this.body) {
-            this.body.classList.remove('pet-somersault', 'pet-bounce');
-            void this.body.offsetWidth; // 触发重绘
-            this.body.classList.add('pet-somersault');
+        // 根据生物学特性触发专属应激防御动作与音效
+        if (pet.type === 'crab') {
+            // 机灵蟹：双螯双剪！咔嚓！咔嚓！
+            PetSound.crabSnip();
+            if (this.body) {
+                this.body.classList.remove('crab-pinch', 'pet-somersault', 'pet-bounce');
+                void this.body.offsetWidth;
+                this.body.classList.add('crab-pinch');
+                setTimeout(() => { if (this.body) this.body.classList.remove('crab-pinch'); }, 650);
+            }
+            // 快速横移逃跑一段
+            const w = window.innerWidth;
+            const escapeDx = (this.x > w / 2 ? -45 : 45);
+            this.x = Math.max(20, Math.min(w - 85, this.x + escapeDx));
+            this.applyPosition();
+
+        } else if (pet.type === 'shrimp') {
+            // 跳跳虾：弓背反向暴弹起飞！
+            PetSound.shrimpSnap();
+            if (this.body) {
+                this.body.classList.remove('shrimp-snap', 'pet-somersault', 'pet-bounce');
+                void this.body.offsetWidth;
+                this.body.classList.add('shrimp-snap');
+                setTimeout(() => { if (this.body) this.body.classList.remove('shrimp-snap'); }, 750);
+            }
+            // 向上暴跃
+            this.y = Math.max(120, this.y - 40);
+            this.applyPosition();
+
+        } else if (pet.type === 'octopus') {
+            // 皮皮章：喷射黑紫色墨汁烟雾逃生！
+            PetSound.octopusJet();
+            if (this.body) {
+                this.body.classList.remove('octopus-dash', 'pet-somersault', 'pet-bounce');
+                void this.body.offsetWidth;
+                this.body.classList.add('octopus-dash');
+                setTimeout(() => { if (this.body) this.body.classList.remove('octopus-dash'); }, 700);
+            }
+
+            // 产生真实墨汁烟雾
+            const ink = document.createElement('div');
+            ink.className = 'roaming-ink-cloud';
+            ink.style.left = `${this.x + 34}px`;
+            ink.style.top = `${this.y + 34}px`;
+            document.body.appendChild(ink);
             setTimeout(() => {
-                if (this.body) this.body.classList.remove('pet-somersault');
-            }, 750);
+                if (ink.parentNode) ink.parentNode.removeChild(ink);
+            }, 1600);
+
+            // 借墨雾后撤
+            this.y = Math.min(window.innerHeight - 90, this.y + 35);
+            this.applyPosition();
+
+        } else {
+            // 小泡鱼：摆尾急速游窜 + 连珠水泡
+            PetSound.fishDart();
+            if (this.body) {
+                this.body.classList.remove('fish-dash', 'pet-somersault', 'pet-bounce');
+                void this.body.offsetWidth;
+                this.body.classList.add('fish-dash');
+                setTimeout(() => { if (this.body) this.body.classList.remove('fish-dash'); }, 650);
+            }
+            // 吐一串惊扰气泡
+            for (let i = 0; i < 3; i++) {
+                setTimeout(() => {
+                    if (!this.container) return;
+                    const b = document.createElement('div');
+                    b.innerText = '🫧';
+                    b.style.position = 'absolute';
+                    b.style.left = `${40 + i * 8}%`;
+                    b.style.top = '10px';
+                    b.style.fontSize = `${10 + i * 4}px`;
+                    b.style.pointerEvents = 'none';
+                    b.style.transition = 'all 0.9s ease-out';
+                    this.container.appendChild(b);
+                    setTimeout(() => {
+                        b.style.transform = `translate(${(Math.random() - 0.5) * 40}px, -45px) scale(1.4)`;
+                        b.style.opacity = '0';
+                    }, 20);
+                    setTimeout(() => { if (b.parentNode) b.parentNode.removeChild(b); }, 900);
+                }, i * 100);
+            }
         }
 
         // 爱心粒子飘出
@@ -620,9 +927,6 @@ class RoamingPetEngine {
         }
 
         // 随机专属台词与语音朗读
-        const pet = getPetData();
-        const activeForm = getPetActiveForm(pet);
-        const petDef = SEAFOOD_PETS[pet.type] || SEAFOOD_PETS.fish;
         const quotesPool = [activeForm.quote, ...(petDef.quotes || [])];
         const quote = quotesPool[Math.floor(Math.random() * quotesPool.length)];
 
@@ -748,6 +1052,19 @@ class RoamingPetEngine {
         // 清理旧光环类名并应用新光环
         if (this.auraEl) {
             this.auraEl.className = `roaming-pet-aura ${activeForm.aura || 'aura-bubble'}`;
+        }
+
+        // 设置四大物种生物步态动画 (gait-fish / gait-crab / gait-shrimp / gait-octopus)
+        if (this.body) {
+            this.body.classList.remove('gait-fish', 'gait-crab', 'gait-shrimp', 'gait-octopus');
+            this.body.classList.add(`gait-${pet.type || 'fish'}`);
+        }
+
+        // 螃蟹底栖校准：若当前是螃蟹且悬在高处且未吸附停泊，自动归位到底部沙滩海床
+        const h = window.innerHeight;
+        if (pet.type === 'crab' && !this.isDragging && !this.isDocked && this.y < h - 110) {
+            this.y = h - 85;
+            this.applyPosition();
         }
 
         this.updateStreak(childStreak);
