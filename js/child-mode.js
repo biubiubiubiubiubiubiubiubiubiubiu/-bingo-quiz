@@ -592,6 +592,7 @@ const PetVoice = {
         // 2. 调校版萌童声发音
         if ('speechSynthesis' in window) {
             window.speechSynthesis.cancel();
+            this.speaking = false;
 
             const utterance = new SpeechSynthesisUtterance(text);
             utterance.lang = 'zh-CN';
@@ -608,17 +609,24 @@ const PetVoice = {
             this.currentUtterance = utterance;
             this.speaking = true;
 
-            utterance.onend = () => {
+            const resetSpeaking = () => {
                 this.speaking = false;
                 this.currentUtterance = null;
             };
 
+            utterance.onend = resetSpeaking;
             utterance.onerror = () => {
-                this.speaking = false;
-                this.currentUtterance = null;
+                resetSpeaking();
                 // TTS 发声异常时平滑回退至动森拟声
                 this.playAnimalese(text, petType);
             };
+
+            // 语音状态看门狗 (防止个别浏览器垃圾回收漏触发 onend 事件导致状态锁死)
+            setTimeout(() => {
+                if (this.currentUtterance === utterance) {
+                    resetSpeaking();
+                }
+            }, Math.max(6000, text.length * 450));
 
             // 留出 100ms 间隔使开口音先清晰入耳
             setTimeout(() => {
@@ -1121,6 +1129,10 @@ const PetBanterEngine = {
         if (banter.type === 'riddle' && banter.q && banter.a) {
             // 二段式脑筋急转弯：先出谜面 -> 延时 2.6s 揭晓爆笑答案
             this.riddleActive = true;
+            if (this.riddleSafetyTimer) clearTimeout(this.riddleSafetyTimer);
+            this.riddleSafetyTimer = setTimeout(() => {
+                this.riddleActive = false;
+            }, 12000);
             window.roamingPet.say(banter.q, 2800);
             PetVoice.speak(banter.q, petType);
 
@@ -1388,6 +1400,7 @@ class RoamingPetEngine {
         this.autoWakeTimer = null;
         this.speechTimer = null;
         this.bubbleTimer = null;
+        this.autonomousBanterTimer = null;
         this.lastIdleBanterCheck = Date.now();
     }
 
@@ -1422,6 +1435,8 @@ class RoamingPetEngine {
         if (typeof PetBanterEngine !== 'undefined') {
             PetBanterEngine.init();
         }
+        // 首次入场预热首聊 (12~16秒快速开启第一句趣味陪伴台词)
+        this.scheduleAutonomousBanter(12000 + Math.random() * 4000);
     }
 
     bindEvents() {
@@ -1532,6 +1547,20 @@ class RoamingPetEngine {
 
         window.addEventListener('pointermove', onPassivePointerMove, { passive: true });
         window.addEventListener('touchmove', onPassivePointerMove, { passive: true });
+
+        // 全局答题/点击活跃感应 (Active Learning Keep-alive)
+        // 孩子在页面上答题或点击卡片时，轻量刷新睡眠倒计时，避免做题中途强制入眠
+        let lastActivityReport = 0;
+        const onPageUserActivity = () => {
+            if (!isChildMode || this.isSleeping || this.isDragging) return;
+            const now = Date.now();
+            if (now - lastActivityReport > 5000) {
+                lastActivityReport = now;
+                this.resetSleepTimer();
+            }
+        };
+        window.addEventListener('pointerdown', onPageUserActivity, { passive: true });
+        window.addEventListener('keydown', onPageUserActivity, { passive: true });
 
         // 视口调整防出界
         window.addEventListener('resize', () => {
@@ -1965,23 +1994,6 @@ class RoamingPetEngine {
             }
         }
 
-        // 闲时自主幽默互动检测 (Idle Occasional Banter)
-        if (!inQuiz && !this.isSleeping && !this.isDocked && !this.isDragging) {
-            const now = Date.now();
-            if (!this.lastIdleBanterCheck) this.lastIdleBanterCheck = now;
-            // 每隔 35~65 秒闲置周期，有 35% 几率主动开启幽默闲聊
-            if (now - this.lastIdleBanterCheck > (35000 + Math.random() * 25000)) {
-                this.lastIdleBanterCheck = now;
-                if (Math.random() < 0.35 && typeof PetBanterEngine !== 'undefined') {
-                    setTimeout(() => {
-                        if (!this.isQuizViewActive() && !this.isSleeping && !this.isDragging) {
-                            PetBanterEngine.triggerBanter(pet.type, true);
-                        }
-                    }, 1000);
-                }
-            }
-        }
-
         this.wanderTimer = setTimeout(() => this.stepAutonomousRoutine(), nextDelay);
     }
 
@@ -2138,6 +2150,9 @@ class RoamingPetEngine {
             this.say(quote);
             PetVoice.speak(quote, pet.type);
         }
+
+        // 用户主动互动后，将下次自主闲聊顺延至 25~35 秒后
+        this.scheduleAutonomousBanter(25000 + Math.random() * 10000);
     }
 
     // 显示气泡台词 (支持自适应阅读时长)
@@ -2208,6 +2223,10 @@ class RoamingPetEngine {
 
     goToSleep() {
         this.isSleeping = true;
+        if (this.autonomousBanterTimer) {
+            clearTimeout(this.autonomousBanterTimer);
+            this.autonomousBanterTimer = null;
+        }
         if (this.sleepEl) this.sleepEl.style.display = 'block';
         if (this.body) this.body.style.filter = 'brightness(0.9)';
         PetSound.petSnore();
@@ -2248,9 +2267,12 @@ class RoamingPetEngine {
                 const greet = hoverGreetings[Math.floor(Math.random() * hoverGreetings.length)];
                 this.say(greet, 3600);
                 PetVoice.speak(greet, pet.type);
+                // 悬停唤醒后，下一次闲聊顺延至 20~28 秒后
+                this.scheduleAutonomousBanter(20000 + Math.random() * 8000);
             } else if (isAuto) {
-                // 自动自然醒来，吐个小泡泡
+                // 自动自然醒来，吐个小泡泡，并在 12~18 秒后开启新趣味闲聊
                 PetSound.bubble();
+                this.scheduleAutonomousBanter(12000 + Math.random() * 6000);
             }
 
             this.stepAutonomousRoutine();
@@ -2317,15 +2339,69 @@ class RoamingPetEngine {
         this.updateStreak(childStreak);
     }
 
+    // 调度下一次自主幽默伴学闲聊 (默认 22~35 秒)
+    scheduleAutonomousBanter(delayMs) {
+        if (this.autonomousBanterTimer) {
+            clearTimeout(this.autonomousBanterTimer);
+            this.autonomousBanterTimer = null;
+        }
+        const delay = (delayMs !== undefined) ? delayMs : (22000 + Math.random() * 13000);
+        this.autonomousBanterTimer = setTimeout(() => {
+            this.triggerAutonomousBanter();
+        }, delay);
+    }
+
+    // 触发自主幽默伴学闲聊
+    triggerAutonomousBanter() {
+        if (this.autonomousBanterTimer) {
+            clearTimeout(this.autonomousBanterTimer);
+            this.autonomousBanterTimer = null;
+        }
+
+        // 如果非儿童模式、处于睡眠、拖拽或侧边停靠，稍后避让重试
+        if (!isChildMode || this.isSleeping || this.isDragging || this.isDocked) {
+            this.scheduleAutonomousBanter(8000 + Math.random() * 4000);
+            return;
+        }
+
+        // 如果当前正在朗读题目语音或脑筋急转弯二段式未完成，礼貌避让
+        if ((typeof PetVoice !== 'undefined' && PetVoice.speaking) ||
+            (typeof PetBanterEngine !== 'undefined' && PetBanterEngine.riddleActive)) {
+            this.scheduleAutonomousBanter(6000 + Math.random() * 3000);
+            return;
+        }
+
+        // 正常触发幽默闲聊
+        const pet = getPetData();
+        if (typeof PetBanterEngine !== 'undefined') {
+            PetBanterEngine.triggerBanter(pet.type, true);
+        }
+
+        // 调度下一轮自主闲聊 (22~35秒周期)
+        this.scheduleAutonomousBanter();
+    }
+
+    // 开发者/测试快捷手动触发接口
+    triggerBanterNow() {
+        this.triggerAutonomousBanter();
+    }
+
     show() {
         if (!this.container) this.init();
         if (this.container) {
             this.container.style.display = 'block';
             this.render();
+            if (!this.isSleeping && !this.autonomousBanterTimer) {
+                this.scheduleAutonomousBanter(12000 + Math.random() * 4000);
+            }
         }
     }
 
     hide() {
+        if (this.autonomousBanterTimer) {
+            clearTimeout(this.autonomousBanterTimer);
+            this.autonomousBanterTimer = null;
+        }
         if (this.container) {
             this.container.style.display = 'none';
         }
