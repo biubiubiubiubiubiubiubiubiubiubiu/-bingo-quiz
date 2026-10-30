@@ -1,10 +1,11 @@
-const CACHE_NAME = 'bingo-quiz-v18';
+const CACHE_NAME = 'bingo-quiz-v19';
 const ASSETS = [
     './',
     './index.html',
     './manifest.json',
     './icon.png',
     './css/app.css',
+    './data/dynamic_banter.json',
     './js/app.js',
     './js/pwa.js',
     './js/storage.js',
