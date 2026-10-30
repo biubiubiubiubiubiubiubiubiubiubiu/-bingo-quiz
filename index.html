@@ -5,7 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport"
         content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <meta name="theme-color" content="#F0F4F0" id="theme-color-meta">
+    <meta name="theme-color" content="#F4FBF7" id="theme-color-meta">
     <title>斌狗！通关！</title>
 
     <!-- PWA Manifest -->
@@ -184,11 +184,11 @@
                         0 根</span>
                 </div>
 
-                <!-- 修复后的布局 -->
-                <div style="display:flex; gap:12px; align-items: stretch; height: 52px;">
-                    <!-- 新增：重置进度按钮 -->
+                <!-- 顺序开啃控制区 -->
+                <div style="display:flex; gap:10px; align-items: stretch; height: 48px;">
+                    <!-- 重置进度按钮 -->
                     <button class="btn btn-ghost" onclick="resetProgress()" title="重置进度到1"
-                        style="width: 52px; padding: 0; color: var(--danger); flex-shrink: 0;">
+                        style="width: 48px; padding: 0; color: var(--md-sys-color-error); flex-shrink: 0; border-radius: var(--md-sys-shape-corner-large);">
                         <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
                             stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
                             <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 12" />
@@ -203,11 +203,11 @@
                     </div>
 
                     <!-- 按钮 -->
-                    <button class="btn btn-primary" style="width: 80px; flex-shrink: 0;"
+                    <button class="btn btn-primary" style="width: 84px; flex-shrink: 0;"
                         onclick="startQuiz('sequence')">开啃</button>
 
                     <!-- 下拉框 -->
-                    <div style="flex-shrink: 0; width: 90px;">
+                    <div style="flex-shrink: 0; width: 95px;">
                         <select id="sequence-count" class="btn btn-ghost">
                             <option value="10">10根</option>
                             <option value="20">20根</option>
@@ -216,7 +216,7 @@
                         </select>
                     </div>
                 </div>
-                <div style="font-size:12px; color:var(--text-sub); margin-top:5px; text-align:center;">
+                <div style="font-size:12px; color:var(--text-sub); margin-top:6px; text-align:center;">
                     * 输入数字后直接开啃，系统会自动记录新进度
                 </div>
             </div>
@@ -238,9 +238,9 @@
             </div>
 
             <div
-                style="margin-top: 20px; border-top: 1px solid var(--bg-input); padding-top: 15px; display:flex; gap:10px;">
+                style="margin-top: 20px; border-top: 1px solid var(--md-sys-color-outline-variant); padding-top: 15px; display:flex; gap:10px;">
                 <button class="btn btn-primary"
-                    style="background: linear-gradient(135deg, #D9A869, #C18842); flex-grow: 1;"
+                    style="background: linear-gradient(135deg, var(--md-sys-color-primary), var(--md-sys-color-secondary)); flex-grow: 1;"
                     onclick="startMockExam()">模拟开啃</button>
                 <select id="mock-exam-count" class="btn btn-ghost"
                     style="max-width: 100px; padding: 0 15px; -webkit-appearance: none; appearance: none; background-image: none;">
@@ -286,9 +286,8 @@
             <div id="quiz-container"></div>
         </div>
 
-        <!-- 提交按钮区 -->
-        <div id="quiz-fab-area"
-            style="position:fixed; bottom:0; left:0; width:100%; padding:16px 20px calc(16px + env(safe-area-inset-bottom)) 20px; background:var(--bg-body); border-top:1px solid var(--bg-input); display:flex; gap:10px; z-index:90;">
+        <!-- 提交按钮区 (M3 Bottom Sheet FAB Area) -->
+        <div id="quiz-fab-area">
             <button class="btn btn-success" onclick="submitPaper()">汪！交卷！</button>
         </div>
     </div>
