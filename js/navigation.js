@@ -149,8 +149,18 @@
                 saveMeta(allMeta);
             }
 
+            // 同步选项防背乱序开关状态 (默认开启)
+            const shuffleToggle = document.getElementById('toggle-option-shuffle');
+            if (shuffleToggle) {
+                shuffleToggle.checked = localStorage.getItem('bingo_shuffle_options') !== 'false';
+            }
+
             renderHistoryList(id);
             if (typeof updatePetWidgets === 'function') updatePetWidgets();
+        }
+
+        function handleOptionShuffleChange(checked) {
+            localStorage.setItem('bingo_shuffle_options', checked ? 'true' : 'false');
         }
 
         // 重置进度到 0

@@ -9,6 +9,213 @@
                 .replace(/'/g, '&#039;');
         }
 
+        // --- 选项防背乱序引擎 (Option Shuffling Engine) ---
+        function isOptionShuffleEnabled() {
+            return localStorage.getItem('bingo_shuffle_options') !== 'false';
+        }
+
+        function applyOptionShuffleToQuiz(questions) {
+            if (!questions || !Array.isArray(questions)) return questions;
+            if (!isOptionShuffleEnabled()) return questions;
+
+            return questions.map(item => {
+                // 判断题不乱序 (保持 A. 正确, B. 错误)
+                if (item.t === '判断' || (item.o && Object.keys(item.o).length === 2 && (item.o.A === '正确' || item.o.A === '对'))) {
+                    return { ...item };
+                }
+                if (!item.o || Object.keys(item.o).length <= 1) return { ...item };
+
+                const originalKeys = Object.keys(item.o);
+                const shuffledEntries = originalKeys.map(k => ({ oldKey: k, text: item.o[k] }));
+
+                // Fisher-Yates 洗牌
+                for (let i = shuffledEntries.length - 1; i > 0; i--) {
+                    const j = Math.floor(Math.random() * (i + 1));
+                    [shuffledEntries[i], shuffledEntries[j]] = [shuffledEntries[j], shuffledEntries[i]];
+                }
+
+                const newOptions = {};
+                const oldToNewMap = {};
+                shuffledEntries.forEach((entry, idx) => {
+                    const newKey = String.fromCharCode(65 + idx);
+                    newOptions[newKey] = entry.text;
+                    oldToNewMap[entry.oldKey] = newKey;
+                });
+
+                let newAnswer = '';
+                if (item.a) {
+                    newAnswer = item.a.split('')
+                        .map(k => oldToNewMap[k] || k)
+                        .sort()
+                        .join('');
+                }
+
+                return {
+                    ...item,
+                    o: newOptions,
+                    a: newAnswer,
+                    _isShuffled: true
+                };
+            });
+        }
+
+        // --- 翻牌闪记背题模式 (Flashcard Mode) ---
+        function startFlashcardQuiz() {
+            quizType = 'flashcard';
+            isReviewMode = false;
+            userAnswers = {};
+            flaggedQuestions.clear();
+            eliminatedOptions = {};
+            currentSingleIndex = 0;
+            lastVisibleQuestionIndex = 0;
+
+            const countVal = document.getElementById('flashcard-count')?.value || '20';
+            const selectedCategory = document.getElementById('category-select')?.value;
+            let questionsForQuiz = currentDb.questions;
+
+            if (selectedCategory && selectedCategory !== 'all') {
+                questionsForQuiz = currentDb.questions.filter(q => (q.c || '未分类') === selectedCategory);
+            }
+
+            if (!questionsForQuiz || questionsForQuiz.length === 0) {
+                alert('当前没有可供背诵的题目！');
+                return;
+            }
+
+            const count = countVal === 'all' ? questionsForQuiz.length : parseInt(countVal);
+            const shuffled = [...questionsForQuiz].sort(() => 0.5 - Math.random());
+            currentQuiz = applyOptionShuffleToQuiz(shuffled.slice(0, count));
+
+            history.pushState({ view: 'quiz', dbId: currentDb.id }, '', '#quiz');
+            updateView({ view: 'quiz' });
+
+            renderFlashcardView();
+            updateQuizNavBarControls();
+        }
+
+        function renderFlashcardView() {
+            const container = document.getElementById('quiz-container');
+            container.innerHTML = '';
+            container.className = 'flashcard-mode-view';
+
+            const singleNav = document.getElementById('quiz-single-nav');
+            if (singleNav) singleNav.style.display = 'none';
+            const fabArea = document.getElementById('quiz-fab-area');
+            if (fabArea) fabArea.style.display = 'none';
+
+            const progEl = document.getElementById('quiz-progress-text');
+            if (progEl) {
+                progEl.innerText = `🎴 闪记 ${Math.min(currentSingleIndex + 1, currentQuiz.length)} / ${currentQuiz.length}`;
+            }
+
+            if (currentSingleIndex >= currentQuiz.length) {
+                renderFlashcardCompletion();
+                return;
+            }
+
+            const item = currentQuiz[currentSingleIndex];
+            const stage = document.createElement('div');
+            stage.className = 'flashcard-stage';
+
+            let optionsHtml = '';
+            if (item.o && Object.keys(item.o).length > 0) {
+                optionsHtml = `
+                    <div style="margin: 14px 0 8px 0; display:flex; flex-direction:column; gap:8px;">
+                        ${Object.keys(item.o).map(k => `
+                            <div style="background:var(--md-sys-color-surface-container); padding:8px 12px; border-radius:10px; font-size:14px; color:var(--md-sys-color-on-surface); text-align:left;">
+                                <strong style="color:var(--md-sys-color-primary);">${k}.</strong> ${escapeHtml(item.o[k])}
+                            </div>
+                        `).join('')}
+                    </div>
+                `;
+            }
+
+            let answerText = item.a;
+            if (item.o && item.a) {
+                const optTexts = item.a.split('').map(k => item.o[k] ? `${k} (${item.o[k]})` : k).join('，');
+                if (optTexts) answerText = optTexts;
+            }
+
+            stage.innerHTML = `
+                <div class="flashcard-card" id="flashcard-card-element" onclick="flipFlashcard()">
+                    <!-- 正面 -->
+                    <div class="flashcard-face flashcard-front">
+                        <div>
+                            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
+                                <span class="m3-badge" style="font-size:12px;">${escapeHtml(item.t || '单选')} · ${escapeHtml(item.c || '未分类')}</span>
+                                <span style="font-size:12px; font-weight:700; color:var(--text-sub);">第 ${currentSingleIndex + 1} / ${currentQuiz.length} 张</span>
+                            </div>
+                            <div style="font-size:17px; font-weight:700; line-height:1.5; color:var(--md-sys-color-on-surface); margin-top:10px; text-align:left;">
+                                ${escapeHtml(item.q)}
+                            </div>
+                            ${optionsHtml}
+                        </div>
+                        <div class="flashcard-hint-pill">
+                            <span>👆 轻触卡片翻面看答案</span>
+                        </div>
+                    </div>
+
+                    <!-- 背面 -->
+                    <div class="flashcard-face flashcard-back">
+                        <div style="text-align:left;">
+                            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
+                                <span class="m3-badge" style="background:#FFF3CD; color:#856404; font-size:12px;">⭐ 答案与解析</span>
+                                <span style="font-size:12px; font-weight:700; color:var(--text-sub);">第 ${currentSingleIndex + 1} / ${currentQuiz.length} 张</span>
+                            </div>
+                            <div style="background:var(--md-sys-color-surface-container); border-left:4px solid var(--md-sys-color-success); padding:10px 14px; border-radius:8px; margin-bottom:14px;">
+                                <div style="font-size:12px; color:var(--text-sub); margin-bottom:2px;">正确答案</div>
+                                <div style="font-size:16px; font-weight:800; color:var(--md-sys-color-success);">${escapeHtml(answerText)}</div>
+                            </div>
+                            <div style="font-size:14px; color:var(--md-sys-color-on-surface-variant); line-height:1.6; max-height:160px; overflow-y:auto;">
+                                <strong>【解析精编】</strong><br>
+                                ${escapeHtml(item.e || '暂无详细解析，多读两遍加深印象吧！')}
+                            </div>
+                        </div>
+
+                        <div class="flashcard-actions" onclick="event.stopPropagation()">
+                            <button class="btn btn-warning m3-btn--tonal m3-ripple" style="flex:1; height:44px; font-weight:bold;" onclick="handleFlashcardAction(false)">
+                                🤔 还不熟 (稍后再练)
+                            </button>
+                            <button class="btn btn-success m3-btn--filled m3-ripple" style="flex:1; height:44px; font-weight:bold;" onclick="handleFlashcardAction(true)">
+                                💡 记住了 (下一个)
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            container.appendChild(stage);
+        }
+
+        function flipFlashcard() {
+            const card = document.getElementById('flashcard-card-element');
+            if (card) card.classList.toggle('flipped');
+        }
+
+        function handleFlashcardAction(mastered) {
+            if (!mastered) {
+                const currentItem = currentQuiz[currentSingleIndex];
+                currentQuiz.push(currentItem);
+            }
+            currentSingleIndex++;
+            renderFlashcardView();
+        }
+
+        function renderFlashcardCompletion() {
+            const container = document.getElementById('quiz-container');
+            container.innerHTML = `
+                <div class="m3-card m3-card--elevated ios-card" style="text-align:center; max-width:480px; margin:30px auto; padding:32px 20px;">
+                    <div style="font-size:56px; margin-bottom:12px;">🎉</div>
+                    <h2 class="m3-title-large" style="margin:0 0 8px 0;">这组骨头全记住啦！</h2>
+                    <p style="font-size:14px; color:var(--text-sub); margin-bottom:24px;">你已经完成了本组闪卡的全部背诵与回顾。</p>
+                    <div style="display:flex; flex-direction:column; gap:10px;">
+                        <button class="btn btn-primary m3-btn--filled m3-ripple" onclick="startFlashcardQuiz()">🔂 再背一轮</button>
+                        <button class="btn btn-ghost m3-btn--tonal m3-ripple" onclick="handleQuizExit()">回狗窝</button>
+                    </div>
+                </div>
+            `;
+        }
+
         function handleQuizExit() {
             // 如果是模拟考试模式，且并不是在回看错题（是在答题中）
             if (quizType === 'mock_exam' && !isReviewMode) {
@@ -49,7 +256,7 @@
             if (typeof childSessionWrongQuestions !== 'undefined') childSessionWrongQuestions = [];
             quizFeedbackMode = localStorage.getItem('bingo_feedback_mode') || 'instant';
             masteredInSession = 0;
-            currentQuiz = wrongQuestions.sort(() => 0.5 - Math.random());
+            currentQuiz = applyOptionShuffleToQuiz(wrongQuestions.sort(() => 0.5 - Math.random()));
             lastVisibleQuestionIndex = 0;
             if (window.PetEngine && PetEngine.Skills) { PetEngine.Skills.resetQuizSkills(); }
 
@@ -190,7 +397,7 @@
             }
 
             const shuffled = [...questionsForQuiz].sort(() => 0.5 - Math.random());
-            currentQuiz = shuffled.slice(0, count);
+            currentQuiz = applyOptionShuffleToQuiz(shuffled.slice(0, count));
 
             if (currentQuiz.length === 0) {
                 return alert('这个分类下没有足够的骨头进行模拟！');
@@ -297,6 +504,8 @@
                 }
             }
 
+            currentQuiz = applyOptionShuffleToQuiz(currentQuiz);
+
             history.pushState({ view: 'quiz', dbId: currentDb.id }, '', '#quiz');
             updateView({ view: 'quiz' });
 
@@ -308,6 +517,20 @@
 
         // --- 顶栏控件与指示器同步 ---
         function updateQuizNavBarControls() {
+            if (quizType === 'flashcard') {
+                const progEl = document.getElementById('quiz-progress-text');
+                if (progEl && currentQuiz) {
+                    progEl.innerText = `🎴 闪记 ${Math.min(currentSingleIndex + 1, currentQuiz.length)} / ${currentQuiz.length}`;
+                }
+                const paletteBtn = document.getElementById('btn-quiz-palette');
+                if (paletteBtn) paletteBtn.style.display = 'none';
+                const viewBtn = document.getElementById('btn-quiz-view-mode');
+                if (viewBtn) viewBtn.style.display = 'none';
+                const feedbackBtn = document.getElementById('btn-quiz-feedback-mode');
+                if (feedbackBtn) feedbackBtn.style.display = 'none';
+                return;
+            }
+
             const progEl = document.getElementById('quiz-progress-text');
             if (progEl && currentQuiz) {
                 if (isChildMode) {
@@ -800,6 +1023,12 @@
             container.innerHTML = '';
 
             updateQuizNavBarControls();
+
+            // 如果处于闪卡背题模式
+            if (quizType === 'flashcard') {
+                renderFlashcardView();
+                return;
+            }
 
             // 如果处于单题沉浸模式
             if (quizDisplayMode === 'single') {
@@ -1344,7 +1573,7 @@
             flaggedQuestions.clear();
             eliminatedOptions = {};
             currentSingleIndex = 0;
-            currentQuiz = [...lastSessionWrongQuestions];
+            currentQuiz = applyOptionShuffleToQuiz([...lastSessionWrongQuestions]);
             renderQuizItems();
             saveWipQuiz();
         }

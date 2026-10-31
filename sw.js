@@ -1,4 +1,4 @@
-const CACHE_NAME = 'bingo-quiz-m3-v35';
+const CACHE_NAME = 'bingo-quiz-m3-v36';
 const ASSETS = [
     './',
     './index.html',
@@ -6,6 +6,7 @@ const ASSETS = [
     './icon.png',
     './css/app.css',
     './data/dynamic_banter.json',
+    './data/starter_decks.json',
     './js/app.js',
     './js/pwa.js',
     './js/storage.js',

@@ -4825,7 +4825,9 @@ function startChildRetryWrongQuiz() {
     const modal = document.getElementById('modal-child-victory');
     if (modal) modal.style.display = 'none';
 
-    currentQuiz = [...childSessionWrongQuestions];
+    currentQuiz = (typeof applyOptionShuffleToQuiz === 'function')
+        ? applyOptionShuffleToQuiz([...childSessionWrongQuestions])
+        : [...childSessionWrongQuestions];
     childSessionWrongQuestions = [];
     userAnswers = {};
     currentSingleIndex = 0;

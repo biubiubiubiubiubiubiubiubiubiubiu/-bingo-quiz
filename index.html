@@ -124,7 +124,7 @@
             style="display:none;" onclick="showImportModal()">
             <div class="m3-empty-icon">🦴</div>
             <h3 class="m3-title-medium" style="margin:0;">狗窝空空如也</h3>
-            <p class="m3-body-medium" style="color:var(--text-sub); margin:6px 0 0 0;">快去挖点新骨头 (+)，支持 Excel 表格导入</p>
+            <p class="m3-body-medium" style="color:var(--text-sub); margin:6px 0 0 0;">快去挖点新骨头 (+)，支持 Excel 表格、文本速记与官方精品库</p>
         </div>
 
         <button class="btn-float m3-fab m3-ripple" onclick="showImportModal()" title="新建题库" aria-label="新建题库">
@@ -194,6 +194,21 @@
             <div id="category-container" style="margin-top: 14px; display:none;">
                 <label for="category-select" class="m3-label-medium" style="display:block; margin-bottom: 6px; color:var(--text-sub);">分类筛选</label>
                 <select id="category-select" class="m3-select"></select>
+            </div>
+
+            <!-- 体验增强：选项防背乱序开关 -->
+            <div class="dash-setting-row" style="margin-top:14px; padding-top:12px; border-top:1px dashed var(--bg-input); display:flex; justify-content:space-between; align-items:center;">
+                <div style="display:flex; align-items:center; gap:8px;">
+                    <span style="font-size:18px;">🔀</span>
+                    <div>
+                        <div style="font-size:13px; font-weight:600; color:var(--md-sys-color-on-surface);">选项防背乱序</div>
+                        <div style="font-size:11px; color:var(--text-sub);">开练时随机打乱选项，避免死记位置</div>
+                    </div>
+                </div>
+                <label class="m3-switch" title="开启后单选/多选题选项顺序将随机打乱">
+                    <input type="checkbox" id="toggle-option-shuffle" onchange="handleOptionShuffleChange(this.checked)">
+                    <span class="m3-switch__track"></span>
+                </label>
             </div>
 
             <button id="btn-resume-quiz" class="btn btn-primary m3-btn--filled m3-ripple"
@@ -285,6 +300,28 @@
             <button class="btn btn-primary m3-btn--filled m3-ripple"
                 style="width: 100%;"
                 onclick="startMockExam()">进入模拟考场</button>
+        </div>
+
+        <!-- 模式卡片 4: 🎴 翻牌闪记 (背题模式) -->
+        <div class="m3-card m3-card--outlined ios-card flashcard-mode-card">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 12px;">
+                <span class="m3-title-medium">🎴 翻牌闪记</span>
+                <span class="m3-badge">快速背题</span>
+            </div>
+            <p style="font-size:13px; color:var(--text-sub); margin:0 0 12px 0;">3D 卡片翻转记忆，先思考再看答案，快速掌握核心考点。</p>
+            <div class="m3-segmented-button" data-for="flashcard-count" style="margin-bottom: 12px;">
+                <button type="button" class="m3-segmented-button__btn" data-val="10">10根</button>
+                <button type="button" class="m3-segmented-button__btn active" data-val="20">20根</button>
+                <button type="button" class="m3-segmented-button__btn" data-val="50">50根</button>
+                <button type="button" class="m3-segmented-button__btn" data-val="all">全库</button>
+            </div>
+            <select id="flashcard-count" class="btn btn-ghost" style="display:none;">
+                <option value="10">10根</option>
+                <option value="20" selected>20根</option>
+                <option value="50">50根</option>
+                <option value="all">全库</option>
+            </select>
+            <button class="btn btn-warning m3-btn--filled m3-ripple" style="width: 100%;" onclick="startFlashcardQuiz()">开启翻牌闪记</button>
         </div>
 
         <!-- 错题处理区 -->
@@ -410,31 +447,85 @@
 
     <!-- Modal: 导入 -->
     <div class="modal-mask" id="modal-import">
-        <div class="modal-box m3-dialog">
-            <h3 class="m3-dialog__headline">挖掘新宝藏</h3>
-            <p class="m3-body-medium" style="color:var(--text-sub); margin-bottom: 16px;">宝藏地图 (.xlsx/.xls) 指南：<br>表格第一行必须包含 “题目”、“答案” 等字段。</p>
-
-            <div id="import-feedback" style="margin-top:15px; display:none;">
-                <div id="import-loader" class="spinner"
-                    style="display:none; margin: 0 auto 10px auto; width:28px; height:28px; border-width: 3px;"></div>
-                <p id="import-status" style="font-size:13px; color:var(--md-sys-color-error); text-align:center; margin:0;"></p>
+        <div class="modal-box m3-dialog" style="max-width: 520px; width: 90%;">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
+                <h3 class="m3-dialog__headline" style="margin:0;">挖掘新宝藏</h3>
+                <button class="btn btn-ghost btn-icon m3-icon-btn" onclick="closeImportModal()" title="关闭" style="font-size:18px;">✕</button>
             </div>
 
-            <input type="file" id="file-input" accept=".xlsx, .xls" style="display:none"
-                onchange="handleFileSelect(this)">
-
-            <button class="btn btn-primary m3-btn--filled m3-ripple" id="btn-select-file" style="width:100%;"
-                onclick="document.getElementById('file-input').click()">📂 选择藏宝图</button>
-
-            <div id="import-preview" style="display:none; margin-top:15px;">
-                <div id="sheet-selection-container"></div>
-                <div style="font-size:13px; color:var(--md-sys-color-success); font-weight:600; margin-top:8px;">发现宝藏！</div>
+            <!-- Tab 分段切换 -->
+            <div class="m3-segmented-button import-tab-group" style="margin-bottom: 16px;">
+                <button type="button" class="m3-segmented-button__btn active" id="tab-btn-excel" onclick="switchImportTab('excel')">📂 Excel 表格</button>
+                <button type="button" class="m3-segmented-button__btn" id="tab-btn-text" onclick="switchImportTab('text')">📋 文本速记粘贴</button>
+                <button type="button" class="m3-segmented-button__btn" id="tab-btn-presets" onclick="switchImportTab('presets')">🎁 推荐精品库</button>
             </div>
 
-            <div class="m3-dialog__actions">
-                <button class="btn btn-ghost m3-btn--text m3-ripple" onclick="closeImportModal()">溜了溜了</button>
-                <button class="btn btn-primary m3-btn--filled m3-ripple" id="btn-confirm-import" style="display:none;"
-                    onclick="confirmImport()">埋进狗窝</button>
+            <!-- TAB 1: EXCEL 表格 (原有逻辑与元素 100% 完整保留) -->
+            <div id="import-tab-excel" class="import-tab-panel">
+                <p class="m3-body-medium" style="color:var(--text-sub); margin-bottom: 14px; font-size:13px;">
+                    宝藏地图 (.xlsx/.xls) 指南：<br>表格第一行必须包含 “题目”、“答案” 等字段，支持多选、单选与多工作表。
+                </p>
+
+                <div id="import-feedback" style="margin-top:15px; display:none;">
+                    <div id="import-loader" class="spinner"
+                        style="display:none; margin: 0 auto 10px auto; width:28px; height:28px; border-width: 3px;"></div>
+                    <p id="import-status" style="font-size:13px; color:var(--md-sys-color-error); text-align:center; margin:0;"></p>
+                </div>
+
+                <input type="file" id="file-input" accept=".xlsx, .xls" style="display:none"
+                    onchange="handleFileSelect(this)">
+
+                <button class="btn btn-primary m3-btn--filled m3-ripple" id="btn-select-file" style="width:100%;"
+                    onclick="document.getElementById('file-input').click()">📂 选择藏宝图文件</button>
+
+                <div id="import-preview" style="display:none; margin-top:15px;">
+                    <div id="sheet-selection-container"></div>
+                    <div style="font-size:13px; color:var(--md-sys-color-success); font-weight:600; margin-top:8px;">发现宝藏！</div>
+                </div>
+
+                <div class="m3-dialog__actions" style="margin-top:16px;">
+                    <button class="btn btn-ghost m3-btn--text m3-ripple" onclick="closeImportModal()">溜了溜了</button>
+                    <button class="btn btn-primary m3-btn--filled m3-ripple" id="btn-confirm-import" style="display:none;"
+                        onclick="confirmImport()">埋进狗窝</button>
+                </div>
+            </div>
+
+            <!-- TAB 2: 文本速记导入 (新增能力) -->
+            <div id="import-tab-text" class="import-tab-panel" style="display:none;">
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+                    <span style="font-size:13px; color:var(--text-sub);">微信/文档试卷直接粘贴</span>
+                    <button type="button" class="btn btn-ghost m3-btn--text" onclick="fillSampleText()" style="font-size:12px; padding:2px 8px; color:var(--md-sys-color-primary);">填入示例试题</button>
+                </div>
+
+                <input type="text" id="text-import-name" class="input-ghost m3-text-field" placeholder="题库名称 (例如: 物理第一章测验)" style="width:100%; margin-bottom:10px; box-sizing:border-box;">
+
+                <textarea id="text-import-content" class="input-ghost m3-text-field" rows="7"
+                    placeholder="在此粘贴试题文本...&#10;支持常见序号、Aiken格式、Markdown试题：&#10;&#10;1. 什么是光合作用？&#10;A. 植物制造养分的过程&#10;B. 呼吸作用&#10;答案: A&#10;解析: 释放氧气并合成有机物。"
+                    style="width:100%; resize:vertical; font-size:13px; box-sizing:border-box; line-height:1.5;"
+                    oninput="handleTextInputChange()"></textarea>
+
+                <div id="text-import-preview-badge" style="font-size:12px; margin-top:8px; color:var(--text-sub); display:none;">
+                    ✨ 智能识别：已解析出 <strong id="text-parsed-count" style="color:var(--md-sys-color-primary); font-size:14px;">0</strong> 道题目
+                </div>
+
+                <div class="m3-dialog__actions" style="margin-top:16px;">
+                    <button class="btn btn-ghost m3-btn--text m3-ripple" onclick="closeImportModal()">溜了溜了</button>
+                    <button class="btn btn-primary m3-btn--filled m3-ripple" id="btn-confirm-text-import"
+                        onclick="confirmTextImport()">一键解析入库</button>
+                </div>
+            </div>
+
+            <!-- TAB 3: 推荐精品库 (新增能力) -->
+            <div id="import-tab-presets" class="import-tab-panel" style="display:none;">
+                <p class="m3-body-medium" style="color:var(--text-sub); margin-bottom: 12px; font-size:13px;">
+                    官方精选趣味题库，开箱即用，点击一键挖进狗窝：
+                </p>
+                <div id="preset-decks-list" class="preset-decks-scroll" style="max-height:300px; overflow-y:auto; display:flex; flex-direction:column; gap:10px;">
+                    <!-- 动态渲染推荐题库卡片 -->
+                </div>
+                <div class="m3-dialog__actions" style="margin-top:16px;">
+                    <button class="btn btn-ghost m3-btn--text m3-ripple" onclick="closeImportModal()">完成</button>
+                </div>
             </div>
         </div>
     </div>
