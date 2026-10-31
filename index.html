@@ -47,8 +47,9 @@
     <!-- VIEW 1: 题库列表首页 -->
     <div id="view-home" class="container">
         <div class="nav-bar m3-top-app-bar">
-            <div>
-                <div class="nav-title m3-title-large">我的狗窝 <span class="bingo-badge m3-badge">Pro</span></div>
+            <div class="nav-title-container">
+                <span class="nav-title m3-title-large">我的狗窝</span>
+                <span class="bingo-badge m3-badge">Pro</span>
             </div>
             <div style="display:flex; gap:6px; align-items:center;">
                 <!-- 在 view-home 的 nav-bar div里 -->
@@ -62,38 +63,55 @@
                         <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
                     </svg>
                 </button>
-                <button class="btn btn-ghost btn-icon m3-icon-btn m3-ripple" onclick="exportBackup()" title="导出备份">
-                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                        stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
-                        <polyline points="7 10 12 15 17 10"></polyline>
-                        <line x1="12" y1="15" x2="12" y2="3"></line>
-                    </svg>
-                </button>
-                <button class="btn btn-ghost btn-icon m3-icon-btn m3-ripple" onclick="document.getElementById('backup-input').click()"
-                    title="导入备份">
-                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                        stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
-                        <polyline points="17 8 12 3 7 8"></polyline>
-                        <line x1="12" y1="3" x2="12" y2="15"></line>
-                    </svg>
-                </button>
-                <button class="btn btn-ghost btn-icon m3-icon-btn btn-delete m3-ripple" onclick="deleteAllData()" title="删除所有数据">
-                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                        stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-                        <polyline points="3 6 5 6 21 6"></polyline>
-                        <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
-                    </svg>
-                </button>
-                <button id="btn-install-pwa" class="btn btn-ghost btn-icon m3-icon-btn m3-ripple" style="display: none;" title="安装应用">
-                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                        stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-                        <polyline points="8 17 12 21 16 17"></polyline>
-                        <line x1="12" y1="12" x2="12" y2="21"></line>
-                        <path d="M20.88 18.09A5 5 0 0 0 18 9h-1.26A8 8 0 1 0 3 16.29"></path>
-                    </svg>
-                </button>
+                <!-- M3 更多操作菜单 (Overflow Menu) -->
+                <div class="m3-menu-anchor">
+                    <button class="btn btn-ghost btn-icon m3-icon-btn m3-ripple" id="btn-more-options" title="更多操作"
+                        aria-label="更多操作" aria-haspopup="true" aria-expanded="false" onclick="toggleOverflowMenu(event)">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+                            <circle cx="12" cy="5" r="2"></circle>
+                            <circle cx="12" cy="12" r="2"></circle>
+                            <circle cx="12" cy="19" r="2"></circle>
+                        </svg>
+                    </button>
+                    <div class="m3-dropdown-menu" id="home-overflow-menu" role="menu">
+                        <button type="button" class="m3-menu-item" role="menuitem" onclick="handleMenuAction('exportBackup')">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                                <polyline points="7 10 12 15 17 10"></polyline>
+                                <line x1="12" y1="15" x2="12" y2="3"></line>
+                            </svg>
+                            <span>导出全部备份</span>
+                        </button>
+                        <button type="button" class="m3-menu-item" role="menuitem" onclick="handleMenuAction('importBackup')">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                                <polyline points="17 8 12 3 7 8"></polyline>
+                                <line x1="12" y1="3" x2="12" y2="15"></line>
+                            </svg>
+                            <span>导入数据备份</span>
+                        </button>
+                        <button type="button" class="m3-menu-item" id="btn-install-pwa" role="menuitem" style="display: none;" onclick="closeOverflowMenu()">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                                <polyline points="8 17 12 21 16 17"></polyline>
+                                <line x1="12" y1="12" x2="12" y2="21"></line>
+                                <path d="M20.88 18.09A5 5 0 0 0 18 9h-1.26A8 8 0 1 0 3 16.29"></path>
+                            </svg>
+                            <span>安装桌面应用</span>
+                        </button>
+                        <hr class="m3-menu-divider">
+                        <button type="button" class="m3-menu-item danger" role="menuitem" onclick="handleMenuAction('deleteAllData')">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                                <polyline points="3 6 5 6 21 6"></polyline>
+                                <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                            </svg>
+                            <span>清空所有数据</span>
+                        </button>
+                    </div>
+                </div>
             </div>
         </div>
 

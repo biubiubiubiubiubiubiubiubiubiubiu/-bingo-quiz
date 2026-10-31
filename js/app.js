@@ -103,11 +103,56 @@
             });
         }
 
+        // --- M3 更多操作菜单 (Overflow Menu) ---
+        function toggleOverflowMenu(e) {
+            if (e) e.stopPropagation();
+            const menu = document.getElementById('home-overflow-menu');
+            const btn = document.getElementById('btn-more-options');
+            if (!menu) return;
+            const isShow = menu.classList.toggle('show');
+            if (btn) btn.setAttribute('aria-expanded', isShow ? 'true' : 'false');
+        }
+
+        function closeOverflowMenu() {
+            const menu = document.getElementById('home-overflow-menu');
+            const btn = document.getElementById('btn-more-options');
+            if (menu && menu.classList.contains('show')) {
+                menu.classList.remove('show');
+                if (btn) btn.setAttribute('aria-expanded', 'false');
+            }
+        }
+
+        function handleMenuAction(action) {
+            closeOverflowMenu();
+            if (action === 'exportBackup') {
+                if (typeof exportBackup === 'function') exportBackup();
+            } else if (action === 'importBackup') {
+                const input = document.getElementById('backup-input');
+                if (input) input.click();
+            } else if (action === 'deleteAllData') {
+                if (typeof deleteAllData === 'function') deleteAllData();
+            }
+        }
+
+        function initOverflowMenu() {
+            document.addEventListener('click', function (e) {
+                if (!e.target.closest('.m3-menu-anchor')) {
+                    closeOverflowMenu();
+                }
+            });
+            document.addEventListener('keydown', function (e) {
+                if (e.key === 'Escape') {
+                    closeOverflowMenu();
+                }
+            });
+        }
+
         window.onload = function () {
             initM3Ripple();
             initTopAppBarScroll();
             initSegmentedButtons();
             initTheme();
+            initOverflowMenu();
 
             const currentHash = window.location.hash;
             if (currentHash.startsWith('#dashboard/')) {

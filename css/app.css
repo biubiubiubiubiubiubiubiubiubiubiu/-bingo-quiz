@@ -311,8 +311,13 @@ body {
 
 .nav-bar,
 .m3-top-app-bar {
-    height: 64px;
-    padding: calc(10px + env(safe-area-inset-top)) 16px 10px 16px;
+    min-height: calc(64px + env(safe-area-inset-top));
+    height: auto;
+    padding-top: calc(8px + env(safe-area-inset-top));
+    padding-bottom: 8px;
+    padding-left: 16px;
+    padding-right: 16px;
+    box-sizing: border-box;
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -329,6 +334,14 @@ body {
     box-shadow: var(--md-sys-elevation-level2);
 }
 
+.nav-title-container {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    flex-shrink: 0;
+    white-space: nowrap;
+}
+
 .nav-title {
     font-size: 22px;
     font-weight: 700;
@@ -337,6 +350,8 @@ body {
     display: flex;
     align-items: center;
     gap: 8px;
+    white-space: nowrap;
+    line-height: 1.2;
 }
 
 .bingo-badge,
@@ -411,6 +426,105 @@ body {
 .nav-bar .btn-icon.btn-delete:hover {
     background: var(--md-sys-color-error-container);
     color: var(--md-sys-color-error);
+}
+
+/* ==========================================================================
+   M3 Dropdown & Overflow Menu
+   ========================================================================== */
+
+.m3-menu-anchor {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+}
+
+.m3-dropdown-menu {
+    position: absolute;
+    top: calc(100% + 8px);
+    right: 0;
+    background: var(--md-sys-color-surface-container-high);
+    color: var(--md-sys-color-on-surface);
+    border-radius: var(--md-sys-shape-corner-l);
+    box-shadow: var(--md-sys-elevation-level3);
+    border: 1px solid var(--md-sys-color-outline-variant);
+    min-width: 200px;
+    padding: 8px 0;
+    z-index: 1000;
+    display: none;
+    flex-direction: column;
+    animation: m3MenuOpen 0.18s cubic-bezier(0, 0, 0.2, 1);
+    transform-origin: top right;
+}
+
+.m3-dropdown-menu.show {
+    display: flex;
+}
+
+@keyframes m3MenuOpen {
+    from {
+        opacity: 0;
+        transform: scale(0.92);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+.m3-menu-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 16px;
+    font-family: inherit;
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--md-sys-color-on-surface);
+    background: transparent;
+    border: none;
+    width: 100%;
+    text-align: left;
+    cursor: pointer;
+    box-sizing: border-box;
+    transition: background-color 0.15s ease, color 0.15s ease;
+    user-select: none;
+    text-decoration: none;
+}
+
+.m3-menu-item:hover {
+    background-color: var(--md-sys-color-surface-container-highest);
+}
+
+.m3-menu-item:active {
+    background-color: var(--md-sys-color-surface-container-lowest);
+}
+
+.m3-menu-item svg {
+    width: 18px;
+    height: 18px;
+    stroke-width: 2.2;
+    flex-shrink: 0;
+    color: var(--md-sys-color-on-surface-variant);
+}
+
+.m3-menu-item.danger {
+    color: var(--md-sys-color-error);
+}
+
+.m3-menu-item.danger svg {
+    color: var(--md-sys-color-error);
+}
+
+.m3-menu-item.danger:hover {
+    background-color: var(--md-sys-color-error-container);
+    color: var(--md-sys-color-on-error-container);
+}
+
+.m3-menu-divider {
+    height: 1px;
+    background: var(--md-sys-color-outline-variant);
+    margin: 6px 0;
+    border: none;
 }
 
 /* ==========================================================================
@@ -1191,6 +1305,7 @@ select:focus {
 [data-mode="child"] .btn-delete,
 [data-mode="child"] .btn-delete-hist,
 [data-mode="child"] .nav-bar .btn-icon:not(.btn-child-toggle):not(.btn-quiz-exit):not(.btn-back-home):not(.btn-theme-toggle),
+[data-mode="child"] .m3-menu-anchor,
 [data-mode="child"] #import-export-area,
 [data-mode="child"] .btn-float {
     display: none !important;
