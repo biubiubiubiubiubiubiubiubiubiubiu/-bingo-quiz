@@ -52,7 +52,9 @@
                 quizType: quizType,
                 currentQuiz: currentQuiz,
                 userAnswers: userAnswers,
-                lastVisibleQuestionIndex: lastVisibleQuestionIndex
+                lastVisibleQuestionIndex: lastVisibleQuestionIndex,
+                currentSingleIndex: typeof currentSingleIndex !== 'undefined' ? currentSingleIndex : 0,
+                flaggedQuestions: typeof flaggedQuestions !== 'undefined' ? Array.from(flaggedQuestions) : []
             };
             localStorage.setItem(`bingo_wip_${currentDb.id}`, JSON.stringify(wipState));
         }

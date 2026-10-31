@@ -535,99 +535,296 @@ const PetEngine = (function() {
             return `<g class="pet-body-group">${tentacles}${head}${stageDecor}${eyes}${mouth}</g>`;
         }
     };
-    // --- 2. 虚拟生命体与深度养成系统 (PET LIFE SYSTEM) ---
+    // --- 2. 虚拟生命体与深度养成系统 (PET LIFE SYSTEM - MULTI-PET EDITION) ---
     const PetLifeSystem = {
         STORAGE_KEY: 'bingo_child_pet_v2',
+
+        DEFAULT_PETS: {
+            fish: { type: 'fish', customName: '纸灵锦', exp: 0, feedCount: 0, level: 1, equippedStage: null, satiety: 85, lastSatietyDecay: Date.now(), bondExp: 0, bondLevel: 1, rebirthCount: 0, isNamed: false },
+            crab: { type: 'crab', customName: '纸灵蟹', exp: 0, feedCount: 0, level: 1, equippedStage: null, satiety: 85, lastSatietyDecay: Date.now(), bondExp: 0, bondLevel: 1, rebirthCount: 0, isNamed: false },
+            shrimp: { type: 'shrimp', customName: '纸灵虾', exp: 0, feedCount: 0, level: 1, equippedStage: null, satiety: 85, lastSatietyDecay: Date.now(), bondExp: 0, bondLevel: 1, rebirthCount: 0, isNamed: false },
+            octopus: { type: 'octopus', customName: '纸灵章', exp: 0, feedCount: 0, level: 1, equippedStage: null, satiety: 85, lastSatietyDecay: Date.now(), bondExp: 0, bondLevel: 1, rebirthCount: 0, isNamed: false },
+            turtle: { type: 'turtle', customName: '纸灵龟', exp: 0, feedCount: 0, level: 1, equippedStage: null, satiety: 85, lastSatietyDecay: Date.now(), bondExp: 0, bondLevel: 1, rebirthCount: 0, isNamed: false },
+            jellyfish: { type: 'jellyfish', customName: '纸灵水母', exp: 0, feedCount: 0, level: 1, equippedStage: null, satiety: 85, lastSatietyDecay: Date.now(), bondExp: 0, bondLevel: 1, rebirthCount: 0, isNamed: false },
+            whale: { type: 'whale', customName: '纸灵鲸', exp: 0, feedCount: 0, level: 1, equippedStage: null, satiety: 85, lastSatietyDecay: Date.now(), bondExp: 0, bondLevel: 1, rebirthCount: 0, isNamed: false }
+        },
 
         init() {
             this.checkSatietyDecay();
             setInterval(() => this.checkSatietyDecay(), 60000); // 每一分钟自检一次
         },
 
-        getData() {
+        // 获取底层全部状态记录（含多宠物独立字典）
+        _getFullStorage() {
             try {
-                let data = null;
+                let parsed = null;
                 const v2 = localStorage.getItem(this.STORAGE_KEY);
                 if (v2) {
-                    data = JSON.parse(v2);
+                    parsed = JSON.parse(v2);
                 } else {
-                    // 兼容读取 v1 数据
                     const v1 = localStorage.getItem('bingo_child_pet');
-                    if (v1) data = JSON.parse(v1);
+                    if (v1) parsed = JSON.parse(v1);
                 }
 
-                if (!data || typeof data !== 'object') {
-                    data = {};
+                if (!parsed || typeof parsed !== 'object') {
+                    parsed = {};
                 }
 
-                return {
-                    type: data.type || 'fish',
-                    customName: data.customName || '小泡鱼',
-                    exp: data.exp || 0,
-                    feedCount: data.feedCount || 0,
-                    level: data.level || 1,
-                    equippedStage: data.equippedStage ?? null,
-                    // v2 新增生命体属性
-                    satiety: Math.max(0, Math.min(100, data.satiety ?? 85)), // 饱腹度 0~100
-                    lastSatietyDecay: data.lastSatietyDecay || Date.now(),
-                    bondExp: data.bondExp || 0,                              // 亲密度经验
-                    bondLevel: data.bondLevel || 1,                          // 亲密度等级 1~10
-                    shells: Math.max(0, data.shells ?? 20),                  // 贝壳币 (初始赠送20)
-                    skillsUsedInQuiz: data.skillsUsedInQuiz || 0             // 当局答题已用技能数
-                };
+                const activeType = parsed.activeType || parsed.type || 'fish';
+                const shells = Math.max(0, parsed.shells ?? 20);
+
+                let pets = {};
+                if (parsed.pets && typeof parsed.pets === 'object') {
+                    // 已是多宠物结构
+                    pets = { ...parsed.pets };
+                } else {
+                    // 自动无损升级旧单体数据：将原有成长赋值给原出战宠物，其余宠物初始为萌宝
+                    const oldType = parsed.type || 'fish';
+                    pets[oldType] = {
+                        type: oldType,
+                        customName: parsed.customName || (oldType === 'crab' ? '纸灵蟹' : oldType === 'shrimp' ? '纸灵虾' : oldType === 'octopus' ? '纸灵章' : '纸灵锦'),
+                        exp: parsed.exp || 0,
+                        feedCount: parsed.feedCount || 0,
+                        level: parsed.level || 1,
+                        equippedStage: parsed.equippedStage ?? null,
+                        satiety: Math.max(0, Math.min(100, parsed.satiety ?? 85)),
+                        lastSatietyDecay: parsed.lastSatietyDecay || Date.now(),
+                        bondExp: parsed.bondExp || 0,
+                        bondLevel: parsed.bondLevel || 1,
+                        rebirthCount: parsed.rebirthCount || 0,
+                        isNamed: parsed.isNamed || Boolean(parsed.customName && parsed.customName !== this.DEFAULT_PETS[oldType].customName)
+                    };
+                }
+
+                // 补齐四大海鲜灵兽槽位
+                Object.keys(this.DEFAULT_PETS).forEach(key => {
+                    if (!pets[key]) {
+                        pets[key] = { ...this.DEFAULT_PETS[key], lastSatietyDecay: Date.now() };
+                    } else {
+                        const def = this.DEFAULT_PETS[key];
+                        pets[key] = {
+                            ...def,
+                            ...pets[key],
+                            type: key,
+                            satiety: Math.max(0, Math.min(100, pets[key].satiety ?? 85)),
+                            rebirthCount: Math.max(0, pets[key].rebirthCount || 0),
+                            isNamed: pets[key].isNamed || Boolean(pets[key].customName && pets[key].customName !== def.customName)
+                        };
+                    }
+                });
+
+                return { activeType, shells, pets, skillsUsedInQuiz: parsed.skillsUsedInQuiz || 0 };
             } catch (e) {
                 console.error('读取宠物生命体数据失败:', e);
                 return {
-                    type: 'fish', customName: '小泡鱼', exp: 0, feedCount: 0, level: 1,
-                    equippedStage: null, satiety: 85, lastSatietyDecay: Date.now(),
-                    bondExp: 0, bondLevel: 1, shells: 20, skillsUsedInQuiz: 0
+                    activeType: 'fish',
+                    shells: 20,
+                    pets: { ...this.DEFAULT_PETS },
+                    skillsUsedInQuiz: 0
                 };
             }
         },
 
+        // 获取出战宠物或指定宠物的独立数据
+        getData(targetPetType) {
+            const full = this._getFullStorage();
+            const type = targetPetType || full.activeType || 'fish';
+            const petRecord = full.pets[type] || { ...this.DEFAULT_PETS[type] };
+
+            return {
+                ...petRecord,
+                activeType: full.activeType,
+                shells: full.shells,
+                skillsUsedInQuiz: full.skillsUsedInQuiz
+            };
+        },
+
+        // 获取全部宠物的独立数据清单（供水族馆总览展厅使用）
+        getAllPets() {
+            const full = this._getFullStorage();
+            return full.pets;
+        },
+
+        // 保存单个宠物的成长（自动同步回多宠存储体系）
         saveData(data) {
             try {
-                localStorage.setItem(this.STORAGE_KEY, JSON.stringify(data));
-                // 同时同步一份给老系统
+                if (!data || !data.type) return;
+                const full = this._getFullStorage();
+                const petType = data.type;
+
+                full.activeType = petType;
+                if (data._overrideShells !== undefined) full.shells = data._overrideShells;
+
+                const existing = full.pets[petType];
+                const def = this.DEFAULT_PETS[petType] || { customName: '纸灵伴学' };
+                full.pets[petType] = {
+                    type: petType,
+                    customName: data.customName || (existing && existing.customName) || def.customName,
+                    exp: data.exp || 0,
+                    feedCount: data.feedCount || 0,
+                    level: data.level || 1,
+                    equippedStage: data.equippedStage ?? null,
+                    satiety: Math.max(0, Math.min(100, data.satiety ?? 85)),
+                    lastSatietyDecay: data.lastSatietyDecay || Date.now(),
+                    bondExp: data.bondExp || 0,
+                    bondLevel: data.bondLevel || 1,
+                    rebirthCount: data.rebirthCount ?? (existing && existing.rebirthCount) ?? 0,
+                    isNamed: data.isNamed ?? (existing && existing.isNamed) ?? false
+                };
+
+                localStorage.setItem(this.STORAGE_KEY, JSON.stringify(full));
+
+                // 同时同步一份当前出战宠物给兼容层
                 localStorage.setItem('bingo_child_pet', JSON.stringify({
-                    type: data.type, customName: data.customName, exp: data.exp,
-                    feedCount: data.feedCount, level: data.level, equippedStage: data.equippedStage
+                    type: petType,
+                    customName: full.pets[petType].customName,
+                    exp: full.pets[petType].exp,
+                    feedCount: full.pets[petType].feedCount,
+                    level: full.pets[petType].level,
+                    equippedStage: full.pets[petType].equippedStage,
+                    rebirthCount: full.pets[petType].rebirthCount,
+                    isNamed: full.pets[petType].isNamed
                 }));
             } catch (e) {
                 console.error('保存宠物生命体数据失败:', e);
             }
         },
 
+        // 切换出战领航宠物
+        switchActivePet(petId) {
+            const full = this._getFullStorage();
+            if (!this.DEFAULT_PETS[petId]) return;
+            full.activeType = petId;
+            localStorage.setItem(this.STORAGE_KEY, JSON.stringify(full));
+            this.saveData(full.pets[petId]);
+        },
+
+        // 灵兽涅槃重生（重新开始升级，累加转生印记，归零等级经验，保留贝壳币）
+        rebirthPet(targetPetType, newName) {
+            try {
+                const full = this._getFullStorage();
+                const petType = targetPetType || full.activeType || 'fish';
+                if (!this.DEFAULT_PETS[petType]) return null;
+
+                const defaultDef = this.DEFAULT_PETS[petType];
+                const currentPet = full.pets[petType] || { ...defaultDef };
+                const currentRebirthCount = currentPet.rebirthCount || 0;
+                const finalName = (newName && newName.trim()) ? newName.trim() : defaultDef.customName;
+
+                full.pets[petType] = {
+                    ...defaultDef,
+                    type: petType,
+                    customName: finalName,
+                    exp: 0,
+                    feedCount: 0,
+                    level: 1,
+                    equippedStage: null,
+                    satiety: 85,
+                    lastSatietyDecay: Date.now(),
+                    bondExp: currentPet.bondExp || 0,
+                    bondLevel: currentPet.bondLevel || 1,
+                    rebirthCount: currentRebirthCount + 1,
+                    isNamed: true
+                };
+
+                localStorage.setItem(this.STORAGE_KEY, JSON.stringify(full));
+                this.saveData(full.pets[petType]);
+                return full.pets[petType];
+            } catch (e) {
+                console.error('宠物重生失败:', e);
+                return null;
+            }
+        },
+
+        // 灵兽命名/改名
+        renamePet(targetPetType, newName) {
+            try {
+                const full = this._getFullStorage();
+                const petType = targetPetType || full.activeType || 'fish';
+                if (!this.DEFAULT_PETS[petType]) return null;
+
+                const defaultDef = this.DEFAULT_PETS[petType];
+                const finalName = (newName && newName.trim()) ? newName.trim() : defaultDef.customName;
+
+                if (!full.pets[petType]) {
+                    full.pets[petType] = { ...defaultDef };
+                }
+                full.pets[petType].customName = finalName;
+                full.pets[petType].isNamed = true;
+
+                localStorage.setItem(this.STORAGE_KEY, JSON.stringify(full));
+                this.saveData(full.pets[petType]);
+                return full.pets[petType];
+            } catch (e) {
+                console.error('宠物命名失败:', e);
+                return null;
+            }
+        },
+
+        // 检查学长照料经验加速光环 (Mentorship Bonus)
+        getMentorshipBonus(currentPetType) {
+            const full = this._getFullStorage();
+            const curType = currentPetType || full.activeType;
+            const currentPet = full.pets[curType];
+            let maxOtherLevel = 0;
+            let mentorPetName = '';
+
+            Object.keys(full.pets).forEach(key => {
+                if (key !== curType) {
+                    const p = full.pets[key];
+                    if ((p.level || 1) > maxOtherLevel) {
+                        maxOtherLevel = p.level || 1;
+                        mentorPetName = p.customName;
+                    }
+                }
+            });
+
+            // 若有其他灵兽达到 Lv.5 (深海巨擘) 以上，且当前灵兽等级落后，激活 +30% 学长经验加成
+            if (maxOtherLevel >= 5 && (currentPet.level || 1) < maxOtherLevel) {
+                return { active: true, bonusRate: 0.3, maxOtherLevel, mentorPetName };
+            }
+            return { active: false, bonusRate: 0, maxOtherLevel, mentorPetName: '' };
+        },
+
         // 自然衰减机制：每在应用中活跃 15 分钟衰减 1 点饱腹度
         checkSatietyDecay() {
-            const data = this.getData();
+            const full = this._getFullStorage();
             const now = Date.now();
-            const minutes = (now - (data.lastSatietyDecay || now)) / (1000 * 60);
-            if (minutes >= 15) {
-                const drop = Math.floor(minutes / 15);
-                data.satiety = Math.max(10, data.satiety - drop);
-                data.lastSatietyDecay = now;
-                this.saveData(data);
+            let changed = false;
+
+            Object.keys(full.pets).forEach(k => {
+                const p = full.pets[k];
+                const minutes = (now - (p.lastSatietyDecay || now)) / (1000 * 60);
+                if (minutes >= 15) {
+                    const drop = Math.floor(minutes / 15);
+                    p.satiety = Math.max(10, p.satiety - drop);
+                    p.lastSatietyDecay = now;
+                    changed = true;
+                }
+            });
+
+            if (changed) {
+                localStorage.setItem(this.STORAGE_KEY, JSON.stringify(full));
                 if (typeof updatePetWidgets === 'function') updatePetWidgets();
             }
         },
 
-        // 答对投喂美食
+        // 答对投喂美食 (仅投喂当前出战灵兽)
         feed(foodBonus = 15) {
             const data = this.getData();
             const oldSatiety = data.satiety;
             data.satiety = Math.min(100, data.satiety + foodBonus);
             data.feedCount += 1;
             data.bondExp += 6;
-            data.shells += 2; // 每做对一题获得 2 个贝壳币
+            this.addShells(2); // 每做对一题获得 2 个贝壳币 (共享资产)
 
-            // 亲密度等级算法 (每级所需经验 30, 80, 160...)
+            // 亲密度等级算法
             const nextBondExp = data.bondLevel * 45;
             if (data.bondExp >= nextBondExp && data.bondLevel < 10) {
                 data.bondLevel += 1;
                 if (typeof PetSound !== 'undefined') PetSound.cheer();
                 if (window.roamingPet) {
-                    window.roamingPet.say(`💖 羁绊提升！我们达成 Lv.${data.bondLevel} 亲密伙伴啦！`, 4200);
+                    window.roamingPet.say(`💖 羁绊提升！${data.customName}与你达成 Lv.${data.bondLevel} 亲密搭档！`, 4200);
                 }
             }
 
@@ -636,16 +833,30 @@ const PetEngine = (function() {
                 satiety: data.satiety,
                 satietyGained: data.satiety - oldSatiety,
                 bondLevel: data.bondLevel,
-                shells: data.shells
+                shells: this.getShells()
             };
         },
 
-        // 消耗贝壳币
+        // 获取当前共享贝壳币
+        getShells() {
+            const full = this._getFullStorage();
+            return full.shells || 0;
+        },
+
+        // 增加共享贝壳币
+        addShells(amount) {
+            const full = this._getFullStorage();
+            full.shells = Math.max(0, (full.shells || 0) + (amount || 0));
+            localStorage.setItem(this.STORAGE_KEY, JSON.stringify(full));
+            return full.shells;
+        },
+
+        // 消耗贝壳币 (共享资产)
         spendShells(amount) {
-            const data = this.getData();
-            if (data.shells >= amount) {
-                data.shells -= amount;
-                this.saveData(data);
+            const full = this._getFullStorage();
+            if (full.shells >= amount) {
+                full.shells -= amount;
+                localStorage.setItem(this.STORAGE_KEY, JSON.stringify(full));
                 return true;
             }
             return false;
@@ -682,6 +893,34 @@ const PetEngine = (function() {
                 icon: '💡',
                 desc: '喷洒夜光墨水，智能圈出题干中的关键核心词',
                 maxUses: 2
+            },
+            origami_koi: {
+                id: 'origami_fold',
+                name: '千纸开慧',
+                icon: '🎋',
+                desc: '翻折智慧纸笺，立刻点亮 1 个正确线索并为全场带来祥瑞纸花！',
+                maxUses: 2
+            },
+            turtle: {
+                id: 'shield_guard',
+                name: '玄甲庇护',
+                icon: '🛡️',
+                desc: '召唤玄武晶盾，沉稳守护当前题目，若答错自动免除连胜中断！',
+                maxUses: 2
+            },
+            jellyfish: {
+                id: 'prism_glow',
+                name: '幻光聚焦',
+                icon: '🪼',
+                desc: '释放柔和水母荧光，温柔照亮排除 1 个干扰选项！',
+                maxUses: 2
+            },
+            whale: {
+                id: 'wave_splash',
+                name: '巨浪翻涌',
+                icon: '🌊',
+                desc: '引动渊海波涛，为小主人洗净思维浮躁，接下来的答题获得双倍收益！',
+                maxUses: 1
             }
         },
 
@@ -739,6 +978,27 @@ const PetEngine = (function() {
                     break;
                 case 'octopus':
                     this.executeOctoScanner(activeCard);
+                    break;
+                case 'origami_koi':
+                    this.executeOrigamiFold(activeCard);
+                    break;
+                case 'turtle':
+                    this.executeFishShield(activeCard);
+                    if (window.roamingPet) {
+                        window.roamingPet.say('🛡️ 玄武晶甲庇护已激活！心平气和，认真答题！🐢', 3800);
+                    }
+                    break;
+                case 'jellyfish':
+                    this.executeCrabSnip(activeCard);
+                    if (window.roamingPet) {
+                        window.roamingPet.say('🪼 幻光聚焦！柔美水母荧光照耀，排除一个干扰项！', 3800);
+                    }
+                    break;
+                case 'whale':
+                    this.executeShrimpBoost();
+                    if (window.roamingPet) {
+                        window.roamingPet.say('🌊 巨浪翻涌！乘风破浪，接下来收获双倍智慧与贝壳！🐳', 3800);
+                    }
                     break;
             }
 
@@ -834,6 +1094,18 @@ const PetEngine = (function() {
             }
         },
 
+        // 🎏 纸灵锦技能：翻折智慧纸笺，排除错误干扰
+        executeOrigamiFold(card) {
+            this.executeCrabSnip(card);
+            if (typeof PetSound !== 'undefined' && typeof PetSound.paperRustle === 'function') {
+                PetSound.paperRustle();
+            }
+            if (window.roamingPet) {
+                window.roamingPet.say('🎋 灵纸翻折！为你排除一道迷障选项！', 3800);
+                if (typeof PetVoice !== 'undefined') PetVoice.speak('灵纸翻折，答案浮现！', 'origami_koi');
+            }
+        },
+
         // 更新界面技能按钮状态
         updateQuizSkillBtn() {
             const btn = document.getElementById('pet-quiz-skill-btn');
@@ -901,16 +1173,1314 @@ const PetEngine = (function() {
         }
     };
 
+    // --- 5. 路线 B：高质感专业精灵序列帧引擎 (PET SPRITE SHEET ENGINE) ---
+    const PetSpriteEngine = {
+        STORAGE_MODE_KEY: 'bingo_child_pet_render_mode',
+        currentAction: 'idle',
+        actionTimer: null,
+
+        // 默认内置全套清单 (开箱即用，离线即载)
+        manifest: {
+            basePath: './assets/pets/',
+            species: {
+                fish: {
+                    name: '小泡鱼',
+                    actions: {
+                        idle: { frames: 4, fps: 4, file: 'fish/idle.svg', loop: true },
+                        move: { frames: 6, fps: 8, file: 'fish/move.svg', loop: true },
+                        think: { frames: 4, fps: 3, file: 'fish/think.svg', loop: true },
+                        celebrate: { frames: 6, fps: 9, file: 'fish/celebrate.svg', loop: true },
+                        sleep: { frames: 3, fps: 2, file: 'fish/sleep.svg', loop: true },
+                        drag: { frames: 4, fps: 8, file: 'fish/drag.svg', loop: true }
+                    }
+                },
+                crab: {
+                    name: '机灵蟹',
+                    actions: {
+                        idle: { frames: 4, fps: 4, file: 'crab/idle.svg', loop: true },
+                        move: { frames: 6, fps: 8, file: 'crab/move.svg', loop: true },
+                        think: { frames: 4, fps: 3, file: 'crab/think.svg', loop: true },
+                        celebrate: { frames: 6, fps: 9, file: 'crab/celebrate.svg', loop: true },
+                        sleep: { frames: 3, fps: 2, file: 'crab/sleep.svg', loop: true },
+                        drag: { frames: 4, fps: 8, file: 'crab/drag.svg', loop: true },
+                        climb: { frames: 6, fps: 6, file: 'crab/climb.svg', loop: true }
+                    }
+                },
+                shrimp: {
+                    name: '跳跳虾',
+                    actions: {
+                        idle: { frames: 4, fps: 4, file: 'shrimp/idle.svg', loop: true },
+                        move: { frames: 6, fps: 9, file: 'shrimp/move.svg', loop: true },
+                        think: { frames: 4, fps: 3, file: 'shrimp/think.svg', loop: true },
+                        celebrate: { frames: 6, fps: 9, file: 'shrimp/celebrate.svg', loop: true },
+                        sleep: { frames: 3, fps: 2, file: 'shrimp/sleep.svg', loop: true },
+                        drag: { frames: 4, fps: 8, file: 'shrimp/drag.svg', loop: true }
+                    }
+                },
+                octopus: {
+                    name: '皮皮章',
+                    actions: {
+                        idle: { frames: 4, fps: 4, file: 'octopus/idle.svg', loop: true },
+                        move: { frames: 6, fps: 7, file: 'octopus/move.svg', loop: true },
+                        think: { frames: 4, fps: 3, file: 'octopus/think.svg', loop: true },
+                        celebrate: { frames: 6, fps: 9, file: 'octopus/celebrate.svg', loop: true },
+                        sleep: { frames: 3, fps: 2, file: 'octopus/sleep.svg', loop: true },
+                        drag: { frames: 4, fps: 8, file: 'octopus/drag.svg', loop: true }
+                    }
+                }
+            }
+        },
+
+        init() {
+            // 尝试异步加载远程/外部更新的 manifest.json（支持外部图包热插拔）
+            try {
+                fetch('./assets/pets/manifest.json')
+                    .then(res => res.ok ? res.json() : null)
+                    .then(data => {
+                        if (data && data.species) {
+                            this.manifest = Object.assign({}, this.manifest, data);
+                        }
+                    })
+                    .catch(() => {});
+            } catch (e) {}
+        },
+
+        getRenderMode() {
+            // 默认启用路线 B (Sprite 模式)
+            return localStorage.getItem(this.STORAGE_MODE_KEY) || 'sprite';
+        },
+
+        setRenderMode(mode) {
+            if (mode !== 'vector' && mode !== 'sprite') mode = 'sprite';
+            localStorage.setItem(this.STORAGE_MODE_KEY, mode);
+            if (window.roamingPet && typeof window.roamingPet.render === 'function') {
+                window.roamingPet.render();
+            }
+            if (typeof updatePetWidgets === 'function') {
+                updatePetWidgets();
+            }
+            return mode;
+        },
+
+        getActionConf(species, action) {
+            const spDef = this.manifest.species[species] || this.manifest.species.fish;
+            return spDef.actions[action] || spDef.actions.idle;
+        },
+
+        // 调度全局精灵播放特定动作 (带有可选定时自动恢复 idle)
+        setAction(action, duration = 0) {
+            if (this.actionTimer) {
+                clearTimeout(this.actionTimer);
+                this.actionTimer = null;
+            }
+            this.currentAction = action;
+
+            // 实时更新视口中的活动动作
+            const viewports = document.querySelectorAll('.pet-sprite-viewport');
+            viewports.forEach(vp => {
+                const sp = vp.getAttribute('data-species') || 'fish';
+                const conf = this.getActionConf(sp, action);
+                vp.setAttribute('data-action', action);
+                const img = vp.querySelector('.pet-sprite-sheet-img');
+                if (img && conf) {
+                    const src = `${this.manifest.basePath}${conf.file}`;
+                    if (img.getAttribute('src') !== src) {
+                        img.setAttribute('src', src);
+                    }
+                    const durationSec = (conf.frames / conf.fps).toFixed(2);
+                    img.style.animationDuration = `${durationSec}s`;
+                    img.style.animationTimingFunction = `steps(${conf.frames})`;
+                }
+            });
+
+            if (duration > 0) {
+                this.actionTimer = setTimeout(() => {
+                    this.actionTimer = null;
+                    this.setAction('idle');
+                }, duration);
+            }
+        },
+
+        // 五阶觉醒高阶光环与王冠法饰
+        getStageDecor(stageIndex) {
+            if (stageIndex <= 0) return '';
+            if (stageIndex === 1) {
+                return '<div class="pet-sprite-stage-glow stage-1" title="二阶·极光碧灵"></div>';
+            } else if (stageIndex === 2) {
+                return '<div class="pet-sprite-stage-crown stage-2" title="三阶·霸王金冠"><span class="crown-icon">👑</span></div>';
+            } else if (stageIndex === 3) {
+                return '<div class="pet-sprite-stage-orb stage-3" title="四阶·祥瑞灵珠"><span class="orb-icon">🔮</span></div>';
+            } else if (stageIndex === 4) {
+                return `
+                    <div class="pet-sprite-stage-aura stage-4" title="五阶·九霄真龙">
+                        <span class="cosmic-crown">🔱</span>
+                        <div class="cosmic-ring ring-outer"></div>
+                        <div class="cosmic-ring ring-inner"></div>
+                        <span class="cosmic-sparkle">✨</span>
+                    </div>
+                `;
+            }
+            return '';
+        },
+
+        // 生成高质感精灵视口 HTML
+        renderAvatar(species = 'fish', stageIndex = 0, opts = {}) {
+            const sp = this.manifest.species[species] ? species : 'fish';
+            let action = opts.action;
+            if (!action) {
+                const emotion = opts.emotion || PetEmotionSystem.currentEmotion || 'normal';
+                if (emotion === 'sleep') action = 'sleep';
+                else if (emotion === 'thinking') action = 'think';
+                else if (emotion === 'celebrate') action = 'celebrate';
+                else action = this.currentAction || 'idle';
+            }
+
+            const conf = this.getActionConf(sp, action);
+            const w = opts.width || 68;
+            const h = opts.height || 68;
+            const s = Math.max(0, Math.min(4, stageIndex));
+            const src = `${this.manifest.basePath}${conf.file}`;
+            const durationSec = (conf.frames / conf.fps).toFixed(2);
+            const decor = this.getStageDecor(s);
+
+            return `
+                <div class="pet-sprite-viewport species-${sp} action-${action} stage-${s}" 
+                     data-species="${sp}" data-action="${action}" data-stage="${s}"
+                     style="width:${w}px; height:${h}px;" title="${this.manifest.species[sp].name} (第${s + 1}阶)">
+                    <div class="pet-sprite-actor stage-${s}" style="width:${w}px; height:${h}px;">
+                        <img class="pet-sprite-sheet-img" src="${src}" alt="${sp}" draggable="false"
+                             style="height:100%; max-width:none; width:auto; animation-duration:${durationSec}s; animation-timing-function:steps(${conf.frames});" />
+                    </div>
+                    ${decor}
+                </div>
+            `.trim();
+        }
+    };
+
+        // --- 6. 现代微立体几何切面折纸引擎 (FACETED LOW-POLY ORIGAMI ENGINE - 20 MODELS) ---
+    const PetOrigamiEngine = {
+        uidCounter: 0,
+
+        get_fish_stage_0(uid) {
+            return `<!-- Fish Stage 0: 萌动小纸苗 (四角折纸灵雏) -->
+        <polygon points="80,50 48,30 48,50" fill="#A7F3D0" />
+        <polygon points="80,50 48,50 48,70" fill="#10B981" />
+        <polygon points="48,30 48,50 26,50" fill="#34D399" />
+        <polygon points="48,50 48,70 26,50" fill="#059669" />
+        <polygon points="26,50 10,32 18,50" fill="#6EE7B7" />
+        <polygon points="26,50 18,50 10,68" fill="#047857" />
+        <line x1="80" y1="50" x2="18" y2="50" stroke="#FFFFFF" stroke-width="1.1" stroke-dasharray="2.5,1.5" stroke-linecap="round" />
+        <line x1="48" y1="30" x2="48" y2="70" stroke="#FFFFFF" stroke-width="0.8" stroke-dasharray="2,1" stroke-linecap="round" />
+        <polygon points="66,45 69,47 66,49 63,47" fill="#FFFFFF" />
+        <polygon points="66,46 67.5,47 66,48 64.5,47" fill="#065F46" />`;
+        },
+
+        get_fish_stage_1(uid) {
+            return `<!-- Fish Stage 1: 几何切面鱼 (六棱极光灵鱼) -->
+        <polygon points="86,50 64,36 68,50" fill="#A5F3FC" />
+        <polygon points="86,50 68,50 64,64" fill="#0891B2" />
+        <polygon points="64,36 40,24 44,50 68,50" fill="#38BDF8" />
+        <polygon points="64,64 68,50 44,50 40,76" fill="#0284C7" />
+        <polygon points="40,24 20,50 44,50" fill="#0284C7" />
+        <polygon points="40,76 44,50 20,50" fill="#0369A1" />
+        <polygon points="40,24 32,8 36,26" fill="#BAE6FD" />
+        <polygon points="36,26 32,8 26,30" fill="#38BDF8" />
+        <polygon points="20,50 4,24 12,42" fill="#7DD3FC" />
+        <polygon points="20,50 12,42 8,50" fill="#0284C7" />
+        <polygon points="20,50 8,50 12,58" fill="#0369A1" />
+        <polygon points="20,50 12,58 4,76" fill="#075985" />
+        <polyline points="86,50 68,50 44,50 20,50 8,50" stroke="#FFFFFF" stroke-width="1.2" stroke-dasharray="2.5,1.5" stroke-linecap="round" />
+        <line x1="64" y1="36" x2="64" y2="64" stroke="#FFFFFF" stroke-width="0.8" stroke-dasharray="2,1" stroke-linecap="round" />
+        <line x1="40" y1="24" x2="40" y2="76" stroke="#FFFFFF" stroke-width="0.8" stroke-dasharray="2,1" stroke-linecap="round" />
+        <polygon points="72,44 76,47 72,50 68,47" fill="#FFFFFF" />
+        <polygon points="72,45 74.5,47 72,49 69.5,47" fill="#0369A1" />`;
+        },
+
+        get_fish_stage_2(uid) {
+            return `<!-- Fish Stage 2: 立体千羽鱼 (三阶·展翼霸主) -->
+        <polygon points="62,18 68,8 74,18 68,14" fill="#FDE047" stroke="#F59E0B" stroke-width="0.6" />
+        <polygon points="56,22 62,18 65,23" fill="#F59E0B" />
+        <polygon points="74,18 80,22 71,23" fill="#D97706" />
+        <polygon points="86,50 66,32 70,50" fill="#C7D2FE" />
+        <polygon points="86,50 70,50 66,68" fill="#6366F1" />
+        <polygon points="66,32 44,20 48,50 70,50" fill="#818CF8" />
+        <polygon points="66,68 70,50 48,50 44,80" fill="#4F46E5" />
+        <polygon points="44,20 22,50 48,50" fill="#4338CA" />
+        <polygon points="44,80 48,50 22,50" fill="#312E81" />
+        <polygon points="48,50 34,4 40,24" fill="#A5B4FC" />
+        <polygon points="48,50 40,24 44,20" fill="#6366F1" />
+        <polygon points="34,4 24,14 40,24" fill="#C7D2FE" />
+        <polygon points="48,50 44,80 40,76" fill="#3730A3" />
+        <polygon points="48,50 40,76 34,96" fill="#4F46E5" />
+        <polygon points="34,96 24,86 40,76" fill="#312E81" />
+        <polygon points="22,50 2,20 12,40" fill="#818CF8" />
+        <polygon points="22,50 12,40 6,50" fill="#4F46E5" />
+        <polygon points="22,50 6,50 12,60" fill="#4338CA" />
+        <polygon points="22,50 12,60 2,80" fill="#312E81" />
+        <polyline points="86,50 70,50 48,50 22,50 6,50" stroke="#FDE047" stroke-width="1.3" stroke-dasharray="3,1.5" stroke-linecap="round" />
+        <polygon points="74,43 78,47 74,51 70,47" fill="#FFFFFF" />
+        <polygon points="74,44.5 76.5,47 74,49.5 71.5,47" fill="#312E81" />`;
+        },
+
+        get_fish_stage_3(uid) {
+            return `<!-- Fish Stage 3: 烫金和风锦 (四阶·朱红烈焰金箔锦鲤) -->
+        <g class="origami-floating-orb">
+            <polygon points="0,-8 6,-3 6,3 0,8 -6,3 -6,-3" fill="#FDE047" stroke="#F59E0B" stroke-width="0.8" />
+            <polygon points="0,-8 0,0 6,-3" fill="#FFFBEB" />
+            <polygon points="6,-3 0,0 6,3" fill="#FBBF24" />
+            <polygon points="6,3 0,0 0,8" fill="#F59E0B" />
+            <polygon points="0,8 0,0 -6,3" fill="#D97706" />
+            <polygon points="-6,3 0,0 -6,-3" fill="#B45309" />
+            <polygon points="-6,-3 0,0 0,-8" fill="#FDE68A" />
+        </g>
+        <polygon points="88,50 66,30 72,50" fill="#FDA4AF" stroke="#FBBF24" stroke-width="0.8" />
+        <polygon points="88,50 72,50 66,70" fill="#E11D48" stroke="#FBBF24" stroke-width="0.8" />
+        <polygon points="66,30 42,16 48,50 72,50" fill="#F43F5E" stroke="#FBBF24" stroke-width="0.8" />
+        <polygon points="66,70 72,50 48,50 42,84" fill="#BE123C" stroke="#FBBF24" stroke-width="0.8" />
+        <polygon points="42,16 20,50 48,50" fill="#E11D48" stroke="#FBBF24" stroke-width="0.8" />
+        <polygon points="42,84 48,50 20,50" fill="#9F1239" stroke="#FBBF24" stroke-width="0.8" />
+        <polygon points="66,30 52,6 56,26" fill="#FBBF24" stroke="#D97706" stroke-width="0.8" />
+        <polygon points="66,70 56,74 52,94" fill="#F59E0B" stroke="#B45309" stroke-width="0.8" />
+        <polygon points="20,50 0,16 8,36" fill="#FB7185" stroke="#FBBF24" stroke-width="0.8" />
+        <polygon points="20,50 8,36 4,46" fill="#F43F5E" stroke="#FBBF24" stroke-width="0.8" />
+        <polygon points="20,50 4,46 4,54" fill="#FBBF24" stroke="#F59E0B" stroke-width="0.8" />
+        <polygon points="20,50 4,54 8,64" fill="#E11D48" stroke="#FBBF24" stroke-width="0.8" />
+        <polygon points="20,50 8,64 0,84" fill="#9F1239" stroke="#FBBF24" stroke-width="0.8" />
+        <polyline points="88,50 72,50 48,50 20,50 4,50" stroke="#FFFBEB" stroke-width="1.6" stroke-dasharray="3,1" stroke-linecap="round" />
+        <polygon points="76,43 81,47 76,51 71,47" fill="#FFFFFF" stroke="#FBBF24" stroke-width="0.8" />
+        <polygon points="76,44.5 79,47 76,49.5 73,47" fill="#881337" />`;
+        },
+
+        get_fish_stage_4(uid) {
+            return `<!-- Fish Stage 4: 九天折纸龙 (五阶·全息全真神龙觉醒) -->
+        <g class="origami-cosmic-ring ring-outer">
+            <polygon points="50,2 74,8 92,26 98,50 92,74 74,92 50,98 26,92 8,74 2,50 8,26 26,8"
+                     fill="none" stroke="#FBBF24" stroke-width="1.4" stroke-dasharray="4,2.5" />
+        </g>
+        <g class="origami-cosmic-ring ring-inner">
+            <polygon points="50,12 77,23 88,50 77,77 50,88 23,77 12,50 23,23"
+                     fill="none" stroke="#22D3EE" stroke-width="1.2" stroke-dasharray="3,2" />
+        </g>
+        <polygon points="68,26 76,6 72,22" fill="#FDE047" stroke="#F59E0B" stroke-width="0.6" />
+        <polygon points="76,6 84,10 75,20" fill="#F59E0B" />
+        <polygon points="60,28 58,10 63,22" fill="#FBBF24" />
+        <polyline points="88,54 96,62 92,72 98,78" fill="none" stroke="#FDE047" stroke-width="1.2" stroke-linecap="round" />
+        <polygon points="90,48 72,28 76,48" fill="#67E8F9" />
+        <polygon points="90,48 76,48 84,62 88,54" fill="#06B6D4" />
+        <polygon points="76,48 84,62 70,68 68,52" fill="#0891B2" />
+        <polygon points="72,28 52,16 56,42 76,48" fill="#C084FC" />
+        <polygon points="68,52 56,42 48,68 64,74" fill="#9333EA" />
+        <polygon points="52,16 32,24 38,48 56,42" fill="#F472B6" />
+        <polygon points="56,42 38,48 30,72 48,68" fill="#DB2777" />
+        <polygon points="32,24 16,42 38,48" fill="#FBBF24" />
+        <polygon points="38,48 16,42 18,66 30,72" fill="#D97706" />
+        <polygon points="16,42 0,28 8,46" fill="#FDE047" stroke="#F59E0B" stroke-width="0.8" />
+        <polygon points="16,42 8,46 2,54" fill="#F43F5E" stroke="#E11D48" stroke-width="0.8" />
+        <polygon points="16,42 2,54 6,64" fill="#C084FC" stroke="#9333EA" stroke-width="0.8" />
+        <polygon points="16,42 6,64 0,76" fill="#22D3EE" stroke="#0891B2" stroke-width="0.8" />
+        <polyline points="90,48 76,48 56,42 38,48 16,42 2,54" stroke="#FFFBEB" stroke-width="1.8" stroke-dasharray="3,1.5" stroke-linecap="round" />
+        <polygon points="86,22 88,20 90,22 88,24" fill="#FDE047" />
+        <polygon points="14,20 16,18 18,20 16,22" fill="#67E8F9" />
+        <polygon points="22,86 24,84 26,86 24,88" fill="#F472B6" />
+        <polygon points="80,42 85,45 80,48 75,45" fill="#FFFFFF" stroke="#FBBF24" stroke-width="0.8" />
+        <polygon points="80,43.5 83,45 80,46.5 77,45" fill="#581C87" />`;
+        },
+
+        get_crab_stage_0(uid) {
+            return `<!-- Crab Stage 0: 纸灵幼蟹 (方块六角豆蟹) -->
+        <polygon points="50,28 66,36 66,62 50,72 34,62 34,36" fill="#FB923C" />
+        <polygon points="50,28 66,36 50,50" fill="#FDBA74" />
+        <polygon points="50,28 50,50 34,36" fill="#F97316" />
+        <polygon points="34,36 50,50 34,62" fill="#EA580C" />
+        <polygon points="66,36 66,62 50,50" fill="#C2410C" />
+        <polygon points="34,62 50,50 50,72" fill="#9A3412" />
+        <!-- 左小剪刀 -->
+        <polygon points="34,36 16,24 22,40" fill="#F97316" />
+        <polygon points="34,36 22,40 26,44" fill="#C2410C" />
+        <!-- 右小剪刀 -->
+        <polygon points="66,36 84,24 78,40" fill="#FDBA74" />
+        <polygon points="66,36 78,40 74,44" fill="#EA580C" />
+        <!-- 折纸足肢 -->
+        <polygon points="34,50 20,58 34,58" fill="#C2410C" />
+        <polygon points="34,60 22,72 34,68" fill="#9A3412" />
+        <polygon points="66,50 80,58 66,58" fill="#EA580C" />
+        <polygon points="66,60 78,72 66,68" fill="#C2410C" />
+        <!-- 折痕骨架 -->
+        <line x1="50" y1="28" x2="50" y2="72" stroke="#FFFFFF" stroke-width="1" stroke-dasharray="2,1.5" />
+        <line x1="34" y1="50" x2="66" y2="50" stroke="#FFFFFF" stroke-width="0.8" stroke-dasharray="2,1" />
+        <!-- 眼睛 -->
+        <polygon points="44,22 47,25 44,28 41,25" fill="#FFFFFF" />
+        <polygon points="44,23.5 45.5,25 44,26.5 42.5,25" fill="#7C2D12" />
+        <polygon points="56,22 59,25 56,28 53,25" fill="#FFFFFF" />
+        <polygon points="56,23.5 57.5,25 56,26.5 54.5,25" fill="#7C2D12" />`;
+        },
+
+        get_crab_stage_1(uid) {
+            return `<!-- Crab Stage 1: 棱角双钳蟹 (折纸铁甲重钳) -->
+        <!-- 甲壳主面 (八棱切面) -->
+        <polygon points="50,22 72,32 72,62 50,74 28,62 28,32" fill="#F97316" />
+        <polygon points="50,22 72,32 50,48" fill="#FED7AA" />
+        <polygon points="50,22 50,48 28,32" fill="#FB923C" />
+        <polygon points="28,32 50,48 28,62" fill="#EA580C" />
+        <polygon points="72,32 72,62 50,48" fill="#C2410C" />
+        <polygon points="28,62 50,48 50,74" fill="#9A3412" />
+        <polygon points="50,74 50,48 72,62" fill="#7C2D12" />
+        <!-- 强力折纸左鳌 -->
+        <polygon points="28,32 10,14 18,34" fill="#F87171" />
+        <polygon points="10,14 6,24 18,34" fill="#DC2626" />
+        <polygon points="28,32 18,34 22,46" fill="#991B1B" />
+        <!-- 强力折纸右鳌 -->
+        <polygon points="72,32 90,14 82,34" fill="#FCA5A5" />
+        <polygon points="90,14 94,24 82,34" fill="#EF4444" />
+        <polygon points="72,32 82,34 78,46" fill="#B91C1C" />
+        <!-- 侧足切面 -->
+        <polygon points="28,46 12,56 26,56" fill="#EA580C" />
+        <polygon points="28,58 14,74 26,68" fill="#C2410C" />
+        <polygon points="72,46 88,56 74,56" fill="#F97316" />
+        <polygon points="72,58 86,74 74,68" fill="#EA580C" />
+        <!-- 折痕线 -->
+        <polyline points="50,22 50,48 50,74" stroke="#FFFFFF" stroke-width="1.2" stroke-dasharray="3,1.5" />
+        <line x1="28" y1="48" x2="72" y2="48" stroke="#FFFFFF" stroke-width="0.8" stroke-dasharray="2,1" />
+        <!-- 双眼 -->
+        <polygon points="42,16 46,20 42,24 38,20" fill="#FFFFFF" />
+        <polygon points="42,18 44,20 42,22 40,20" fill="#991B1B" />
+        <polygon points="58,16 62,20 58,24 54,20" fill="#FFFFFF" />
+        <polygon points="58,18 60,20 58,22 56,20" fill="#991B1B" />`;
+        },
+
+        get_crab_stage_2(uid) {
+            return `<!-- Crab Stage 2: 金冠赤甲帝王蟹 (三阶·黄金霸王鳌) -->
+        <!-- 折纸王者金冠 👑 -->
+        <polygon points="44,14 50,4 56,14 50,10" fill="#FDE047" stroke="#F59E0B" stroke-width="0.6" />
+        <polygon points="38,18 44,14 47,19" fill="#F59E0B" />
+        <polygon points="56,14 62,18 53,19" fill="#D97706" />
+        <!-- 主躯干厚重晶面 -->
+        <polygon points="50,18 76,28 76,64 50,76 24,64 24,28" fill="#EF4444" stroke="#FBBF24" stroke-width="0.8" />
+        <polygon points="50,18 76,28 50,46" fill="#FCA5A5" />
+        <polygon points="50,18 50,46 24,28" fill="#F87171" />
+        <polygon points="24,28 50,46 24,64" fill="#DC2626" />
+        <polygon points="76,28 76,64 50,46" fill="#B91C1C" />
+        <polygon points="24,64 50,46 50,76" fill="#991B1B" />
+        <polygon points="50,76 50,46 76,64" fill="#7F1D1D" />
+        <!-- 黄金切面大双鳌 -->
+        <polygon points="24,28 6,8 16,30" fill="#FDE047" stroke="#D97706" stroke-width="0.8" />
+        <polygon points="6,8 2,18 16,30" fill="#F59E0B" />
+        <polygon points="24,28 16,30 20,44" fill="#B45309" />
+        <polygon points="76,28 94,8 84,30" fill="#FFFBEB" stroke="#D97706" stroke-width="0.8" />
+        <polygon points="94,8 98,18 84,30" fill="#FDE047" />
+        <polygon points="76,28 84,30 80,44" fill="#D97706" />
+        <!-- 侧足三联折纸 -->
+        <polygon points="24,44 6,52 20,54" fill="#DC2626" />
+        <polygon points="24,54 8,68 20,64" fill="#B91C1C" />
+        <polygon points="24,64 12,82 22,74" fill="#991B1B" />
+        <polygon points="76,44 94,52 80,54" fill="#EF4444" />
+        <polygon points="76,54 92,68 80,64" fill="#DC2626" />
+        <polygon points="76,64 88,82 78,74" fill="#B91C1C" />
+        <!-- 黄金主折脊线 -->
+        <polyline points="50,18 50,46 50,76" stroke="#FDE047" stroke-width="1.4" stroke-dasharray="3,1.5" />
+        <!-- 双眼 -->
+        <polygon points="40,14 44,18 40,22 36,18" fill="#FFFFFF" />
+        <polygon points="40,16 42,18 40,20 38,18" fill="#D97706" />
+        <polygon points="60,14 64,18 60,22 56,18" fill="#FFFFFF" />
+        <polygon points="60,16 62,18 60,20 58,18" fill="#D97706" />`;
+        },
+
+        get_crab_stage_3(uid) {
+            return `<!-- Crab Stage 3: 机甲多棱暴风蟹 (四阶·钛晶光刃神鳌) -->
+        <!-- 浮动折纸光棱护盾 (左上方旋转) -->
+        <g class="origami-floating-orb" transform="translate(18, 16)">
+            <polygon points="0,-8 7,-4 7,4 0,8 -7,4 -7,-4" fill="#A855F7" stroke="#FBBF24" stroke-width="0.8" />
+            <polygon points="0,-8 0,0 7,-4" fill="#E9D5FF" />
+            <polygon points="7,-4 0,0 7,4" fill="#C084FC" />
+            <polygon points="7,4 0,0 0,8" fill="#A855F7" />
+            <polygon points="0,8 0,0 -7,4" fill="#7E22CE" />
+            <polygon points="-7,4 0,0 -7,-4" fill="#581C87" />
+            <polygon points="-7,-4 0,0 0,-8" fill="#C084FC" />
+        </g>
+        <!-- 主躯干钛晶紫金折甲 -->
+        <polygon points="50,16 78,26 80,64 50,78 20,64 22,26" fill="#8B5CF6" stroke="#FBBF24" stroke-width="0.9" />
+        <polygon points="50,16 78,26 50,44" fill="#DDD6FE" />
+        <polygon points="50,16 50,44 22,26" fill="#A78BFA" />
+        <polygon points="22,26 50,44 20,64" fill="#7C3AED" />
+        <polygon points="78,26 80,64 50,44" fill="#6D28D9" />
+        <polygon points="20,64 50,44 50,78" fill="#5B21B6" />
+        <polygon points="50,78 50,44 80,64" fill="#4C1D95" />
+        <!-- 等离子多棱巨双鳌 (刀锋展开) -->
+        <polygon points="22,26 2,4 12,28" fill="#F43F5E" stroke="#FBBF24" stroke-width="0.9" />
+        <polygon points="2,4 0,16 12,28" fill="#E11D48" />
+        <polygon points="22,26 12,28 16,42" fill="#BE123C" />
+        <polygon points="78,26 98,4 88,28" fill="#FB7185" stroke="#FBBF24" stroke-width="0.9" />
+        <polygon points="98,4 100,16 88,28" fill="#F43F5E" />
+        <polygon points="78,26 88,28 84,42" fill="#E11D48" />
+        <!-- 折纸战甲侧刃 -->
+        <polygon points="20,44 4,52 18,54" fill="#7C3AED" stroke="#FBBF24" stroke-width="0.6" />
+        <polygon points="20,54 4,68 18,64" fill="#6D28D9" />
+        <polygon points="20,64 8,82 20,74" fill="#5B21B6" />
+        <polygon points="80,44 96,52 82,54" fill="#8B5CF6" stroke="#FBBF24" stroke-width="0.6" />
+        <polygon points="80,54 96,68 82,64" fill="#7C3AED" />
+        <polygon points="80,64 92,82 80,74" fill="#6D28D9" />
+        <!-- 烫金能量脊梁 -->
+        <polyline points="50,16 50,44 50,78" stroke="#FDE047" stroke-width="1.6" stroke-dasharray="3,1" />
+        <!-- 双眼 -->
+        <polygon points="38,12 43,16 38,20 33,16" fill="#22D3EE" />
+        <polygon points="62,12 67,16 62,20 57,16" fill="#22D3EE" />`;
+        },
+
+        get_crab_stage_4(uid) {
+            return `<!-- Crab Stage 4: 星穹裂空神鳌 (五阶·宇宙真神巨鳌) -->
+        <!-- 外层十二边形全息神圣星环 -->
+        <g class="origami-cosmic-ring ring-outer">
+            <polygon points="50,2 74,8 92,26 98,50 92,74 74,92 50,98 26,92 8,74 2,50 8,26 26,8"
+                     fill="none" stroke="#FBBF24" stroke-width="1.4" stroke-dasharray="4,2.5" />
+        </g>
+        <g class="origami-cosmic-ring ring-inner">
+            <polygon points="50,12 77,23 88,50 77,77 50,88 23,77 12,50 23,23"
+                     fill="none" stroke="#A855F7" stroke-width="1.2" stroke-dasharray="3,2" />
+        </g>
+        <!-- 巨鳌王冠 -->
+        <polygon points="44,10 50,0 56,10 50,6" fill="#FDE047" stroke="#F59E0B" stroke-width="0.6" />
+        <!-- 星穹主甲 -->
+        <polygon points="50,14 80,24 82,64 50,80 18,64 20,24" fill="#6366F1" stroke="#FDE047" stroke-width="1" />
+        <polygon points="50,14 80,24 50,44" fill="#C7D2FE" />
+        <polygon points="50,14 50,44 20,24" fill="#818CF8" />
+        <polygon points="20,24 50,44 18,64" fill="#4F46E5" />
+        <polygon points="80,24 82,64 50,44" fill="#4338CA" />
+        <polygon points="18,64 50,44 50,80" fill="#3730A3" />
+        <polygon points="50,80 50,44 82,64" fill="#312E81" />
+        <!-- 宇宙裂空巨鳌 (横跨天际) -->
+        <polygon points="20,24 0,0 12,28" fill="#FDE047" stroke="#F59E0B" stroke-width="1" />
+        <polygon points="0,0 0,16 12,28" fill="#F43F5E" />
+        <polygon points="20,24 12,28 16,42" fill="#E11D48" />
+        <polygon points="80,24 100,0 88,28" fill="#FFFBEB" stroke="#F59E0B" stroke-width="1" />
+        <polygon points="100,0 100,16 88,28" fill="#FBBF24" />
+        <polygon points="80,24 88,28 84,42" fill="#D97706" />
+        <!-- 六足神晶刃 -->
+        <polygon points="18,44 2,52 16,54" fill="#A855F7" stroke="#FDE047" stroke-width="0.6" />
+        <polygon points="18,54 2,68 16,64" fill="#9333EA" />
+        <polygon points="18,64 6,82 18,74" fill="#7E22CE" />
+        <polygon points="82,44 98,52 84,54" fill="#22D3EE" stroke="#FDE047" stroke-width="0.6" />
+        <polygon points="82,54 98,68 84,64" fill="#06B6D4" />
+        <polygon points="82,64 94,82 82,74" fill="#0891B2" />
+        <!-- 贯穿全息脊梁 -->
+        <polyline points="50,14 50,44 50,80" stroke="#FFFBEB" stroke-width="1.8" stroke-dasharray="3,1" />
+        <!-- 散落全息折纸小星芒 -->
+        <polygon points="88,20 90,18 92,20 90,22" fill="#FDE047" />
+        <polygon points="10,20 12,18 14,20 12,22" fill="#22D3EE" />
+        <polygon points="22,86 24,84 26,86 24,88" fill="#F472B6" />
+        <!-- 神威双目 -->
+        <polygon points="38,10 43,14 38,18 33,14" fill="#FDE047" />
+        <polygon points="62,10 67,14 62,18 57,14" fill="#FDE047" />`;
+        },
+
+        get_shrimp_stage_0(uid) {
+            return `<!-- Shrimp Stage 0: 弯折小纸虾 (三段式软萌纸虾) -->
+        <!-- 头部前节 -->
+        <polygon points="76,38 58,26 62,48" fill="#F472B6" />
+        <polygon points="76,38 62,48 70,54" fill="#DB2777" />
+        <!-- 躯干中节 -->
+        <polygon points="58,26 40,32 44,52 62,48" fill="#FB7185" />
+        <!-- 腹部后节 -->
+        <polygon points="40,32 24,46 28,62 44,52" fill="#E11D48" />
+        <!-- 尾扇双折纸 -->
+        <polygon points="24,46 8,56 18,60" fill="#FDA4AF" />
+        <polygon points="24,46 18,60 14,70 28,62" fill="#BE123C" />
+        <!-- 虾须几何折线 -->
+        <polyline points="76,38 88,26 96,16" stroke="#F472B6" stroke-width="1" stroke-linecap="round" fill="none" />
+        <polyline points="76,38 88,32 94,24" stroke="#FB7185" stroke-width="0.8" stroke-linecap="round" fill="none" />
+        <!-- 折痕骨架 -->
+        <line x1="62" y1="48" x2="44" y2="52" stroke="#FFFFFF" stroke-width="0.8" stroke-dasharray="2,1" />
+        <line x1="44" y1="52" x2="28" y2="62" stroke="#FFFFFF" stroke-width="0.8" stroke-dasharray="2,1" />
+        <!-- 眼睛 -->
+        <polygon points="66,35 69,38 66,41 63,38" fill="#FFFFFF" />
+        <polygon points="66,36.5 67.5,38 66,39.5 64.5,38" fill="#881337" />`;
+        },
+
+        get_shrimp_stage_1(uid) {
+            return `<!-- Shrimp Stage 1: 扇尾晶莹虾 (六节折叠弹射晶虾) -->
+        <!-- 头部与前额刺 -->
+        <polygon points="82,34 62,24 66,46" fill="#FBBF24" />
+        <polygon points="82,34 66,46 76,52" fill="#F59E0B" />
+        <polygon points="82,34 94,24 74,32" fill="#FDE047" />
+        <!-- 躯干甲片 1 -->
+        <polygon points="62,24 46,28 48,50 66,46" fill="#F472B6" />
+        <!-- 躯干甲片 2 -->
+        <polygon points="46,28 32,38 36,58 48,50" fill="#FB7185" />
+        <!-- 尾节 -->
+        <polygon points="32,38 18,52 24,68 36,58" fill="#E11D48" />
+        <!-- 四折百褶纸扇尾 -->
+        <polygon points="18,52 2,56 10,64" fill="#FDE047" />
+        <polygon points="18,52 10,64 6,74" fill="#F59E0B" />
+        <polygon points="18,52 6,74 16,78" fill="#D97706" />
+        <polygon points="18,52 16,78 24,68" fill="#B45309" />
+        <!-- 虾须折线 -->
+        <polyline points="82,34 92,20 100,10" stroke="#FDE047" stroke-width="1.2" stroke-linecap="round" fill="none" />
+        <!-- 折痕骨架 -->
+        <polyline points="82,34 66,46 48,50 36,58 18,52" stroke="#FFFFFF" stroke-width="1.2" stroke-dasharray="2.5,1.5" fill="none" />
+        <!-- 眼睛 -->
+        <polygon points="70,32 74,36 70,40 66,36" fill="#FFFFFF" />
+        <polygon points="70,33.5 72.5,36 70,38.5 67.5,36" fill="#991B1B" />`;
+        },
+
+        get_shrimp_stage_2(uid) {
+            return `<!-- Shrimp Stage 2: 烈焰喷射虾 (三阶·火箭喷射金羽) -->
+        <!-- 折纸王者金冠 👑 -->
+        <polygon points="56,16 62,6 68,16 62,12" fill="#FDE047" stroke="#F59E0B" stroke-width="0.6" />
+        <!-- 火箭喷射折叠翼 -->
+        <polygon points="46,28 36,10 42,28" fill="#F97316" stroke="#EA580C" stroke-width="0.8" />
+        <polygon points="36,10 28,18 40,28" fill="#EA580C" />
+        <!-- 头部烈焰面 -->
+        <polygon points="84,36 64,24 68,48" fill="#FED7AA" />
+        <polygon points="84,36 68,48 78,54" fill="#F97316" />
+        <!-- 躯干甲片 -->
+        <polygon points="64,24 46,28 48,52 68,48" fill="#F43F5E" />
+        <polygon points="46,28 30,40 34,60 48,52" fill="#E11D48" />
+        <polygon points="30,40 16,54 22,70 34,60" fill="#BE123C" />
+        <!-- 火焰五折尾 -->
+        <polygon points="16,54 0,54 8,64" fill="#FDE047" stroke="#F59E0B" stroke-width="0.8" />
+        <polygon points="16,54 8,64 4,74" fill="#F97316" />
+        <polygon points="16,54 4,74 14,80" fill="#EF4444" />
+        <polygon points="16,54 14,80 22,70" fill="#DC2626" />
+        <!-- 黄金长须 -->
+        <polyline points="84,36 94,18 100,6" stroke="#FDE047" stroke-width="1.3" stroke-linecap="round" fill="none" />
+        <!-- 烫金主折痕 -->
+        <polyline points="84,36 68,48 48,52 34,60 16,54" stroke="#FFFBEB" stroke-width="1.4" stroke-dasharray="3,1.5" fill="none" />
+        <!-- 眼睛 -->
+        <polygon points="72,32 76,36 72,40 68,36" fill="#FFFFFF" />
+        <polygon points="72,33.5 74.5,36 72,38.5 69.5,36" fill="#7C2D12" />`;
+        },
+
+        get_shrimp_stage_3(uid) {
+            return `<!-- Shrimp Stage 3: 雷霆金羽神速虾 (四阶·电光金翼神速) -->
+        <!-- 悬浮折纸电光灵球 (右上方) -->
+        <g class="origami-floating-orb" transform="translate(80, 14)">
+            <polygon points="0,-8 6,-3 6,3 0,8 -6,3 -6,-3" fill="#38BDF8" stroke="#FDE047" stroke-width="0.8" />
+            <polygon points="0,-8 0,0 6,-3" fill="#E0F2FE" />
+            <polygon points="6,-3 0,0 6,3" fill="#7DD3FC" />
+            <polygon points="6,3 0,0 0,8" fill="#38BDF8" />
+            <polygon points="0,8 0,0 -6,3" fill="#0284C7" />
+            <polygon points="-6,3 0,0 -6,-3" fill="#0369A1" />
+            <polygon points="-6,-3 0,0 0,-8" fill="#BAE6FD" />
+        </g>
+        <!-- 舒展的折纸雷霆神翼 -->
+        <polygon points="48,28 36,4 42,26" fill="#FDE047" stroke="#D97706" stroke-width="0.8" />
+        <polygon points="36,4 24,12 40,26" fill="#F59E0B" />
+        <polygon points="24,12 16,6 30,22" fill="#D97706" />
+        <!-- 主躯干金羽甲片 -->
+        <polygon points="84,36 64,22 68,48" fill="#FEF08A" stroke="#F59E0B" stroke-width="0.8" />
+        <polygon points="84,36 68,48 78,56" fill="#FDE047" />
+        <polygon points="64,22 46,26 48,52 68,48" fill="#FBBF24" />
+        <polygon points="46,26 28,38 32,60 48,52" fill="#F59E0B" />
+        <polygon points="28,38 14,54 20,72 32,60" fill="#D97706" />
+        <!-- 金羽扇尾 -->
+        <polygon points="14,54 0,50 6,62" fill="#38BDF8" stroke="#FDE047" stroke-width="0.8" />
+        <polygon points="14,54 6,62 0,72" fill="#0284C7" />
+        <polygon points="14,54 0,72 10,80" fill="#FBBF24" />
+        <polygon points="14,54 10,80 20,72" fill="#F59E0B" />
+        <!-- 闪电折痕须 -->
+        <polyline points="84,36 94,24 92,16 100,8" stroke="#FDE047" stroke-width="1.5" stroke-linecap="round" fill="none" />
+        <polyline points="84,36 68,48 48,52 32,60 14,54" stroke="#FFFBEB" stroke-width="1.6" stroke-dasharray="3,1" fill="none" />
+        <!-- 眼睛 -->
+        <polygon points="72,30 77,34 72,38 67,34" fill="#38BDF8" />`;
+        },
+
+        get_shrimp_stage_4(uid) {
+            return `<!-- Shrimp Stage 4: 不死朱雀真神虾 (五阶·朱雀神凰极意) -->
+        <!-- 外层十二边形神圣星环 -->
+        <g class="origami-cosmic-ring ring-outer">
+            <polygon points="50,2 74,8 92,26 98,50 92,74 74,92 50,98 26,92 8,74 2,50 8,26 26,8"
+                     fill="none" stroke="#FBBF24" stroke-width="1.4" stroke-dasharray="4,2.5" />
+        </g>
+        <g class="origami-cosmic-ring ring-inner">
+            <polygon points="50,12 77,23 88,50 77,77 50,88 23,77 12,50 23,23"
+                     fill="none" stroke="#F43F5E" stroke-width="1.2" stroke-dasharray="3,2" />
+        </g>
+        <!-- 朱雀真神冠羽 -->
+        <polygon points="62,18 70,4 74,18" fill="#FDE047" stroke="#F59E0B" stroke-width="0.8" />
+        <polygon points="54,22 62,18 64,24" fill="#F59E0B" />
+        <!-- 舒展的朱雀折纸双翼 -->
+        <polygon points="48,28 30,0 38,24" fill="#FDA4AF" stroke="#FDE047" stroke-width="0.8" />
+        <polygon points="30,0 18,10 34,24" fill="#F43F5E" />
+        <polygon points="18,10 8,6 24,20" fill="#E11D48" />
+        <!-- 主躯干朱雀霓虹甲片 -->
+        <polygon points="84,36 64,20 68,48" fill="#F472B6" stroke="#FDE047" stroke-width="0.8" />
+        <polygon points="84,36 68,48 78,56" fill="#EC4899" />
+        <polygon points="64,20 46,24 48,52 68,48" fill="#DB2777" />
+        <polygon points="46,24 28,36 32,60 48,52" fill="#BE185D" />
+        <polygon points="28,36 14,52 20,72 32,60" fill="#9D174D" />
+        <!-- 绚烂凤凰九折飘尾 -->
+        <polygon points="14,52 0,44 6,58" fill="#FDE047" stroke="#F59E0B" stroke-width="0.8" />
+        <polygon points="14,52 6,58 0,68" fill="#F43F5E" />
+        <polygon points="14,52 0,68 8,78" fill="#C084FC" />
+        <polygon points="14,52 8,78 20,72" fill="#22D3EE" />
+        <!-- 凤凰金丝神须 -->
+        <polyline points="84,36 96,20 92,10 100,0" stroke="#FDE047" stroke-width="1.6" stroke-linecap="round" fill="none" />
+        <polyline points="84,36 68,48 48,52 32,60 14,52" stroke="#FFFBEB" stroke-width="1.8" stroke-dasharray="3,1" fill="none" />
+        <!-- 全息星芒 -->
+        <polygon points="86,18 88,16 90,18 88,20" fill="#FDE047" />
+        <polygon points="12,18 14,16 16,18 14,20" fill="#22D3EE" />
+        <polygon points="22,86 24,84 26,86 24,88" fill="#F472B6" />
+        <!-- 神威明目 -->
+        <polygon points="72,28 77,32 72,36 67,32" fill="#FDE047" />`;
+        },
+
+        get_octo_stage_0(uid) {
+            return `<!-- Octo Stage 0: 八角小纸章 (八角穹顶小软章) -->
+        <!-- 八角折纸穹顶头 -->
+        <polygon points="50,18 68,26 74,44 64,58 50,62 36,58 26,44 32,26" fill="#C084FC" />
+        <polygon points="50,18 68,26 50,42" fill="#E9D5FF" />
+        <polygon points="50,18 50,42 32,26" fill="#D8B4FE" />
+        <polygon points="32,26 50,42 26,44" fill="#C084FC" />
+        <polygon points="68,26 74,44 50,42" fill="#A855F7" />
+        <polygon points="26,44 50,42 36,58" fill="#9333EA" />
+        <polygon points="74,44 50,42 64,58" fill="#7E22CE" />
+        <polygon points="36,58 50,42 50,62" fill="#6B21A8" />
+        <polygon points="64,58 50,42 50,62" fill="#581C87" />
+        <!-- 六只折纸三角触手 -->
+        <polygon points="28,54 18,68 32,64" fill="#9333EA" />
+        <polygon points="34,60 26,76 40,68" fill="#7E22CE" />
+        <polygon points="42,62 44,82 50,68" fill="#6B21A8" />
+        <polygon points="50,68 56,82 58,62" fill="#6B21A8" />
+        <polygon points="60,68 74,76 66,60" fill="#7E22CE" />
+        <polygon points="68,64 82,68 72,54" fill="#9333EA" />
+        <!-- 折痕骨架 -->
+        <line x1="50" y1="18" x2="50" y2="62" stroke="#FFFFFF" stroke-width="1" stroke-dasharray="2,1.5" />
+        <line x1="26" y1="44" x2="74" y2="44" stroke="#FFFFFF" stroke-width="0.8" stroke-dasharray="2,1" />
+        <!-- 折纸几何眼睛 -->
+        <polygon points="40,36 44,39 40,42 36,39" fill="#FFFFFF" />
+        <polygon points="40,37.5 42,39 40,40.5 38,39" fill="#3B0764" />
+        <polygon points="60,36 64,39 60,42 56,39" fill="#FFFFFF" />
+        <polygon points="60,37.5 62,39 60,40.5 58,39" fill="#3B0764" />`;
+        },
+
+        get_octo_stage_1(uid) {
+            return `<!-- Octo Stage 1: 棱面火箭乌贼 (流线折叠箭尾) -->
+        <!-- 火箭尖顶与侧翼 -->
+        <polygon points="50,14 68,34 50,38" fill="#93C5FD" />
+        <polygon points="50,14 50,38 32,34" fill="#60A5FA" />
+        <polygon points="50,14 78,28 68,34" fill="#BFDBFE" />
+        <polygon points="50,14 32,34 22,28" fill="#3B82F6" />
+        <!-- 躯干中央晶面 -->
+        <polygon points="32,34 50,38 48,60 30,56" fill="#2563EB" />
+        <polygon points="68,34 70,56 52,60 50,38" fill="#1D4ED8" />
+        <!-- 触手折叠飘带 -->
+        <polygon points="30,56 16,74 32,70" fill="#3B82F6" />
+        <polygon points="36,60 28,84 42,76" fill="#2563EB" />
+        <polygon points="44,60 48,92 52,76" fill="#1D4ED8" />
+        <polygon points="52,76 52,92 56,60" fill="#1D4ED8" />
+        <polygon points="58,76 72,84 64,60" fill="#1E40AF" />
+        <polygon points="68,70 84,74 70,56" fill="#172554" />
+        <!-- 脊椎折痕线 -->
+        <polyline points="50,14 50,38 50,60" stroke="#FFFFFF" stroke-width="1.2" stroke-dasharray="2.5,1.5" />
+        <!-- 双眼 -->
+        <polygon points="38,44 42,48 38,52 34,48" fill="#FFFFFF" />
+        <polygon points="38,45.5 40.5,48 38,50.5 35.5,48" fill="#1E3A8A" />
+        <polygon points="62,44 66,48 62,52 58,48" fill="#FFFFFF" />
+        <polygon points="62,45.5 64.5,48 62,50.5 59.5,48" fill="#1E3A8A" />`;
+        },
+
+        get_octo_stage_2(uid) {
+            return `<!-- Octo Stage 2: 礼帽折纸魔术章 (三阶·魔术大礼帽) -->
+        <!-- 3D 折纸魔术高礼帽 🎩 -->
+        <polygon points="36,4 64,4 62,20 38,20" fill="#18181B" stroke="#FDE047" stroke-width="0.8" />
+        <polygon points="36,4 50,4 50,20 38,20" fill="#27272A" />
+        <!-- 礼帽金带 -->
+        <polygon points="38,16 62,16 61,20 39,20" fill="#FDE047" />
+        <!-- 礼帽帽檐折面 -->
+        <polygon points="26,20 74,20 68,24 32,24" fill="#3F3F46" />
+        <!-- 章鱼头部晶面 -->
+        <polygon points="32,24 68,24 74,44 64,58 50,62 36,58 26,44" fill="#A855F7" />
+        <polygon points="32,24 68,24 50,42" fill="#C084FC" />
+        <polygon points="32,24 50,42 26,44" fill="#A855F7" />
+        <polygon points="68,24 74,44 50,42" fill="#9333EA" />
+        <polygon points="26,44 50,42 36,58" fill="#7E22CE" />
+        <polygon points="74,44 50,42 64,58" fill="#6B21A8" />
+        <!-- 触手与微型魔杖 -->
+        <polygon points="26,54 12,70 28,66" fill="#9333EA" />
+        <polygon points="34,60 20,84 38,74" fill="#7E22CE" />
+        <polygon points="42,62 44,90 50,74" fill="#6B21A8" />
+        <polygon points="50,74 56,90 58,62" fill="#6B21A8" />
+        <polygon points="60,74 78,84 66,60" fill="#7E22CE" />
+        <!-- 右触手手持金色小魔杖 ✨ -->
+        <polygon points="68,66 84,70 72,54" fill="#9333EA" />
+        <polyline points="72,54 86,40 90,44 76,58" fill="#FDE047" stroke="#D97706" stroke-width="0.8" />
+        <polygon points="88,38 90,36 92,38 90,40" fill="#FFFFFF" />
+        <!-- 双眼 -->
+        <polygon points="40,36 44,40 40,44 36,40" fill="#FFFFFF" />
+        <polygon points="40,37.5 42.5,40 40,42.5 37.5,40" fill="#581C87" />
+        <polygon points="60,36 64,40 60,44 56,40" fill="#FFFFFF" />
+        <polygon points="60,37.5 62.5,40 60,42.5 57.5,40" fill="#581C87" />`;
+        },
+
+        get_octo_stage_3(uid) {
+            return `<!-- Octo Stage 3: 奥术千面学者 (四阶·二十面体奥术球) -->
+        <!-- 悬浮折纸奥术法球 (左上方) -->
+        <g class="origami-floating-orb" transform="translate(18, 16)">
+            <polygon points="0,-8 7,-4 7,4 0,8 -7,4 -7,-4" fill="#22D3EE" stroke="#A855F7" stroke-width="0.8" />
+            <polygon points="0,-8 0,0 7,-4" fill="#E0F2FE" />
+            <polygon points="7,-4 0,0 7,4" fill="#67E8F9" />
+            <polygon points="7,4 0,0 0,8" fill="#06B6D4" />
+            <polygon points="0,8 0,0 -7,4" fill="#0891B2" />
+            <polygon points="-7,4 0,0 -7,-4" fill="#0E7490" />
+            <polygon points="-7,-4 0,0 0,-8" fill="#A5F3FC" />
+        </g>
+        <!-- 学者折纸方巾与金冠 -->
+        <polygon points="42,12 50,4 58,12 50,8" fill="#FDE047" stroke="#F59E0B" stroke-width="0.6" />
+        <!-- 头部深海翡翠奥术晶面 -->
+        <polygon points="50,14 74,24 80,44 68,60 50,64 32,60 20,44 26,24" fill="#059669" stroke="#FBBF24" stroke-width="0.8" />
+        <polygon points="50,14 74,24 50,40" fill="#6EE7B7" />
+        <polygon points="50,14 50,40 26,24" fill="#34D399" />
+        <polygon points="26,24 50,40 20,44" fill="#10B981" />
+        <polygon points="74,24 80,44 50,40" fill="#059669" />
+        <polygon points="20,44 50,40 32,60" fill="#047857" />
+        <polygon points="80,44 50,40 68,60" fill="#065F46" />
+        <!-- 触手八芒舒展折面 -->
+        <polygon points="24,56 6,70 24,66" fill="#10B981" stroke="#FBBF24" stroke-width="0.6" />
+        <polygon points="30,60 16,84 34,74" fill="#059669" />
+        <polygon points="38,62 30,94 44,76" fill="#047857" />
+        <polygon points="46,64 50,96 54,64" fill="#065F46" />
+        <polygon points="56,76 70,94 62,62" fill="#047857" />
+        <polygon points="66,74 84,84 70,60" fill="#059669" />
+        <polygon points="76,66 94,70 76,56" fill="#10B981" stroke="#FBBF24" stroke-width="0.6" />
+        <!-- 奥术折痕脊梁 -->
+        <polyline points="50,14 50,40 50,64" stroke="#FFFBEB" stroke-width="1.6" stroke-dasharray="3,1" />
+        <!-- 智慧双目 -->
+        <polygon points="38,34 43,38 38,42 33,38" fill="#22D3EE" />
+        <polygon points="62,34 67,38 62,42 57,38" fill="#22D3EE" />`;
+        },
+
+        get_octo_stage_4(uid) {
+            return `<!-- Octo Stage 4: 深渊海皇三叉戟真章 (五阶·深渊海皇真神) -->
+        <!-- 外层十二边形神圣星环 -->
+        <g class="origami-cosmic-ring ring-outer">
+            <polygon points="50,2 74,8 92,26 98,50 92,74 74,92 50,98 26,92 8,74 2,50 8,26 26,8"
+                     fill="none" stroke="#FBBF24" stroke-width="1.4" stroke-dasharray="4,2.5" />
+        </g>
+        <g class="origami-cosmic-ring ring-inner">
+            <polygon points="50,12 77,23 88,50 77,77 50,88 23,77 12,50 23,23"
+                     fill="none" stroke="#A855F7" stroke-width="1.2" stroke-dasharray="3,2" />
+        </g>
+        <!-- 至尊折纸海皇冠 -->
+        <polygon points="42,12 50,0 58,12 50,6" fill="#FDE047" stroke="#F59E0B" stroke-width="0.8" />
+        <polygon points="36,16 42,12 44,18" fill="#F59E0B" />
+        <polygon points="58,12 64,16 56,18" fill="#D97706" />
+        <!-- 深渊紫金帝王头面 -->
+        <polygon points="50,14 76,22 82,44 70,62 50,66 30,62 18,44 24,22" fill="#7C3AED" stroke="#FDE047" stroke-width="1" />
+        <polygon points="50,14 76,22 50,40" fill="#DDD6FE" />
+        <polygon points="50,14 50,40 24,22" fill="#C4B5FD" />
+        <polygon points="24,22 50,40 18,44" fill="#A78BFA" />
+        <polygon points="76,22 82,44 50,40" fill="#8B5CF6" />
+        <polygon points="18,44 50,40 30,62" fill="#7C3AED" />
+        <polygon points="82,44 50,40 70,62" fill="#6D28D9" />
+        <!-- 触手深渊折面 -->
+        <polygon points="22,56 4,70 20,66" fill="#8B5CF6" stroke="#FDE047" stroke-width="0.6" />
+        <polygon points="28,60 14,84 32,74" fill="#7C3AED" />
+        <polygon points="36,62 26,94 42,76" fill="#6D28D9" />
+        <polygon points="46,64 50,96 54,64" fill="#5B21B6" />
+        <polygon points="56,76 74,94 64,62" fill="#6D28D9" />
+        <polygon points="66,74 86,84 72,60" fill="#7C3AED" />
+        <!-- 手握折纸海神三叉戟 🔱 -->
+        <g transform="translate(82, 38)">
+            <line x1="0" y1="36" x2="0" y2="-20" stroke="#FDE047" stroke-width="2.2" stroke-linecap="round" />
+            <polygon points="-6,-12 0,-26 6,-12 0,-16" fill="#FDE047" stroke="#D97706" stroke-width="0.8" />
+            <polygon points="-12,-8 -6,-16 -4,-8" fill="#FBBF24" stroke="#D97706" stroke-width="0.6" />
+            <polygon points="12,-8 6,-16 4,-8" fill="#FBBF24" stroke="#D97706" stroke-width="0.6" />
+        </g>
+        <!-- 烫金神圣折脊线 -->
+        <polyline points="50,14 50,40 50,66" stroke="#FFFBEB" stroke-width="1.8" stroke-dasharray="3,1" />
+        <!-- 散落全息星芒 -->
+        <polygon points="86,16 88,14 90,16 88,18" fill="#FDE047" />
+        <polygon points="12,16 14,14 16,16 14,18" fill="#22D3EE" />
+        <polygon points="20,86 22,84 24,86 22,88" fill="#F472B6" />
+        <!-- 海皇神威双目 -->
+        <polygon points="38,34 43,38 38,42 33,38" fill="#FDE047" />
+        <polygon points="62,34 67,38 62,42 57,38" fill="#FDE047" />`;
+        },
+
+        // ========================================================
+        // 🐢 5. 纸灵龟 (GEOMETRIC TORTOISE - 5 STAGES)
+        // ========================================================
+        get_turtle_stage_0(uid) {
+            return `<!-- Turtle Stage 0: 萌动小钱龟 (六棱翡翠折纸幼龟) -->
+        <!-- 四肢小折桨 -->
+        <polygon points="30,36 12,26 24,46" fill="#34D399" />
+        <polygon points="70,36 88,26 76,46" fill="#10B981" />
+        <polygon points="32,62 16,74 34,70" fill="#059669" />
+        <polygon points="68,62 84,74 66,70" fill="#047857" />
+        <!-- 小尾巴 -->
+        <polygon points="50,78 46,88 54,88" fill="#059669" />
+        <!-- 呆萌小头 -->
+        <polygon points="50,14 58,28 42,28" fill="#6EE7B7" />
+        <polygon points="46,20 48,22 46,24 44,22" fill="#064E3B" />
+        <polygon points="54,20 56,22 54,24 52,22" fill="#064E3B" />
+        <!-- 六边形折纸龟壳 -->
+        <polygon points="50,48 50,28 68,38" fill="#34D399" />
+        <polygon points="50,48 68,38 68,60" fill="#10B981" />
+        <polygon points="50,48 68,60 50,72" fill="#059669" />
+        <polygon points="50,48 50,72 32,60" fill="#047857" />
+        <polygon points="50,48 32,60 32,38" fill="#10B981" />
+        <polygon points="50,48 32,38 50,28" fill="#6EE7B7" />
+        <!-- 边缘折痕虚线 -->
+        <polygon points="50,28 68,38 68,60 50,72 32,60 32,38" fill="none" stroke="#FFFFFF" stroke-width="1.1" stroke-dasharray="2.5,1.5" />
+        <line x1="50" y1="28" x2="50" y2="72" stroke="#FFFFFF" stroke-width="0.8" stroke-dasharray="2,1" />`;
+        },
+
+        get_turtle_stage_1(uid) {
+            return `<!-- Turtle Stage 1: 菱晶浮游龟 (二阶·宽翼划水晶体灵龟) -->
+        <!-- 宽大前肢翼桨 -->
+        <polygon points="32,36 4,22 18,48 28,42" fill="#6EE7B7" />
+        <polygon points="68,36 96,22 82,48 72,42" fill="#10B981" />
+        <polygon points="30,64 12,78 32,74" fill="#059669" />
+        <polygon points="70,64 88,78 68,74" fill="#047857" />
+        <polygon points="50,80 45,92 55,92" fill="#065F46" />
+        <!-- 头部与眼部 -->
+        <polygon points="50,12 60,26 40,26" fill="#A7F3D0" />
+        <polygon points="50,12 50,26 40,26" fill="#6EE7B7" />
+        <polygon points="45,18 47,20 45,22 43,20" fill="#064E3B" />
+        <polygon points="55,18 57,20 55,22 53,20" fill="#064E3B" />
+        <!-- 多面菱晶龟甲 -->
+        <polygon points="50,30 64,40 50,52 36,40" fill="#34D399" />
+        <polygon points="50,52 64,64 50,76 36,64" fill="#059669" />
+        <polygon points="36,40 50,52 36,64 24,52" fill="#10B981" />
+        <polygon points="64,40 76,52 64,64 50,52" fill="#047857" />
+        <polygon points="50,30 36,40 24,34 38,26" fill="#A7F3D0" />
+        <polygon points="50,30 64,40 76,34 62,26" fill="#6EE7B7" />
+        <polygon points="36,64 50,76 44,82 28,72" fill="#065F46" />
+        <polygon points="64,64 50,76 56,82 72,72" fill="#064E3B" />
+        <!-- 晶体折脊线 -->
+        <polyline points="50,12 50,30 50,52 50,76" stroke="#FFFFFF" stroke-width="1.2" stroke-dasharray="3,1.5" />`;
+        },
+
+        get_turtle_stage_2(uid) {
+            return `<!-- Turtle Stage 2: 金纹厚甲龟 (三阶·头戴金冠镇浪神龟) -->
+        <polygon points="44,8 50,2 56,8 50,5" fill="#FDE047" stroke="#F59E0B" stroke-width="0.6" />
+        <polygon points="38,12 44,8 46,13" fill="#F59E0B" />
+        <polygon points="56,8 62,12 54,13" fill="#D97706" />
+        <!-- 威严前鳍 -->
+        <polygon points="30,36 2,20 16,48 28,42" fill="#34D399" stroke="#FDE047" stroke-width="0.6" />
+        <polygon points="70,36 98,20 84,48 72,42" fill="#10B981" stroke="#FDE047" stroke-width="0.6" />
+        <polygon points="28,66 10,82 32,76" fill="#059669" />
+        <polygon points="72,66 90,82 68,76" fill="#047857" />
+        <!-- 龙首灵头 -->
+        <polygon points="50,12 62,28 38,28" fill="#A7F3D0" />
+        <polygon points="44,18 48,21 44,24 40,21" fill="#FFFFFF" />
+        <polygon points="56,18 60,21 56,24 52,21" fill="#FFFFFF" />
+        <!-- 金纹玄岩龟甲 -->
+        <polygon points="50,32 66,42 50,56 34,42" fill="#059669" stroke="#FDE047" stroke-width="0.8" />
+        <polygon points="50,56 66,70 50,82 34,70" fill="#047857" stroke="#FDE047" stroke-width="0.8" />
+        <polygon points="34,42 50,56 34,70 20,56" fill="#10B981" stroke="#FDE047" stroke-width="0.8" />
+        <polygon points="66,42 80,56 66,70 50,56" fill="#065F46" stroke="#FDE047" stroke-width="0.8" />
+        <polyline points="50,2 50,32 50,56 50,82" stroke="#FDE047" stroke-width="1.4" stroke-dasharray="3,1" />`;
+        },
+
+        get_turtle_stage_3(uid) {
+            return `<!-- Turtle Stage 3: 碧海长青神龟 (四阶·背负仙岛玄灵宝珠) -->
+        <g class="origami-floating-orb">
+            <polygon points="0,-8 6,-3 6,3 0,8 -6,3 -6,-3" fill="#34D399" stroke="#059669" stroke-width="0.8" />
+            <polygon points="0,-8 0,0 6,-3" fill="#A7F3D0" />
+            <polygon points="6,-3 0,0 6,3" fill="#10B981" />
+            <polygon points="6,3 0,0 0,8" fill="#059669" />
+            <polygon points="0,8 0,0 -6,3" fill="#047857" />
+            <polygon points="-6,3 0,0 -6,-3" fill="#065F46" />
+        </g>
+        <!-- 龙首角冠 -->
+        <polygon points="46,12 50,2 54,12" fill="#FDE047" />
+        <polygon points="50,14 64,30 36,30" fill="#6EE7B7" stroke="#FDE047" stroke-width="0.8" />
+        <!-- 巨灵神鳍 -->
+        <polygon points="30,36 0,16 14,50 28,42" fill="#10B981" stroke="#FDE047" stroke-width="0.8" />
+        <polygon points="70,36 100,16 86,50 72,42" fill="#059669" stroke="#FDE047" stroke-width="0.8" />
+        <polygon points="26,66 6,86 32,78" fill="#047857" />
+        <polygon points="74,66 94,86 68,78" fill="#065F46" />
+        <!-- 仙山八棱背甲 -->
+        <polygon points="50,32 70,44 50,60 30,44" fill="#059669" stroke="#FDE047" stroke-width="1" />
+        <polygon points="50,60 70,74 50,88 30,74" fill="#064E3B" stroke="#FDE047" stroke-width="1" />
+        <polygon points="30,44 50,60 30,74 14,60" fill="#047857" stroke="#FDE047" stroke-width="0.8" />
+        <polygon points="70,44 86,60 70,74 50,60" fill="#065F46" stroke="#FDE047" stroke-width="0.8" />
+        <polyline points="50,2 50,32 50,60 50,88" stroke="#FFFBEB" stroke-width="1.6" stroke-dasharray="3,1" />`;
+        },
+
+        get_turtle_stage_4(uid) {
+            return `<!-- Turtle Stage 4: 九天镇岳玄武 (五阶·全息星宿神圣玄武大帝) -->
+        <g class="origami-cosmic-ring ring-outer">
+            <polygon points="50,2 74,8 92,26 98,50 92,74 74,92 50,98 26,92 8,74 2,50 8,26 26,8"
+                     fill="none" stroke="#FDE047" stroke-width="1.4" stroke-dasharray="4,2.5" />
+        </g>
+        <g class="origami-cosmic-ring ring-inner">
+            <polygon points="50,12 77,23 88,50 77,77 50,88 23,77 12,50 23,23"
+                     fill="none" stroke="#10B981" stroke-width="1.2" stroke-dasharray="3,2" />
+        </g>
+        <!-- 玄武灵蛇缠绕折线 -->
+        <path d="M 18,84 Q 8,50 28,30 T 72,30 T 82,70 T 50,94" fill="none" stroke="#34D399" stroke-width="2.2" stroke-linecap="round" stroke-dasharray="5,2" />
+        <!-- 龙首玄武皇冠 -->
+        <polygon points="42,10 50,0 58,10 50,4" fill="#FDE047" stroke="#F59E0B" stroke-width="0.8" />
+        <polygon points="50,12 66,28 34,28" fill="#A7F3D0" stroke="#FDE047" stroke-width="1" />
+        <polygon points="44,18 48,21 44,24 40,21" fill="#FDE047" />
+        <polygon points="56,18 60,21 56,24 52,21" fill="#FDE047" />
+        <!-- 镇岳神甲 -->
+        <polygon points="50,32 72,46 50,62 28,46" fill="#047857" stroke="#FDE047" stroke-width="1.2" />
+        <polygon points="50,62 72,76 50,90 28,76" fill="#064E3B" stroke="#FDE047" stroke-width="1.2" />
+        <polygon points="28,46 50,62 28,76 10,60" fill="#065F46" stroke="#FDE047" stroke-width="1" />
+        <polygon points="72,46 90,60 72,76 50,62" fill="#022C22" stroke="#FDE047" stroke-width="1" />
+        <!-- 金曜星芒 -->
+        <polygon points="88,14 90,12 92,14 90,16" fill="#FDE047" />
+        <polygon points="12,14 14,12 16,14 14,16" fill="#FDE047" />
+        <polyline points="50,0 50,32 50,62 50,90" stroke="#FFFFFF" stroke-width="2" stroke-dasharray="4,1.5" />`;
+        },
+
+        // ========================================================
+        // 🪼 6. 纸灵水母 (GEOMETRIC JELLYFISH - 5 STAGES)
+        // ========================================================
+        get_jelly_stage_0(uid) {
+            return `<!-- Jellyfish Stage 0: 微光小伞帽 (多面折纸灵水母幼体) -->
+        <!-- 伞盖主体 (半球折纸面) -->
+        <polygon points="50,20 26,38 50,42" fill="#FDA4AF" />
+        <polygon points="50,20 50,42 74,38" fill="#F43F5E" />
+        <polygon points="26,38 18,52 34,50 50,42" fill="#FB7185" />
+        <polygon points="74,38 50,42 66,50 82,52" fill="#E11D48" />
+        <polygon points="34,50 50,42 66,50 50,56" fill="#BE123C" />
+        <!-- 裙边荷叶折线 -->
+        <polyline points="18,52 34,50 50,56 66,50 82,52" stroke="#FFFFFF" stroke-width="1.2" stroke-dasharray="2.5,1.5" />
+        <!-- 呆萌小眼 -->
+        <polygon points="40,36 43,38 40,40 37,38" fill="#881337" />
+        <polygon points="60,36 63,38 60,40 57,38" fill="#881337" />
+        <!-- 飘动波浪折纸触须 -->
+        <polyline points="28,52 24,68 32,82 28,94" stroke="#F43F5E" stroke-width="2.2" stroke-linecap="round" />
+        <polyline points="42,54 46,72 40,86 44,96" stroke="#FB7185" stroke-width="2.5" stroke-linecap="round" />
+        <polyline points="58,54 54,72 60,86 56,96" stroke="#FDA4AF" stroke-width="2.5" stroke-linecap="round" />
+        <polyline points="72,52 76,68 68,82 72,94" stroke="#E11D48" stroke-width="2.2" stroke-linecap="round" />`;
+        },
+
+        get_jelly_stage_1(uid) {
+            return `<!-- Jellyfish Stage 1: 琉璃七彩水母 (二阶·棱镜霓光幻水母) -->
+        <!-- 琉璃伞盖 -->
+        <polygon points="50,16 28,34 50,40" fill="#E879F9" />
+        <polygon points="50,16 50,40 72,34" fill="#C084FC" />
+        <polygon points="28,34 14,50 32,48 50,40" fill="#F472B6" />
+        <polygon points="72,34 50,40 68,48 86,50" fill="#A855F7" />
+        <polygon points="32,48 50,40 68,48 50,56" fill="#9333EA" />
+        <polygon points="14,50 24,56 32,48" fill="#FB7185" />
+        <polygon points="86,50 68,48 76,56" fill="#7E22CE" />
+        <polyline points="14,50 24,56 32,48 50,56 68,48 76,56 86,50" stroke="#FFFFFF" stroke-width="1.3" stroke-dasharray="2,1" />
+        <!-- 晶体眼 -->
+        <polygon points="38,34 42,37 38,40 34,37" fill="#FFFFFF" />
+        <polygon points="62,34 66,37 62,40 58,37" fill="#FFFFFF" />
+        <!-- 6条多折飘带触须 -->
+        <polyline points="20,54 12,70 22,84 16,96" stroke="#F472B6" stroke-width="2" stroke-linecap="round" />
+        <polyline points="32,52 28,68 36,84 30,98" stroke="#E879F9" stroke-width="2.2" stroke-linecap="round" />
+        <polyline points="44,56 48,74 42,88 46,98" stroke="#38BDF8" stroke-width="2.5" stroke-linecap="round" />
+        <polyline points="56,56 52,74 58,88 54,98" stroke="#38BDF8" stroke-width="2.5" stroke-linecap="round" />
+        <polyline points="68,52 72,68 64,84 70,98" stroke="#C084FC" stroke-width="2.2" stroke-linecap="round" />
+        <polyline points="80,54 88,70 78,84 84,96" stroke="#A855F7" stroke-width="2" stroke-linecap="round" />`;
+        },
+
+        get_jelly_stage_2(uid) {
+            return `<!-- Jellyfish Stage 2: 极光仙羽水母 (三阶·灵珠王冠仙羽水母) -->
+        <polygon points="44,8 50,2 56,8 50,5" fill="#FDE047" stroke="#F59E0B" stroke-width="0.6" />
+        <polygon points="38,12 44,8 46,13" fill="#F59E0B" />
+        <polygon points="56,8 62,12 54,13" fill="#D97706" />
+        <!-- 仙羽伞盖 -->
+        <polygon points="50,14 24,32 50,38" fill="#F472B6" stroke="#FDE047" stroke-width="0.6" />
+        <polygon points="50,14 50,38 76,32" fill="#C084FC" stroke="#FDE047" stroke-width="0.6" />
+        <polygon points="24,32 10,48 30,46 50,38" fill="#FB7185" />
+        <polygon points="76,32 50,38 70,46 90,48" fill="#A855F7" />
+        <polygon points="30,46 50,38 70,46 50,56" fill="#7C3AED" />
+        <polyline points="10,48 30,46 50,56 70,46 90,48" stroke="#FDE047" stroke-width="1.4" stroke-dasharray="3,1" />
+        <!-- 灵威大眼 -->
+        <polygon points="38,32 42,35 38,38 34,35" fill="#FDE047" />
+        <polygon points="62,32 66,35 62,38 58,35" fill="#FDE047" />
+        <!-- 仙羽飘飘触须 -->
+        <polyline points="18,50 8,68 20,84 14,98" stroke="#F43F5E" stroke-width="2.2" stroke-linecap="round" />
+        <polyline points="32,48 26,68 34,84 28,98" stroke="#E879F9" stroke-width="2.5" stroke-linecap="round" />
+        <polyline points="44,56 50,76 42,90 48,98" stroke="#22D3EE" stroke-width="2.8" stroke-linecap="round" />
+        <polyline points="56,56 50,76 58,90 52,98" stroke="#22D3EE" stroke-width="2.8" stroke-linecap="round" />
+        <polyline points="68,48 74,68 66,84 72,98" stroke="#A855F7" stroke-width="2.5" stroke-linecap="round" />
+        <polyline points="82,50 92,68 80,84 86,98" stroke="#7C3AED" stroke-width="2.2" stroke-linecap="round" />`;
+        },
+
+        get_jelly_stage_3(uid) {
+            return `<!-- Jellyfish Stage 3: 织梦星河灵母 (四阶·背负星珠梦幻深海神母) -->
+        <g class="origami-floating-orb">
+            <polygon points="0,-8 6,-3 6,3 0,8 -6,3 -6,-3" fill="#E879F9" stroke="#C084FC" stroke-width="0.8" />
+            <polygon points="0,-8 0,0 6,-3" fill="#FDF4FF" />
+            <polygon points="6,-3 0,0 6,3" fill="#F472B6" />
+            <polygon points="6,3 0,0 0,8" fill="#A855F7" />
+            <polygon points="0,8 0,0 -6,3" fill="#7C3AED" />
+            <polygon points="-6,3 0,0 -6,-3" fill="#6D28D9" />
+        </g>
+        <polygon points="50,14 20,32 50,38" fill="#FB7185" stroke="#FDE047" stroke-width="0.8" />
+        <polygon points="50,14 50,38 80,32" fill="#A855F7" stroke="#FDE047" stroke-width="0.8" />
+        <polygon points="20,32 6,48 28,46 50,38" fill="#F43F5E" />
+        <polygon points="80,32 50,38 72,46 94,48" fill="#7C3AED" />
+        <polygon points="28,46 50,38 72,46 50,56" fill="#5B21B6" />
+        <!-- 流光触手 -->
+        <polyline points="14,50 4,68 18,84 10,98" stroke="#FB7185" stroke-width="2.4" stroke-linecap="round" />
+        <polyline points="30,48 22,68 32,86 24,98" stroke="#E879F9" stroke-width="2.8" stroke-linecap="round" />
+        <polyline points="44,56 52,76 42,92 48,100" stroke="#38BDF8" stroke-width="3" stroke-linecap="round" />
+        <polyline points="56,56 48,76 58,92 52,100" stroke="#38BDF8" stroke-width="3" stroke-linecap="round" />
+        <polyline points="70,48 78,68 68,86 76,98" stroke="#C084FC" stroke-width="2.8" stroke-linecap="round" />
+        <polyline points="86,50 96,68 82,84 90,98" stroke="#7C3AED" stroke-width="2.4" stroke-linecap="round" />`;
+        },
+
+        get_jelly_stage_4(uid) {
+            return `<!-- Jellyfish Stage 4: 太虚万华神母 (五阶·万华全息星宿神圣水母) -->
+        <g class="origami-cosmic-ring ring-outer">
+            <polygon points="50,2 74,8 92,26 98,50 92,74 74,92 50,98 26,92 8,74 2,50 8,26 26,8"
+                     fill="none" stroke="#FDE047" stroke-width="1.4" stroke-dasharray="4,2.5" />
+        </g>
+        <g class="origami-cosmic-ring ring-inner">
+            <polygon points="50,12 77,23 88,50 77,77 50,88 23,77 12,50 23,23"
+                     fill="none" stroke="#E879F9" stroke-width="1.2" stroke-dasharray="3,2" />
+        </g>
+        <polygon points="42,8 50,0 58,8 50,3" fill="#FDE047" stroke="#F59E0B" stroke-width="0.8" />
+        <!-- 神圣万华伞盖 -->
+        <polygon points="50,14 18,32 50,38" fill="#F472B6" stroke="#FDE047" stroke-width="1" />
+        <polygon points="50,14 50,38 82,32" fill="#A855F7" stroke="#FDE047" stroke-width="1" />
+        <polygon points="18,32 4,48 26,46 50,38" fill="#E11D48" stroke="#FDE047" stroke-width="0.8" />
+        <polygon points="82,32 50,38 74,46 96,48" fill="#6D28D9" stroke="#FDE047" stroke-width="0.8" />
+        <polygon points="26,46 50,38 74,46 50,56" fill="#4C1D95" stroke="#FDE047" stroke-width="1" />
+        <!-- 神威光芒触手 -->
+        <polyline points="12,50 2,68 16,84 8,98" stroke="#F43F5E" stroke-width="2.6" stroke-linecap="round" />
+        <polyline points="28,48 20,68 30,86 22,98" stroke="#E879F9" stroke-width="3" stroke-linecap="round" />
+        <polyline points="44,56 52,76 42,92 48,100" stroke="#FDE047" stroke-width="3.2" stroke-linecap="round" />
+        <polyline points="56,56 48,76 58,92 52,100" stroke="#FDE047" stroke-width="3.2" stroke-linecap="round" />
+        <polyline points="72,48 80,68 70,86 78,98" stroke="#C084FC" stroke-width="3" stroke-linecap="round" />
+        <polyline points="88,50 98,68 84,84 92,98" stroke="#8B5CF6" stroke-width="2.6" stroke-linecap="round" />
+        <!-- 闪耀星芒 -->
+        <polygon points="86,16 88,14 90,16 88,18" fill="#FDE047" />
+        <polygon points="12,16 14,14 16,16 14,18" fill="#22D3EE" />`;
+        },
+
+        // ========================================================
+        // 🐳 7. 纸灵鲸 (GEOMETRIC WHALE - 5 STAGES)
+        // ========================================================
+        get_whale_stage_0(uid) {
+            return `<!-- Whale Stage 0: 喷水萌萌鲸 (流线折纸小巨鲸) -->
+        <!-- 头顶折纸喷泉 -->
+        <polygon points="50,26 44,12 50,16 56,12" fill="#38BDF8" />
+        <polygon points="50,26 40,16 46,20" fill="#7DD3FC" />
+        <polygon points="50,26 60,16 54,20" fill="#0284C7" />
+        <!-- 呆萌鲸鱼身躯 (面朝右侧) -->
+        <polygon points="76,50 50,30 54,50" fill="#38BDF8" />
+        <polygon points="76,50 54,50 50,70" fill="#0284C7" />
+        <polygon points="50,30 26,40 30,50 54,50" fill="#0284C7" />
+        <polygon points="50,70 54,50 30,50 26,60" fill="#0369A1" />
+        <!-- 腹部白色琴弦折纹 -->
+        <polygon points="76,50 50,70 42,74 68,62" fill="#E0F2FE" />
+        <!-- 尾柄与鱼尾 -->
+        <polygon points="26,40 26,60 14,50" fill="#075985" />
+        <polygon points="14,50 2,36 8,50" fill="#38BDF8" />
+        <polygon points="14,50 8,50 2,64" fill="#0284C7" />
+        <!-- 萌萌小胸鳍 -->
+        <polygon points="50,56 36,68 44,56" fill="#0284C7" />
+        <!-- 鲸鱼明目 -->
+        <polygon points="68,44 72,46 68,48 64,46" fill="#0C4A6E" />
+        <line x1="76" y1="50" x2="14" y2="50" stroke="#FFFFFF" stroke-width="1.1" stroke-dasharray="2.5,1.5" />`;
+        },
+
+        get_whale_stage_1(uid) {
+            return `<!-- Whale Stage 1: 蓝晶座头鲸 (二阶·长翼破浪座头鲸) -->
+        <!-- 折纸喷水泉 -->
+        <polygon points="52,24 44,8 52,14 60,8" fill="#38BDF8" />
+        <polygon points="52,24 38,12 46,18" fill="#BAE6FD" />
+        <polygon points="52,24 66,12 58,18" fill="#0284C7" />
+        <!-- 雄伟多棱鲸身 -->
+        <polygon points="82,48 54,28 58,48" fill="#60A5FA" />
+        <polygon points="82,48 58,48 54,68" fill="#2563EB" />
+        <polygon points="54,28 28,36 32,48 58,48" fill="#1D4ED8" />
+        <polygon points="54,68 58,48 32,48 28,60" fill="#1E40AF" />
+        <!-- 腹部切面 -->
+        <polygon points="82,48 54,68 44,72 74,60" fill="#DBEAFE" />
+        <!-- 展翼胸鳍 -->
+        <polygon points="54,54 26,74 38,58" fill="#3B82F6" />
+        <polygon points="26,74 20,78 30,70" fill="#1D4ED8" />
+        <!-- 背鳍与尾鳍 -->
+        <polygon points="40,32 34,20 36,34" fill="#1D4ED8" />
+        <polygon points="28,36 28,60 12,48" fill="#1E3A8A" />
+        <polygon points="12,48 0,30 6,48" fill="#60A5FA" />
+        <polygon points="12,48 6,48 0,66" fill="#1D4ED8" />
+        <!-- 智慧双目 -->
+        <polygon points="72,42 76,45 72,48 68,45" fill="#FFFFFF" />
+        <polygon points="72,43 74.5,45 72,47 69.5,45" fill="#1E3A8A" />
+        <polyline points="82,48 58,48 32,48 12,48" stroke="#FFFFFF" stroke-width="1.3" stroke-dasharray="3,1.5" />`;
+        },
+
+        get_whale_stage_2(uid) {
+            return `<!-- Whale Stage 2: 破浪独角鲸 (三阶·皇冠螺旋晶角独角鲸) -->
+        <polygon points="50,16 56,10 62,16 56,13" fill="#FDE047" stroke="#F59E0B" stroke-width="0.6" />
+        <!-- 额前螺旋独角 -->
+        <polygon points="78,38 98,28 82,42" fill="#FDE047" stroke="#F59E0B" stroke-width="0.8" />
+        <polygon points="82,42 98,28 84,45" fill="#F59E0B" />
+        <!-- 霸气鲸身 -->
+        <polygon points="84,48 56,26 60,48" fill="#93C5FD" stroke="#FDE047" stroke-width="0.6" />
+        <polygon points="84,48 60,48 56,70" fill="#3B82F6" stroke="#FDE047" stroke-width="0.6" />
+        <polygon points="56,26 28,34 32,48 60,48" fill="#1D4ED8" />
+        <polygon points="56,70 60,48 32,48 28,62" fill="#1E40AF" />
+        <!-- 金纹胸鳍 -->
+        <polygon points="56,54 22,76 36,58" fill="#2563EB" stroke="#FDE047" stroke-width="0.6" />
+        <!-- 尾柄与双叉尾鳍 -->
+        <polygon points="28,34 28,62 10,48" fill="#172554" />
+        <polygon points="10,48 -2,28 4,48" fill="#60A5FA" stroke="#FDE047" stroke-width="0.6" />
+        <polygon points="10,48 4,48 -2,68" fill="#1D4ED8" stroke="#FDE047" stroke-width="0.6" />
+        <polyline points="84,48 60,48 32,48 10,48" stroke="#FDE047" stroke-width="1.4" stroke-dasharray="3,1" />`;
+        },
+
+        get_whale_stage_3(uid) {
+            return `<!-- Whale Stage 3: 覆海金铠虎鲸 (四阶·金铠利齿深海霸主) -->
+        <g class="origami-floating-orb">
+            <polygon points="0,-8 6,-3 6,3 0,8 -6,3 -6,-3" fill="#60A5FA" stroke="#2563EB" stroke-width="0.8" />
+            <polygon points="0,-8 0,0 6,-3" fill="#DBEAFE" />
+            <polygon points="6,-3 0,0 6,3" fill="#3B82F6" />
+            <polygon points="6,3 0,0 0,8" fill="#1D4ED8" />
+            <polygon points="0,8 0,0 -6,3" fill="#1E40AF" />
+            <polygon points="-6,3 0,0 -6,-3" fill="#172554" />
+        </g>
+        <!-- 额前独角金晶 -->
+        <polygon points="80,36 100,24 84,40" fill="#FDE047" stroke="#D97706" stroke-width="0.8" />
+        <!-- 虎鲸黑金重铠 -->
+        <polygon points="86,48 58,24 62,48" fill="#1E293B" stroke="#FDE047" stroke-width="0.8" />
+        <polygon points="86,48 62,48 58,72" fill="#0F172A" stroke="#FDE047" stroke-width="0.8" />
+        <polygon points="58,24 28,32 34,48 62,48" fill="#1E3A8A" stroke="#FDE047" stroke-width="0.8" />
+        <polygon points="58,72 62,48 34,48 28,64" fill="#172554" stroke="#FDE047" stroke-width="0.8" />
+        <!-- 金纹高耸背鳍 -->
+        <polygon points="46,28 38,6 40,30" fill="#FDE047" stroke="#D97706" stroke-width="0.8" />
+        <!-- 巨灵胸鳍 -->
+        <polygon points="58,54 18,78 34,58" fill="#2563EB" stroke="#FDE047" stroke-width="0.8" />
+        <polygon points="28,32 28,64 8,48" fill="#020617" />
+        <polygon points="8,48 -4,26 2,48" fill="#3B82F6" stroke="#FDE047" stroke-width="0.8" />
+        <polygon points="8,48 2,48 -4,70" fill="#1D4ED8" stroke="#FDE047" stroke-width="0.8" />
+        <polyline points="86,48 62,48 34,48 8,48" stroke="#FFFBEB" stroke-width="1.6" stroke-dasharray="3,1" />`;
+        },
+
+        get_whale_stage_4(uid) {
+            return `<!-- Whale Stage 4: 扶摇九霄鲲鹏 (五阶·全息星宿神圣鲲鹏觉醒) -->
+        <g class="origami-cosmic-ring ring-outer">
+            <polygon points="50,2 74,8 92,26 98,50 92,74 74,92 50,98 26,92 8,74 2,50 8,26 26,8"
+                     fill="none" stroke="#FDE047" stroke-width="1.4" stroke-dasharray="4,2.5" />
+        </g>
+        <g class="origami-cosmic-ring ring-inner">
+            <polygon points="50,12 77,23 88,50 77,77 50,88 23,77 12,50 23,23"
+                     fill="none" stroke="#38BDF8" stroke-width="1.2" stroke-dasharray="3,2" />
+        </g>
+        <!-- 鲲鹏化羽神翼 (展翼遮天) -->
+        <polygon points="56,36 34,2 44,28" fill="#60A5FA" stroke="#FDE047" stroke-width="1" />
+        <polygon points="56,60 34,98 44,72" fill="#2563EB" stroke="#FDE047" stroke-width="1" />
+        <!-- 龙首鲸角 -->
+        <polygon points="82,34 102,20 86,40" fill="#FDE047" stroke="#F59E0B" stroke-width="1" />
+        <!-- 鲲鹏真身 -->
+        <polygon points="88,48 58,22 64,48" fill="#93C5FD" stroke="#FDE047" stroke-width="1" />
+        <polygon points="88,48 64,48 58,74" fill="#1D4ED8" stroke="#FDE047" stroke-width="1" />
+        <polygon points="58,22 26,30 32,48 64,48" fill="#1E3A8A" stroke="#FDE047" stroke-width="1" />
+        <polygon points="58,74 64,48 32,48 26,66" fill="#172554" stroke="#FDE047" stroke-width="1" />
+        <!-- 双叉神羽凤尾 -->
+        <polygon points="26,30 26,66 6,48" fill="#0F172A" />
+        <polygon points="6,48 -8,22 0,48" fill="#38BDF8" stroke="#FDE047" stroke-width="1" />
+        <polygon points="6,48 0,48 -8,74" fill="#2563EB" stroke="#FDE047" stroke-width="1" />
+        <!-- 闪烁星芒 -->
+        <polygon points="88,14 90,12 92,14 90,16" fill="#FDE047" />
+        <polygon points="14,14 16,12 18,14 16,16" fill="#FDE047" />
+        <polyline points="88,48 64,48 32,48 6,48" stroke="#FFFBEB" stroke-width="2" stroke-dasharray="4,1.5" />`;
+        },
+
+        renderSvg(species = 'fish', stageIndex = 0, opts = {}) {
+            const sp = (species === 'origami_koi') ? 'fish' : (species || 'fish');
+            const uid = 'og_' + (++this.uidCounter);
+            const w = opts.width || 68;
+            const h = opts.height || 68;
+            const s = Math.max(0, Math.min(4, stageIndex));
+            const emotion = opts.emotion || (window.PetEngine && PetEngine.Emotion ? PetEngine.Emotion.currentEmotion : 'normal');
+
+            let modelSvg = '';
+            if (sp === 'crab') {
+                if (s === 0) modelSvg = this.get_crab_stage_0(uid);
+                else if (s === 1) modelSvg = this.get_crab_stage_1(uid);
+                else if (s === 2) modelSvg = this.get_crab_stage_2(uid);
+                else if (s === 3) modelSvg = this.get_crab_stage_3(uid);
+                else modelSvg = this.get_crab_stage_4(uid);
+            } else if (sp === 'shrimp') {
+                if (s === 0) modelSvg = this.get_shrimp_stage_0(uid);
+                else if (s === 1) modelSvg = this.get_shrimp_stage_1(uid);
+                else if (s === 2) modelSvg = this.get_shrimp_stage_2(uid);
+                else if (s === 3) modelSvg = this.get_shrimp_stage_3(uid);
+                else modelSvg = this.get_shrimp_stage_4(uid);
+            } else if (sp === 'octopus') {
+                if (s === 0) modelSvg = this.get_octo_stage_0(uid);
+                else if (s === 1) modelSvg = this.get_octo_stage_1(uid);
+                else if (s === 2) modelSvg = this.get_octo_stage_2(uid);
+                else if (s === 3) modelSvg = this.get_octo_stage_3(uid);
+                else modelSvg = this.get_octo_stage_4(uid);
+            } else if (sp === 'turtle') {
+                if (s === 0) modelSvg = this.get_turtle_stage_0(uid);
+                else if (s === 1) modelSvg = this.get_turtle_stage_1(uid);
+                else if (s === 2) modelSvg = this.get_turtle_stage_2(uid);
+                else if (s === 3) modelSvg = this.get_turtle_stage_3(uid);
+                else modelSvg = this.get_turtle_stage_4(uid);
+            } else if (sp === 'jellyfish') {
+                if (s === 0) modelSvg = this.get_jelly_stage_0(uid);
+                else if (s === 1) modelSvg = this.get_jelly_stage_1(uid);
+                else if (s === 2) modelSvg = this.get_jelly_stage_2(uid);
+                else if (s === 3) modelSvg = this.get_jelly_stage_3(uid);
+                else modelSvg = this.get_jelly_stage_4(uid);
+            } else if (sp === 'whale') {
+                if (s === 0) modelSvg = this.get_whale_stage_0(uid);
+                else if (s === 1) modelSvg = this.get_whale_stage_1(uid);
+                else if (s === 2) modelSvg = this.get_whale_stage_2(uid);
+                else if (s === 3) modelSvg = this.get_whale_stage_3(uid);
+                else modelSvg = this.get_whale_stage_4(uid);
+            } else {
+                if (s === 0) modelSvg = this.get_fish_stage_0(uid);
+                else if (s === 1) modelSvg = this.get_fish_stage_1(uid);
+                else if (s === 2) modelSvg = this.get_fish_stage_2(uid);
+                else if (s === 3) modelSvg = this.get_fish_stage_3(uid);
+                else modelSvg = this.get_fish_stage_4(uid);
+            }
+
+            const titles = {
+                fish: '纸灵锦',
+                crab: '纸灵蟹',
+                shrimp: '纸灵虾',
+                octopus: '纸灵章',
+                turtle: '纸灵龟',
+                jellyfish: '纸灵水母',
+                whale: '纸灵鲸'
+            };
+            const title = `${titles[sp] || '纸灵伴侣'} (第${s + 1}阶)`;
+
+            return `
+                <div class="origami-viewport species-${sp} stage-${s} emotion-${emotion}" 
+                     data-species="${sp}" data-stage="${s}"
+                     style="width:${w}px; height:${h}px;" title="${title}">
+                    <svg viewBox="0 0 100 100" class="origami-pet-svg stage-${s}" style="width:100%; height:100%;">
+                        <defs>
+                            <filter id="${uid}_shadow" x="-30%" y="-30%" width="160%" height="160%">
+                                <feDropShadow dx="0" dy="3.5" stdDeviation="3" flood-color="rgba(15, 23, 42, 0.22)"/>
+                            </filter>
+                        </defs>
+                        <g filter="url(#${uid}_shadow)">
+                            ${modelSvg}
+                        </g>
+                    </svg>
+                </div>
+            `.trim();
+        }
+    };
+
     // 初始化核心系统
     PetVector.init();
+    PetSpriteEngine.init();
     PetLifeSystem.init();
     PetEmotionSystem.init();
 
     return {
         Vector: PetVector,
+        Sprite: PetSpriteEngine,
+        Origami: PetOrigamiEngine,
         Life: PetLifeSystem,
         Skills: PetSkillSystem,
-        Emotion: PetEmotionSystem
+        Emotion: PetEmotionSystem,
+
+        // 统一角色形象渲染入口 (全量采用现代微立体几何切面折纸引擎)
+        renderAvatar(species, stageIndex = 0, opts = {}) {
+            return PetOrigamiEngine.renderSvg(species, stageIndex, opts);
+        }
     };
 })();
 

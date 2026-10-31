@@ -1,0 +1,84 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 768 128" width="768" height="128">
+  <defs>
+    
+    <linearGradient id="shrimpGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#FF9FF3"/>
+      <stop offset="50%" stop-color="#FECA57"/>
+      <stop offset="100%" stop-color="#FF6B6B"/>
+    </linearGradient>
+
+  </defs>
+  <g id="frame-0" transform="translate(0, 0)"><g stroke="#FF9FF3" stroke-width="2.2" stroke-linecap="round" fill="none">
+      <path d="M 78 46.0 C 92 30.0 112 26.0 122 28.0"/>
+      <path d="M 76 42.0 C 88 24.0 106 16.0 118 14.0"/>
+    </g><g transform="translate(32, 88.0) rotate(15.0)">
+      <path d="M 0 0 C -12 6, -18 16, -16 22 C -8 18, 0 10, 0 0 Z" fill="#FECA57"/>
+      <path d="M 0 0 C -8 12, -10 24, -4 26 C 2 20, 4 10, 0 0 Z" fill="#FF6B6B"/>
+      <path d="M 0 0 C 4 10, 6 22, 12 20 C 10 12, 4 6, 0 0 Z" fill="#FF9FF3"/>
+    </g><g stroke="#FECA57" stroke-width="2" stroke-linecap="round">
+      <line x1="70" y1="66.0" x2="66" y2="74.0"/>
+      <line x1="60" y1="74.0" x2="56" y2="82.0"/>
+      <line x1="50" y1="82.0" x2="46" y2="88.0"/>
+    </g><ellipse cx="40" cy="82.0" rx="12" ry="10" fill="url(#shrimpGrad)"/><ellipse cx="52" cy="72.0" rx="14" ry="12" fill="url(#shrimpGrad)"/><ellipse cx="64" cy="62.0" rx="15" ry="13" fill="url(#shrimpGrad)"/><ellipse cx="76" cy="54.0" rx="16" ry="14" fill="url(#shrimpGrad)"/><path d="M 76 50.0 Q 82 44.0 88 50.0" stroke="#222F3E" stroke-width="2.8" stroke-linecap="round" fill="none"/><path d="M 86 57.0 Q 89 59.0 86 61.0" stroke="#222F3E" stroke-width="2" stroke-linecap="round" fill="none"/><circle cx="79" cy="60.0" r="4" fill="#FF6B6B" opacity="0.6"/><text x="48" y="22" font-size="15">🚀</text><text x="86" y="34" font-size="12">✨</text></g>
+<g id="frame-1" transform="translate(128, 0)"><g stroke="#FF9FF3" stroke-width="2.2" stroke-linecap="round" fill="none">
+      <path d="M 78 50.33012701892219 C 92 48.18653347947321 112 44.18653347947321 122 46.18653347947321"/>
+      <path d="M 76 46.33012701892219 C 88 44.957814771583415 106 36.957814771583415 118 34.957814771583415"/>
+    </g><g transform="translate(32, 103.76166234887677) rotate(7.500000000000002)">
+      <path d="M 0 0 C -12 6, -18 16, -16 22 C -8 18, 0 10, 0 0 Z" fill="#FECA57"/>
+      <path d="M 0 0 C -8 12, -10 24, -4 26 C 2 20, 4 10, 0 0 Z" fill="#FF6B6B"/>
+      <path d="M 0 0 C 4 10, 6 22, 12 20 C 10 12, 4 6, 0 0 Z" fill="#FF9FF3"/>
+    </g><g stroke="#FECA57" stroke-width="2" stroke-linecap="round">
+      <line x1="70" y1="70.33012701892218" x2="66" y2="78.33012701892218"/>
+      <line x1="60" y1="78.33012701892218" x2="56" y2="86.33012701892218"/>
+      <line x1="50" y1="86.33012701892218" x2="46" y2="92.33012701892218"/>
+    </g><ellipse cx="40" cy="96.72243186433545" rx="12" ry="10" fill="url(#shrimpGrad)"/><ellipse cx="52" cy="82.56550992617014" rx="14" ry="12" fill="url(#shrimpGrad)"/><ellipse cx="64" cy="68.9282032302755" rx="15" ry="13" fill="url(#shrimpGrad)"/><ellipse cx="76" cy="58.33012701892219" rx="16" ry="14" fill="url(#shrimpGrad)"/><path d="M 76 54.33012701892219 Q 82 48.33012701892219 88 54.33012701892219" stroke="#222F3E" stroke-width="2.8" stroke-linecap="round" fill="none"/><path d="M 86 61.33012701892219 Q 89 63.33012701892219 86 65.33012701892218" stroke="#222F3E" stroke-width="2" stroke-linecap="round" fill="none"/><circle cx="79" cy="64.33012701892218" r="4" fill="#FF6B6B" opacity="0.6"/><text x="48" y="22" font-size="15">🚀</text><text x="86" y="34" font-size="12">✨</text></g>
+<g id="frame-2" transform="translate(256, 0)"><g stroke="#FF9FF3" stroke-width="2.2" stroke-linecap="round" fill="none">
+      <path d="M 78 50.33012701892219 C 92 48.18653347947321 112 44.18653347947321 122 46.18653347947321"/>
+      <path d="M 76 46.33012701892219 C 88 44.957814771583415 106 36.957814771583415 118 34.957814771583415"/>
+    </g><g transform="translate(32, 103.76166234887677) rotate(-7.4999999999999964)">
+      <path d="M 0 0 C -12 6, -18 16, -16 22 C -8 18, 0 10, 0 0 Z" fill="#FECA57"/>
+      <path d="M 0 0 C -8 12, -10 24, -4 26 C 2 20, 4 10, 0 0 Z" fill="#FF6B6B"/>
+      <path d="M 0 0 C 4 10, 6 22, 12 20 C 10 12, 4 6, 0 0 Z" fill="#FF9FF3"/>
+    </g><g stroke="#FECA57" stroke-width="2" stroke-linecap="round">
+      <line x1="70" y1="70.33012701892218" x2="66" y2="78.33012701892218"/>
+      <line x1="60" y1="78.33012701892218" x2="56" y2="86.33012701892218"/>
+      <line x1="50" y1="86.33012701892218" x2="46" y2="92.33012701892218"/>
+    </g><ellipse cx="40" cy="96.72243186433545" rx="12" ry="10" fill="url(#shrimpGrad)"/><ellipse cx="52" cy="82.56550992617014" rx="14" ry="12" fill="url(#shrimpGrad)"/><ellipse cx="64" cy="68.9282032302755" rx="15" ry="13" fill="url(#shrimpGrad)"/><ellipse cx="76" cy="58.33012701892219" rx="16" ry="14" fill="url(#shrimpGrad)"/><path d="M 76 54.33012701892219 Q 82 48.33012701892219 88 54.33012701892219" stroke="#222F3E" stroke-width="2.8" stroke-linecap="round" fill="none"/><path d="M 86 61.33012701892219 Q 89 63.33012701892219 86 65.33012701892218" stroke="#222F3E" stroke-width="2" stroke-linecap="round" fill="none"/><circle cx="79" cy="64.33012701892218" r="4" fill="#FF6B6B" opacity="0.6"/><text x="48" y="22" font-size="15">🚀</text><text x="86" y="34" font-size="12">✨</text></g>
+<g id="frame-3" transform="translate(384, 0)"><g stroke="#FF9FF3" stroke-width="2.2" stroke-linecap="round" fill="none">
+      <path d="M 78 46.0 C 92 30.000000000000004 112 26.000000000000004 122 28.000000000000004"/>
+      <path d="M 76 42.0 C 88 24.000000000000004 106 16.000000000000004 118 14.000000000000002"/>
+    </g><g transform="translate(32, 88.0) rotate(-15.0)">
+      <path d="M 0 0 C -12 6, -18 16, -16 22 C -8 18, 0 10, 0 0 Z" fill="#FECA57"/>
+      <path d="M 0 0 C -8 12, -10 24, -4 26 C 2 20, 4 10, 0 0 Z" fill="#FF6B6B"/>
+      <path d="M 0 0 C 4 10, 6 22, 12 20 C 10 12, 4 6, 0 0 Z" fill="#FF9FF3"/>
+    </g><g stroke="#FECA57" stroke-width="2" stroke-linecap="round">
+      <line x1="70" y1="66.0" x2="66" y2="74.0"/>
+      <line x1="60" y1="74.0" x2="56" y2="82.0"/>
+      <line x1="50" y1="82.0" x2="46" y2="88.0"/>
+    </g><ellipse cx="40" cy="82.0" rx="12" ry="10" fill="url(#shrimpGrad)"/><ellipse cx="52" cy="72.0" rx="14" ry="12" fill="url(#shrimpGrad)"/><ellipse cx="64" cy="62.0" rx="15" ry="13" fill="url(#shrimpGrad)"/><ellipse cx="76" cy="54.0" rx="16" ry="14" fill="url(#shrimpGrad)"/><path d="M 76 50.0 Q 82 44.0 88 50.0" stroke="#222F3E" stroke-width="2.8" stroke-linecap="round" fill="none"/><path d="M 86 57.0 Q 89 59.0 86 61.0" stroke="#222F3E" stroke-width="2" stroke-linecap="round" fill="none"/><circle cx="79" cy="60.0" r="4" fill="#FF6B6B" opacity="0.6"/><text x="48" y="22" font-size="15">🚀</text><text x="86" y="34" font-size="12">✨</text></g>
+<g id="frame-4" transform="translate(512, 0)"><g stroke="#FF9FF3" stroke-width="2.2" stroke-linecap="round" fill="none">
+      <path d="M 78 41.66987298107781 C 92 11.813466520526793 112 7.813466520526793 122 9.813466520526793"/>
+      <path d="M 76 37.66987298107781 C 88 3.0421852284165922 106 -4.957814771583408 118 -6.957814771583408"/>
+    </g><g transform="translate(32, 72.23833765112323) rotate(-7.500000000000007)">
+      <path d="M 0 0 C -12 6, -18 16, -16 22 C -8 18, 0 10, 0 0 Z" fill="#FECA57"/>
+      <path d="M 0 0 C -8 12, -10 24, -4 26 C 2 20, 4 10, 0 0 Z" fill="#FF6B6B"/>
+      <path d="M 0 0 C 4 10, 6 22, 12 20 C 10 12, 4 6, 0 0 Z" fill="#FF9FF3"/>
+    </g><g stroke="#FECA57" stroke-width="2" stroke-linecap="round">
+      <line x1="70" y1="61.66987298107781" x2="66" y2="69.66987298107782"/>
+      <line x1="60" y1="69.66987298107782" x2="56" y2="77.66987298107782"/>
+      <line x1="50" y1="77.66987298107782" x2="46" y2="83.66987298107782"/>
+    </g><ellipse cx="40" cy="67.27756813566455" rx="12" ry="10" fill="url(#shrimpGrad)"/><ellipse cx="52" cy="61.434490073829856" rx="14" ry="12" fill="url(#shrimpGrad)"/><ellipse cx="64" cy="55.07179676972449" rx="15" ry="13" fill="url(#shrimpGrad)"/><ellipse cx="76" cy="49.66987298107781" rx="16" ry="14" fill="url(#shrimpGrad)"/><path d="M 76 45.66987298107781 Q 82 39.66987298107781 88 45.66987298107781" stroke="#222F3E" stroke-width="2.8" stroke-linecap="round" fill="none"/><path d="M 86 52.66987298107781 Q 89 54.66987298107781 86 56.66987298107781" stroke="#222F3E" stroke-width="2" stroke-linecap="round" fill="none"/><circle cx="79" cy="55.66987298107781" r="4" fill="#FF6B6B" opacity="0.6"/><text x="48" y="22" font-size="15">🚀</text><text x="86" y="34" font-size="12">✨</text></g>
+<g id="frame-5" transform="translate(640, 0)"><g stroke="#FF9FF3" stroke-width="2.2" stroke-linecap="round" fill="none">
+      <path d="M 78 41.6698729810778 C 92 11.813466520526777 112 7.813466520526777 122 9.813466520526777"/>
+      <path d="M 76 37.6698729810778 C 88 3.0421852284165745 106 -4.9578147715834255 118 -6.9578147715834255"/>
+    </g><g transform="translate(32, 72.2383376511232) rotate(7.49999999999999)">
+      <path d="M 0 0 C -12 6, -18 16, -16 22 C -8 18, 0 10, 0 0 Z" fill="#FECA57"/>
+      <path d="M 0 0 C -8 12, -10 24, -4 26 C 2 20, 4 10, 0 0 Z" fill="#FF6B6B"/>
+      <path d="M 0 0 C 4 10, 6 22, 12 20 C 10 12, 4 6, 0 0 Z" fill="#FF9FF3"/>
+    </g><g stroke="#FECA57" stroke-width="2" stroke-linecap="round">
+      <line x1="70" y1="61.6698729810778" x2="66" y2="69.6698729810778"/>
+      <line x1="60" y1="69.6698729810778" x2="56" y2="77.6698729810778"/>
+      <line x1="50" y1="77.6698729810778" x2="46" y2="83.6698729810778"/>
+    </g><ellipse cx="40" cy="67.27756813566454" rx="12" ry="10" fill="url(#shrimpGrad)"/><ellipse cx="52" cy="61.43449007382984" rx="14" ry="12" fill="url(#shrimpGrad)"/><ellipse cx="64" cy="55.071796769724486" rx="15" ry="13" fill="url(#shrimpGrad)"/><ellipse cx="76" cy="49.6698729810778" rx="16" ry="14" fill="url(#shrimpGrad)"/><path d="M 76 45.6698729810778 Q 82 39.6698729810778 88 45.6698729810778" stroke="#222F3E" stroke-width="2.8" stroke-linecap="round" fill="none"/><path d="M 86 52.6698729810778 Q 89 54.6698729810778 86 56.6698729810778" stroke="#222F3E" stroke-width="2" stroke-linecap="round" fill="none"/><circle cx="79" cy="55.6698729810778" r="4" fill="#FF6B6B" opacity="0.6"/><text x="48" y="22" font-size="15">🚀</text><text x="86" y="34" font-size="12">✨</text></g>
+
+</svg>

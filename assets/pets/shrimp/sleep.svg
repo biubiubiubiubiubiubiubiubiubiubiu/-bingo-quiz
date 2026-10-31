@@ -1,0 +1,48 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 384 128" width="384" height="128">
+  <defs>
+    
+    <linearGradient id="shrimpGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#FF9FF3"/>
+      <stop offset="50%" stop-color="#FECA57"/>
+      <stop offset="100%" stop-color="#FF6B6B"/>
+    </linearGradient>
+
+  </defs>
+  <g id="frame-0" transform="translate(0, 0)"><g stroke="#FF9FF3" stroke-width="2.2" stroke-linecap="round" fill="none">
+      <path d="M 78 54 C 92 28 112 24 122 26"/>
+      <path d="M 76 50 C 88 20.0 106 12.0 118 10.0"/>
+    </g><g transform="translate(32, 87.2) rotate(-8)">
+      <path d="M 0 0 C -12 6, -18 16, -16 22 C -8 18, 0 10, 0 0 Z" fill="#FECA57"/>
+      <path d="M 0 0 C -8 12, -10 24, -4 26 C 2 20, 4 10, 0 0 Z" fill="#FF6B6B"/>
+      <path d="M 0 0 C 4 10, 6 22, 12 20 C 10 12, 4 6, 0 0 Z" fill="#FF9FF3"/>
+    </g><g stroke="#FECA57" stroke-width="2" stroke-linecap="round">
+      <line x1="70" y1="74" x2="66" y2="82"/>
+      <line x1="60" y1="82" x2="56" y2="90"/>
+      <line x1="50" y1="90" x2="46" y2="96"/>
+    </g><ellipse cx="40" cy="82.0" rx="12" ry="10" fill="url(#shrimpGrad)"/><ellipse cx="52" cy="75.2" rx="14" ry="12" fill="url(#shrimpGrad)"/><ellipse cx="64" cy="68.0" rx="15" ry="13" fill="url(#shrimpGrad)"/><ellipse cx="76" cy="62" rx="16" ry="14" fill="url(#shrimpGrad)"/><path d="M 76 60 Q 82 64 88 60" stroke="#222F3E" stroke-width="2.5" stroke-linecap="round" fill="none"/><path d="M 86 65 Q 89 67 86 69" stroke="#222F3E" stroke-width="2" stroke-linecap="round" fill="none"/><circle cx="79" cy="68" r="4" fill="#FF6B6B" opacity="0.6"/><text x="78" y="34" font-size="11" font-weight="bold" fill="#FF9FF3" opacity="0.5">Z</text></g>
+<g id="frame-1" transform="translate(128, 0)"><g stroke="#FF9FF3" stroke-width="2.2" stroke-linecap="round" fill="none">
+      <path d="M 78 54 C 92 28 112 24 122 26"/>
+      <path d="M 76 50 C 88 20.0 106 12.0 118 10.0"/>
+    </g><g transform="translate(32, 87.2) rotate(-8)">
+      <path d="M 0 0 C -12 6, -18 16, -16 22 C -8 18, 0 10, 0 0 Z" fill="#FECA57"/>
+      <path d="M 0 0 C -8 12, -10 24, -4 26 C 2 20, 4 10, 0 0 Z" fill="#FF6B6B"/>
+      <path d="M 0 0 C 4 10, 6 22, 12 20 C 10 12, 4 6, 0 0 Z" fill="#FF9FF3"/>
+    </g><g stroke="#FECA57" stroke-width="2" stroke-linecap="round">
+      <line x1="70" y1="74" x2="66" y2="82"/>
+      <line x1="60" y1="82" x2="56" y2="90"/>
+      <line x1="50" y1="90" x2="46" y2="96"/>
+    </g><ellipse cx="40" cy="82.0" rx="12" ry="10" fill="url(#shrimpGrad)"/><ellipse cx="52" cy="75.2" rx="14" ry="12" fill="url(#shrimpGrad)"/><ellipse cx="64" cy="68.0" rx="15" ry="13" fill="url(#shrimpGrad)"/><ellipse cx="76" cy="62" rx="16" ry="14" fill="url(#shrimpGrad)"/><path d="M 76 60 Q 82 64 88 60" stroke="#222F3E" stroke-width="2.5" stroke-linecap="round" fill="none"/><path d="M 86 65 Q 89 67 86 69" stroke="#222F3E" stroke-width="2" stroke-linecap="round" fill="none"/><circle cx="79" cy="68" r="4" fill="#FF6B6B" opacity="0.6"/><text x="82" y="29" font-size="14" font-weight="bold" fill="#FF9FF3" opacity="0.75">Z</text></g>
+<g id="frame-2" transform="translate(256, 0)"><g stroke="#FF9FF3" stroke-width="2.2" stroke-linecap="round" fill="none">
+      <path d="M 78 54 C 92 28 112 24 122 26"/>
+      <path d="M 76 50 C 88 20.0 106 12.0 118 10.0"/>
+    </g><g transform="translate(32, 87.2) rotate(-8)">
+      <path d="M 0 0 C -12 6, -18 16, -16 22 C -8 18, 0 10, 0 0 Z" fill="#FECA57"/>
+      <path d="M 0 0 C -8 12, -10 24, -4 26 C 2 20, 4 10, 0 0 Z" fill="#FF6B6B"/>
+      <path d="M 0 0 C 4 10, 6 22, 12 20 C 10 12, 4 6, 0 0 Z" fill="#FF9FF3"/>
+    </g><g stroke="#FECA57" stroke-width="2" stroke-linecap="round">
+      <line x1="70" y1="74" x2="66" y2="82"/>
+      <line x1="60" y1="82" x2="56" y2="90"/>
+      <line x1="50" y1="90" x2="46" y2="96"/>
+    </g><ellipse cx="40" cy="82.0" rx="12" ry="10" fill="url(#shrimpGrad)"/><ellipse cx="52" cy="75.2" rx="14" ry="12" fill="url(#shrimpGrad)"/><ellipse cx="64" cy="68.0" rx="15" ry="13" fill="url(#shrimpGrad)"/><ellipse cx="76" cy="62" rx="16" ry="14" fill="url(#shrimpGrad)"/><path d="M 76 60 Q 82 64 88 60" stroke="#222F3E" stroke-width="2.5" stroke-linecap="round" fill="none"/><path d="M 86 65 Q 89 67 86 69" stroke="#222F3E" stroke-width="2" stroke-linecap="round" fill="none"/><circle cx="79" cy="68" r="4" fill="#FF6B6B" opacity="0.6"/><text x="86" y="24" font-size="17" font-weight="bold" fill="#FF9FF3" opacity="1.0">Z</text></g>
+
+</svg>

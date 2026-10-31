@@ -11,6 +11,14 @@
         let quizType = 'random';
         let childFeedbackTimeout = null; // 新增：用于儿童模式反馈的计时器
 
+        // --- 做题体验增强专属状态 ---
+        let flaggedQuestions = new Set(); // 标记疑难的题目索引 (📌)
+        let eliminatedOptions = {}; // 排除掉的选项 { qIdx: ['A', 'C'] }
+        let currentSingleIndex = 0; // 单题沉浸模式当前题号
+        let quizDisplayMode = localStorage.getItem('bingo_display_mode') || 'single'; // 'single' | 'list'
+        let quizFeedbackMode = localStorage.getItem('bingo_feedback_mode') || 'instant'; // 'instant' | 'exam'
+        let lastSessionWrongQuestions = []; // 用于考后消灭错题闭环
+
 
         // --- 主题切换 ---
         function initTheme() {
@@ -183,11 +191,25 @@
         });
 
 
-        // --- 手势处理 (优化版) ---
+        // --- 手势与键盘快捷处理 (优化版) ---
         window.addEventListener('load', () => {
             try {
                 // 初始化手势库
                 const gesture = new TinyGesture(document.body);
+
+                // 监听左滑事件 (Swipe Left: 单题模式下切到下一题)
+                gesture.on('swipeleft', (event) => {
+                    const quizView = document.getElementById('view-quiz');
+                    if (quizView && quizView.style.display === 'block') {
+                        if (event.target.tagName === 'INPUT' ||
+                            event.target.tagName === 'SELECT' ||
+                            window.getSelection().toString()) return;
+
+                        if (typeof quizDisplayMode !== 'undefined' && quizDisplayMode === 'single') {
+                            if (typeof nextSingleQuestion === 'function') nextSingleQuestion();
+                        }
+                    }
+                });
 
                 // 监听右滑事件 (Swipe Right)
                 gesture.on('swiperight', (event) => {
@@ -195,7 +217,7 @@
                     const quizView = document.getElementById('view-quiz');
 
                     // 1. 如果在仪表盘界面，右滑 = 返回首页
-                    if (dashboardView.style.display === 'block') {
+                    if (dashboardView && dashboardView.style.display === 'block') {
                         // 防止在输入框或选择文字时误触
                         if (event.target.tagName === 'INPUT' ||
                             event.target.tagName === 'SELECT' ||
@@ -204,12 +226,18 @@
                         history.back();
                     }
 
-                    // 2. 如果在答题界面，右滑 = 退出/交卷
-                    if (quizView.style.display === 'block') {
+                    // 2. 如果在答题界面，右滑 = 上一题 / 退出
+                    if (quizView && quizView.style.display === 'block') {
                         // 防止在输入框或选择文字时误触
                         if (event.target.tagName === 'INPUT' ||
                             event.target.tagName === 'SELECT' ||
                             window.getSelection().toString()) return;
+
+                        // 如果在单题沉浸模式且不是第一题，右滑 = 上一题
+                        if (typeof quizDisplayMode !== 'undefined' && quizDisplayMode === 'single' && currentSingleIndex > 0) {
+                            if (typeof prevSingleQuestion === 'function') prevSingleQuestion();
+                            return;
+                        }
 
                         // 核心逻辑修改：
                         // 如果是【模拟考试】且【非回看模式】，调用 handleQuizExit() 来触发弹窗逻辑
@@ -226,5 +254,61 @@
                 });
             } catch (e) {
                 console.log("Gesture library load failed or not compatible", e);
+            }
+        });
+
+        // --- 桌面端全键盘极速做题快捷键系统 ---
+        window.addEventListener('keydown', (e) => {
+            const quizView = document.getElementById('view-quiz');
+            if (!quizView || quizView.style.display !== 'block') return;
+            if (['INPUT', 'TEXTAREA', 'SELECT'].includes(e.target.tagName)) return;
+
+            const key = e.key.toUpperCase();
+            const currentIdx = (typeof quizDisplayMode !== 'undefined' && quizDisplayMode === 'single')
+                ? currentSingleIndex : (typeof lastVisibleQuestionIndex !== 'undefined' ? lastVisibleQuestionIndex : 0);
+            const currentQuestion = (currentQuiz && currentQuiz[currentIdx]) ? currentQuiz[currentIdx] : null;
+
+            // 1. 选项快捷键 (A-F, 1-6)
+            const numToLetter = { '1': 'A', '2': 'B', '3': 'C', '4': 'D', '5': 'E', '6': 'F' };
+            const optLetter = numToLetter[e.key] || (['A', 'B', 'C', 'D', 'E', 'F'].includes(key) ? key : null);
+            if (optLetter && currentQuestion && currentQuestion.o && currentQuestion.o[optLetter]) {
+                e.preventDefault();
+                selectOption(null, currentIdx, optLetter, currentQuestion.t);
+                return;
+            }
+
+            // 2. 切题快捷键 (方向键左右，或 J/K)
+            if (typeof quizDisplayMode !== 'undefined' && quizDisplayMode === 'single') {
+                if (e.key === 'ArrowRight' || key === 'K') {
+                    e.preventDefault();
+                    if (typeof nextSingleQuestion === 'function') nextSingleQuestion();
+                    return;
+                }
+                if (e.key === 'ArrowLeft' || key === 'J') {
+                    e.preventDefault();
+                    if (typeof prevSingleQuestion === 'function') prevSingleQuestion();
+                    return;
+                }
+            }
+
+            // 3. 标记键 (F)
+            if (key === 'F') {
+                e.preventDefault();
+                if (typeof toggleFlagQuestion === 'function') toggleFlagQuestion(currentIdx);
+                return;
+            }
+
+            // 4. 答题卡键 (P)
+            if (key === 'P') {
+                e.preventDefault();
+                if (typeof toggleAnswerPalette === 'function') toggleAnswerPalette();
+                return;
+            }
+
+            // 5. 偷看/展开解析键 (E)
+            if (key === 'E') {
+                e.preventDefault();
+                if (typeof toggleAnalysis === 'function') toggleAnalysis(currentIdx);
+                return;
             }
         });

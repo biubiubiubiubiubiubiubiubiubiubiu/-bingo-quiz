@@ -1,0 +1,232 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 768 128" width="768" height="128">
+  <defs>
+    
+    <linearGradient id="crabGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#FF6B6B"/>
+      <stop offset="60%" stop-color="#EE5253"/>
+      <stop offset="100%" stop-color="#C23616"/>
+    </linearGradient>
+    <linearGradient id="crabClaw" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#FFA502"/>
+      <stop offset="100%" stop-color="#FF4757"/>
+    </linearGradient>
+
+  </defs>
+  <g id="frame-0" transform="translate(0, 0)">
+      <g stroke="#C23616" stroke-width="4.5" stroke-linecap="round" fill="none">
+        <path d="M 44 76.0 Q 30 78.0 22 90.0"/>
+        <path d="M 42 82.0 Q 26 90.0 20 100.0"/>
+        <path d="M 46 86.0 Q 32 92.0 26 101.0"/>
+        <path d="M 84 76.0 Q 98 78.0 106 90.0"/>
+        <path d="M 86 82.0 Q 102 82.0 108 92.0"/>
+        <path d="M 82 86.0 Q 96 92.0 102 101.0"/>
+      </g>
+    <g transform="translate(42, 62.0) rotate(-12.0)">
+      <path d="M 0 0 C -10 -12, -18 -18, -24 -14 C -30 -10, -22 6, -10 4 Z" fill="url(#crabClaw)"/>
+      <g transform="translate(-22, -12) rotate(4)">
+        <path d="M 0 0 C -4 -10, -12 -16, -18 -8 C -14 -2, -6 2, 0 0 Z" fill="url(#crabClaw)"/>
+      </g>
+      <circle cx="-16" cy="-8" r="3.5" fill="#C23616"/>
+    </g><g transform="translate(86, 62.0) rotate(12.0)">
+      <path d="M 0 0 C 10 -12, 18 -18, 24 -14 C 30 -10, 22 6, 10 4 Z" fill="url(#crabClaw)"/>
+      <g transform="translate(22, -12) rotate(-4)">
+        <path d="M 0 0 C 4 -10, 12 -16, 18 -8 C 14 -2, 6 2, 0 0 Z" fill="url(#crabClaw)"/>
+      </g>
+      <circle cx="16" cy="-8" r="3.5" fill="#C23616"/>
+    </g>
+      <ellipse cx="64" cy="74.0" rx="30" ry="22" fill="url(#crabGrad)"/>
+      <ellipse cx="64" cy="80.0" rx="18" ry="11" fill="#FFEAA7" opacity="0.6"/>
+      <path d="M 48 66.0 Q 64 60.0 80 66.0" stroke="#FFF" stroke-width="2.5" stroke-linecap="round" fill="none" opacity="0.4"/>
+    
+          <rect x="48" y="50.0" width="6" height="12" rx="3" fill="#C23616"/>
+          <rect x="74" y="50.0" width="6" height="12" rx="3" fill="#C23616"/>
+          <circle cx="51" cy="50.0" r="8.5" fill="#FFF"/>
+          <circle cx="77" cy="50.0" r="8.5" fill="#FFF"/>
+          <circle cx="52" cy="50.0" r="4.8" fill="#1E272E"/>
+          <circle cx="78" cy="50.0" r="4.8" fill="#1E272E"/>
+          <circle cx="53" cy="48.0" r="2" fill="#FFF"/>
+          <circle cx="79" cy="48.0" r="2" fill="#FFF"/>
+        <circle cx="46" cy="80.0" r="4.5" fill="#FF4757" opacity="0.6"/>
+               <circle cx="82" cy="80.0" r="4.5" fill="#FF4757" opacity="0.6"/><path d="M 58 76.0 Q 64 82.0 70 76.0" stroke="#C23616" stroke-width="2.5" stroke-linecap="round" fill="none"/></g>
+<g id="frame-1" transform="translate(128, 0)">
+      <g stroke="#C23616" stroke-width="4.5" stroke-linecap="round" fill="none">
+        <path d="M 44 78.59807621135332 Q 30 84.06217782649107 22 96.06217782649107"/>
+        <path d="M 42 84.59807621135332 Q 26 86.59807621135332 20 96.59807621135332"/>
+        <path d="M 46 88.59807621135332 Q 32 91.13397459621557 26 100.13397459621557"/>
+        <path d="M 84 78.59807621135332 Q 98 77.13397459621557 106 89.13397459621557"/>
+        <path d="M 86 84.59807621135332 Q 102 90.59807621135332 108 100.59807621135332"/>
+        <path d="M 82 88.59807621135332 Q 96 98.06217782649107 102 107.06217782649107"/>
+      </g>
+    <g transform="translate(42, 64.59807621135332) rotate(-3.3397459621556145)">
+      <path d="M 0 0 C -10 -12, -18 -18, -24 -14 C -30 -10, -22 6, -10 4 Z" fill="url(#crabClaw)"/>
+      <g transform="translate(-22, -12) rotate(18)">
+        <path d="M 0 0 C -4 -10, -12 -16, -18 -8 C -14 -2, -6 2, 0 0 Z" fill="url(#crabClaw)"/>
+      </g>
+      <circle cx="-16" cy="-8" r="3.5" fill="#C23616"/>
+    </g><g transform="translate(86, 64.59807621135332) rotate(3.3397459621556145)">
+      <path d="M 0 0 C 10 -12, 18 -18, 24 -14 C 30 -10, 22 6, 10 4 Z" fill="url(#crabClaw)"/>
+      <g transform="translate(22, -12) rotate(-18)">
+        <path d="M 0 0 C 4 -10, 12 -16, 18 -8 C 14 -2, 6 2, 0 0 Z" fill="url(#crabClaw)"/>
+      </g>
+      <circle cx="16" cy="-8" r="3.5" fill="#C23616"/>
+    </g>
+      <ellipse cx="64" cy="76.59807621135332" rx="30" ry="22" fill="url(#crabGrad)"/>
+      <ellipse cx="64" cy="82.59807621135332" rx="18" ry="11" fill="#FFEAA7" opacity="0.6"/>
+      <path d="M 48 68.59807621135332 Q 64 62.598076211353316 80 68.59807621135332" stroke="#FFF" stroke-width="2.5" stroke-linecap="round" fill="none" opacity="0.4"/>
+    
+          <rect x="48" y="52.598076211353316" width="6" height="12" rx="3" fill="#C23616"/>
+          <rect x="74" y="52.598076211353316" width="6" height="12" rx="3" fill="#C23616"/>
+          <circle cx="51" cy="52.598076211353316" r="8.5" fill="#FFF"/>
+          <circle cx="77" cy="52.598076211353316" r="8.5" fill="#FFF"/>
+          <circle cx="52" cy="52.598076211353316" r="4.8" fill="#1E272E"/>
+          <circle cx="78" cy="52.598076211353316" r="4.8" fill="#1E272E"/>
+          <circle cx="53" cy="50.598076211353316" r="2" fill="#FFF"/>
+          <circle cx="79" cy="50.598076211353316" r="2" fill="#FFF"/>
+        <circle cx="46" cy="82.59807621135332" r="4.5" fill="#FF4757" opacity="0.6"/>
+               <circle cx="82" cy="82.59807621135332" r="4.5" fill="#FF4757" opacity="0.6"/><path d="M 58 78.59807621135332 Q 64 84.59807621135332 70 78.59807621135332" stroke="#C23616" stroke-width="2.5" stroke-linecap="round" fill="none"/></g>
+<g id="frame-2" transform="translate(256, 0)">
+      <g stroke="#C23616" stroke-width="4.5" stroke-linecap="round" fill="none">
+        <path d="M 44 78.59807621135332 Q 30 77.13397459621557 22 89.13397459621557"/>
+        <path d="M 42 84.59807621135332 Q 26 86.59807621135332 20 96.59807621135332"/>
+        <path d="M 46 88.59807621135332 Q 32 98.06217782649107 26 107.06217782649107"/>
+        <path d="M 84 78.59807621135332 Q 98 84.06217782649107 106 96.06217782649107"/>
+        <path d="M 86 84.59807621135332 Q 102 90.59807621135332 108 100.59807621135332"/>
+        <path d="M 82 88.59807621135332 Q 96 91.13397459621557 102 100.13397459621557"/>
+      </g>
+    <g transform="translate(42, 64.59807621135332) rotate(-3.3397459621556127)">
+      <path d="M 0 0 C -10 -12, -18 -18, -24 -14 C -30 -10, -22 6, -10 4 Z" fill="url(#crabClaw)"/>
+      <g transform="translate(-22, -12) rotate(4)">
+        <path d="M 0 0 C -4 -10, -12 -16, -18 -8 C -14 -2, -6 2, 0 0 Z" fill="url(#crabClaw)"/>
+      </g>
+      <circle cx="-16" cy="-8" r="3.5" fill="#C23616"/>
+    </g><g transform="translate(86, 64.59807621135332) rotate(3.3397459621556127)">
+      <path d="M 0 0 C 10 -12, 18 -18, 24 -14 C 30 -10, 22 6, 10 4 Z" fill="url(#crabClaw)"/>
+      <g transform="translate(22, -12) rotate(-4)">
+        <path d="M 0 0 C 4 -10, 12 -16, 18 -8 C 14 -2, 6 2, 0 0 Z" fill="url(#crabClaw)"/>
+      </g>
+      <circle cx="16" cy="-8" r="3.5" fill="#C23616"/>
+    </g>
+      <ellipse cx="64" cy="76.59807621135332" rx="30" ry="22" fill="url(#crabGrad)"/>
+      <ellipse cx="64" cy="82.59807621135332" rx="18" ry="11" fill="#FFEAA7" opacity="0.6"/>
+      <path d="M 48 68.59807621135332 Q 64 62.598076211353316 80 68.59807621135332" stroke="#FFF" stroke-width="2.5" stroke-linecap="round" fill="none" opacity="0.4"/>
+    
+          <rect x="48" y="52.598076211353316" width="6" height="12" rx="3" fill="#C23616"/>
+          <rect x="74" y="52.598076211353316" width="6" height="12" rx="3" fill="#C23616"/>
+          <circle cx="51" cy="52.598076211353316" r="8.5" fill="#FFF"/>
+          <circle cx="77" cy="52.598076211353316" r="8.5" fill="#FFF"/>
+          <circle cx="52" cy="52.598076211353316" r="4.8" fill="#1E272E"/>
+          <circle cx="78" cy="52.598076211353316" r="4.8" fill="#1E272E"/>
+          <circle cx="53" cy="50.598076211353316" r="2" fill="#FFF"/>
+          <circle cx="79" cy="50.598076211353316" r="2" fill="#FFF"/>
+        <circle cx="46" cy="82.59807621135332" r="4.5" fill="#FF4757" opacity="0.6"/>
+               <circle cx="82" cy="82.59807621135332" r="4.5" fill="#FF4757" opacity="0.6"/><path d="M 58 78.59807621135332 Q 64 84.59807621135332 70 78.59807621135332" stroke="#C23616" stroke-width="2.5" stroke-linecap="round" fill="none"/></g>
+<g id="frame-3" transform="translate(384, 0)">
+      <g stroke="#C23616" stroke-width="4.5" stroke-linecap="round" fill="none">
+        <path d="M 44 76.0 Q 30 78.0 22 90.0"/>
+        <path d="M 42 82.0 Q 26 90.0 20 100.0"/>
+        <path d="M 46 86.0 Q 32 92.0 26 101.0"/>
+        <path d="M 84 76.0 Q 98 78.0 106 90.0"/>
+        <path d="M 86 82.0 Q 102 82.0 108 92.0"/>
+        <path d="M 82 86.0 Q 96 92.0 102 101.0"/>
+      </g>
+    <g transform="translate(42, 62.0) rotate(-11.999999999999998)">
+      <path d="M 0 0 C -10 -12, -18 -18, -24 -14 C -30 -10, -22 6, -10 4 Z" fill="url(#crabClaw)"/>
+      <g transform="translate(-22, -12) rotate(4)">
+        <path d="M 0 0 C -4 -10, -12 -16, -18 -8 C -14 -2, -6 2, 0 0 Z" fill="url(#crabClaw)"/>
+      </g>
+      <circle cx="-16" cy="-8" r="3.5" fill="#C23616"/>
+    </g><g transform="translate(86, 62.0) rotate(11.999999999999998)">
+      <path d="M 0 0 C 10 -12, 18 -18, 24 -14 C 30 -10, 22 6, 10 4 Z" fill="url(#crabClaw)"/>
+      <g transform="translate(22, -12) rotate(-4)">
+        <path d="M 0 0 C 4 -10, 12 -16, 18 -8 C 14 -2, 6 2, 0 0 Z" fill="url(#crabClaw)"/>
+      </g>
+      <circle cx="16" cy="-8" r="3.5" fill="#C23616"/>
+    </g>
+      <ellipse cx="64" cy="74.0" rx="30" ry="22" fill="url(#crabGrad)"/>
+      <ellipse cx="64" cy="80.0" rx="18" ry="11" fill="#FFEAA7" opacity="0.6"/>
+      <path d="M 48 66.0 Q 64 60.0 80 66.0" stroke="#FFF" stroke-width="2.5" stroke-linecap="round" fill="none" opacity="0.4"/>
+    
+          <rect x="48" y="50.0" width="6" height="12" rx="3" fill="#C23616"/>
+          <rect x="74" y="50.0" width="6" height="12" rx="3" fill="#C23616"/>
+          <circle cx="51" cy="50.0" r="8.5" fill="#FFF"/>
+          <circle cx="77" cy="50.0" r="8.5" fill="#FFF"/>
+          <circle cx="52" cy="50.0" r="4.8" fill="#1E272E"/>
+          <circle cx="78" cy="50.0" r="4.8" fill="#1E272E"/>
+          <circle cx="53" cy="48.0" r="2" fill="#FFF"/>
+          <circle cx="79" cy="48.0" r="2" fill="#FFF"/>
+        <circle cx="46" cy="80.0" r="4.5" fill="#FF4757" opacity="0.6"/>
+               <circle cx="82" cy="80.0" r="4.5" fill="#FF4757" opacity="0.6"/><path d="M 58 76.0 Q 64 82.0 70 76.0" stroke="#C23616" stroke-width="2.5" stroke-linecap="round" fill="none"/></g>
+<g id="frame-4" transform="translate(512, 0)">
+      <g stroke="#C23616" stroke-width="4.5" stroke-linecap="round" fill="none">
+        <path d="M 44 73.40192378864668 Q 30 78.86602540378443 22 90.86602540378443"/>
+        <path d="M 42 79.40192378864668 Q 26 81.40192378864668 20 91.40192378864668"/>
+        <path d="M 46 83.40192378864668 Q 32 85.93782217350893 26 94.93782217350893"/>
+        <path d="M 84 73.40192378864668 Q 98 71.93782217350893 106 83.93782217350893"/>
+        <path d="M 86 79.40192378864668 Q 102 85.40192378864668 108 95.40192378864668"/>
+        <path d="M 82 83.40192378864668 Q 96 92.86602540378443 102 101.86602540378443"/>
+      </g>
+    <g transform="translate(42, 59.401923788646684) rotate(-20.660254037844386)">
+      <path d="M 0 0 C -10 -12, -18 -18, -24 -14 C -30 -10, -22 6, -10 4 Z" fill="url(#crabClaw)"/>
+      <g transform="translate(-22, -12) rotate(18)">
+        <path d="M 0 0 C -4 -10, -12 -16, -18 -8 C -14 -2, -6 2, 0 0 Z" fill="url(#crabClaw)"/>
+      </g>
+      <circle cx="-16" cy="-8" r="3.5" fill="#C23616"/>
+    </g><g transform="translate(86, 59.401923788646684) rotate(20.660254037844386)">
+      <path d="M 0 0 C 10 -12, 18 -18, 24 -14 C 30 -10, 22 6, 10 4 Z" fill="url(#crabClaw)"/>
+      <g transform="translate(22, -12) rotate(-18)">
+        <path d="M 0 0 C 4 -10, 12 -16, 18 -8 C 14 -2, 6 2, 0 0 Z" fill="url(#crabClaw)"/>
+      </g>
+      <circle cx="16" cy="-8" r="3.5" fill="#C23616"/>
+    </g>
+      <ellipse cx="64" cy="71.40192378864668" rx="30" ry="22" fill="url(#crabGrad)"/>
+      <ellipse cx="64" cy="77.40192378864668" rx="18" ry="11" fill="#FFEAA7" opacity="0.6"/>
+      <path d="M 48 63.401923788646684 Q 64 57.401923788646684 80 63.401923788646684" stroke="#FFF" stroke-width="2.5" stroke-linecap="round" fill="none" opacity="0.4"/>
+    
+          <rect x="48" y="47.401923788646684" width="6" height="12" rx="3" fill="#C23616"/>
+          <rect x="74" y="47.401923788646684" width="6" height="12" rx="3" fill="#C23616"/>
+          <circle cx="51" cy="47.401923788646684" r="8.5" fill="#FFF"/>
+          <circle cx="77" cy="47.401923788646684" r="8.5" fill="#FFF"/>
+          <circle cx="52" cy="47.401923788646684" r="4.8" fill="#1E272E"/>
+          <circle cx="78" cy="47.401923788646684" r="4.8" fill="#1E272E"/>
+          <circle cx="53" cy="45.401923788646684" r="2" fill="#FFF"/>
+          <circle cx="79" cy="45.401923788646684" r="2" fill="#FFF"/>
+        <circle cx="46" cy="77.40192378864668" r="4.5" fill="#FF4757" opacity="0.6"/>
+               <circle cx="82" cy="77.40192378864668" r="4.5" fill="#FF4757" opacity="0.6"/><path d="M 58 73.40192378864668 Q 64 79.40192378864668 70 73.40192378864668" stroke="#C23616" stroke-width="2.5" stroke-linecap="round" fill="none"/></g>
+<g id="frame-5" transform="translate(640, 0)">
+      <g stroke="#C23616" stroke-width="4.5" stroke-linecap="round" fill="none">
+        <path d="M 44 73.40192378864668 Q 30 71.93782217350893 22 83.93782217350893"/>
+        <path d="M 42 79.40192378864668 Q 26 81.40192378864668 20 91.40192378864668"/>
+        <path d="M 46 83.40192378864668 Q 32 92.86602540378443 26 101.86602540378443"/>
+        <path d="M 84 73.40192378864668 Q 98 78.86602540378443 106 90.86602540378443"/>
+        <path d="M 86 79.40192378864668 Q 102 85.40192378864668 108 95.40192378864668"/>
+        <path d="M 82 83.40192378864668 Q 96 85.93782217350893 102 94.93782217350893"/>
+      </g>
+    <g transform="translate(42, 59.401923788646684) rotate(-20.66025403784439)">
+      <path d="M 0 0 C -10 -12, -18 -18, -24 -14 C -30 -10, -22 6, -10 4 Z" fill="url(#crabClaw)"/>
+      <g transform="translate(-22, -12) rotate(4)">
+        <path d="M 0 0 C -4 -10, -12 -16, -18 -8 C -14 -2, -6 2, 0 0 Z" fill="url(#crabClaw)"/>
+      </g>
+      <circle cx="-16" cy="-8" r="3.5" fill="#C23616"/>
+    </g><g transform="translate(86, 59.401923788646684) rotate(20.66025403784439)">
+      <path d="M 0 0 C 10 -12, 18 -18, 24 -14 C 30 -10, 22 6, 10 4 Z" fill="url(#crabClaw)"/>
+      <g transform="translate(22, -12) rotate(-4)">
+        <path d="M 0 0 C 4 -10, 12 -16, 18 -8 C 14 -2, 6 2, 0 0 Z" fill="url(#crabClaw)"/>
+      </g>
+      <circle cx="16" cy="-8" r="3.5" fill="#C23616"/>
+    </g>
+      <ellipse cx="64" cy="71.40192378864668" rx="30" ry="22" fill="url(#crabGrad)"/>
+      <ellipse cx="64" cy="77.40192378864668" rx="18" ry="11" fill="#FFEAA7" opacity="0.6"/>
+      <path d="M 48 63.401923788646684 Q 64 57.401923788646684 80 63.401923788646684" stroke="#FFF" stroke-width="2.5" stroke-linecap="round" fill="none" opacity="0.4"/>
+    
+          <rect x="48" y="47.401923788646684" width="6" height="12" rx="3" fill="#C23616"/>
+          <rect x="74" y="47.401923788646684" width="6" height="12" rx="3" fill="#C23616"/>
+          <circle cx="51" cy="47.401923788646684" r="8.5" fill="#FFF"/>
+          <circle cx="77" cy="47.401923788646684" r="8.5" fill="#FFF"/>
+          <circle cx="52" cy="47.401923788646684" r="4.8" fill="#1E272E"/>
+          <circle cx="78" cy="47.401923788646684" r="4.8" fill="#1E272E"/>
+          <circle cx="53" cy="45.401923788646684" r="2" fill="#FFF"/>
+          <circle cx="79" cy="45.401923788646684" r="2" fill="#FFF"/>
+        <circle cx="46" cy="77.40192378864668" r="4.5" fill="#FF4757" opacity="0.6"/>
+               <circle cx="82" cy="77.40192378864668" r="4.5" fill="#FF4757" opacity="0.6"/><path d="M 58 73.40192378864668 Q 64 79.40192378864668 70 73.40192378864668" stroke="#C23616" stroke-width="2.5" stroke-linecap="round" fill="none"/></g>
+
+</svg>

@@ -1,0 +1,92 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 128" width="512" height="128">
+  <defs>
+    
+    <linearGradient id="shrimpGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#FF9FF3"/>
+      <stop offset="50%" stop-color="#FECA57"/>
+      <stop offset="100%" stop-color="#FF6B6B"/>
+    </linearGradient>
+
+  </defs>
+  <g id="frame-0" transform="translate(0, 0)"><g stroke="#FF9FF3" stroke-width="2.2" stroke-linecap="round" fill="none">
+      <path d="M 78 50 C 92 48 112 44 122 46"/>
+      <path d="M 76 46 C 88 44.8 106 36.8 118 34.8"/>
+    </g><g transform="translate(32, 87.6) rotate(0)">
+      <path d="M 0 0 C -12 6, -18 16, -16 22 C -8 18, 0 10, 0 0 Z" fill="#FECA57"/>
+      <path d="M 0 0 C -8 12, -10 24, -4 26 C 2 20, 4 10, 0 0 Z" fill="#FF6B6B"/>
+      <path d="M 0 0 C 4 10, 6 22, 12 20 C 10 12, 4 6, 0 0 Z" fill="#FF9FF3"/>
+    </g><g stroke="#FECA57" stroke-width="2" stroke-linecap="round">
+      <line x1="70" y1="70" x2="66" y2="78"/>
+      <line x1="60" y1="78" x2="56" y2="86"/>
+      <line x1="50" y1="86" x2="46" y2="92"/>
+    </g><ellipse cx="40" cy="82.0" rx="12" ry="10" fill="url(#shrimpGrad)"/><ellipse cx="52" cy="73.6" rx="14" ry="12" fill="url(#shrimpGrad)"/><ellipse cx="64" cy="65.0" rx="15" ry="13" fill="url(#shrimpGrad)"/><ellipse cx="76" cy="58" rx="16" ry="14" fill="url(#shrimpGrad)"/>
+          <circle cx="82" cy="54" r="7" fill="#FFF"/>
+          <circle cx="83" cy="54" r="4" fill="#222F3E"/>
+          <circle cx="84" cy="52" r="1.8" fill="#FFF"/>
+        <path d="M 86 61 Q 89 63 86 65" stroke="#222F3E" stroke-width="2" stroke-linecap="round" fill="none"/><circle cx="79" cy="64" r="4" fill="#FF6B6B" opacity="0.6"/>
+      <g transform="translate(86, 20)">
+        <text x="0" y="0" font-size="14" font-weight="900" fill="#FECA57">?</text>
+      </g>
+    </g>
+<g id="frame-1" transform="translate(128, 0)"><g stroke="#FF9FF3" stroke-width="2.2" stroke-linecap="round" fill="none">
+      <path d="M 78 50 C 92 48 112 44 122 46"/>
+      <path d="M 76 46 C 88 44.8 106 36.8 118 34.8"/>
+    </g><g transform="translate(32, 87.6) rotate(0)">
+      <path d="M 0 0 C -12 6, -18 16, -16 22 C -8 18, 0 10, 0 0 Z" fill="#FECA57"/>
+      <path d="M 0 0 C -8 12, -10 24, -4 26 C 2 20, 4 10, 0 0 Z" fill="#FF6B6B"/>
+      <path d="M 0 0 C 4 10, 6 22, 12 20 C 10 12, 4 6, 0 0 Z" fill="#FF9FF3"/>
+    </g><g stroke="#FECA57" stroke-width="2" stroke-linecap="round">
+      <line x1="70" y1="70" x2="66" y2="78"/>
+      <line x1="60" y1="78" x2="56" y2="86"/>
+      <line x1="50" y1="86" x2="46" y2="92"/>
+    </g><ellipse cx="40" cy="82.0" rx="12" ry="10" fill="url(#shrimpGrad)"/><ellipse cx="52" cy="73.6" rx="14" ry="12" fill="url(#shrimpGrad)"/><ellipse cx="64" cy="65.0" rx="15" ry="13" fill="url(#shrimpGrad)"/><ellipse cx="76" cy="58" rx="16" ry="14" fill="url(#shrimpGrad)"/>
+          <circle cx="82" cy="54" r="7" fill="#FFF"/>
+          <circle cx="83" cy="54" r="4" fill="#222F3E"/>
+          <circle cx="84" cy="52" r="1.8" fill="#FFF"/>
+        <path d="M 86 61 Q 89 63 86 65" stroke="#222F3E" stroke-width="2" stroke-linecap="round" fill="none"/><circle cx="79" cy="64" r="4" fill="#FF6B6B" opacity="0.6"/>
+      <g transform="translate(86, 20)">
+        <text x="0" y="0" font-size="14" font-weight="900" fill="#FECA57">?</text>
+      </g>
+    </g>
+<g id="frame-2" transform="translate(256, 0)"><g stroke="#FF9FF3" stroke-width="2.2" stroke-linecap="round" fill="none">
+      <path d="M 78 50 C 92 48 112 44 122 46"/>
+      <path d="M 76 46 C 88 44.8 106 36.8 118 34.8"/>
+    </g><g transform="translate(32, 87.6) rotate(0)">
+      <path d="M 0 0 C -12 6, -18 16, -16 22 C -8 18, 0 10, 0 0 Z" fill="#FECA57"/>
+      <path d="M 0 0 C -8 12, -10 24, -4 26 C 2 20, 4 10, 0 0 Z" fill="#FF6B6B"/>
+      <path d="M 0 0 C 4 10, 6 22, 12 20 C 10 12, 4 6, 0 0 Z" fill="#FF9FF3"/>
+    </g><g stroke="#FECA57" stroke-width="2" stroke-linecap="round">
+      <line x1="70" y1="70" x2="66" y2="78"/>
+      <line x1="60" y1="78" x2="56" y2="86"/>
+      <line x1="50" y1="86" x2="46" y2="92"/>
+    </g><ellipse cx="40" cy="82.0" rx="12" ry="10" fill="url(#shrimpGrad)"/><ellipse cx="52" cy="73.6" rx="14" ry="12" fill="url(#shrimpGrad)"/><ellipse cx="64" cy="65.0" rx="15" ry="13" fill="url(#shrimpGrad)"/><ellipse cx="76" cy="58" rx="16" ry="14" fill="url(#shrimpGrad)"/>
+          <circle cx="82" cy="54" r="7" fill="#FFF"/>
+          <circle cx="83" cy="54" r="4" fill="#222F3E"/>
+          <circle cx="84" cy="52" r="1.8" fill="#FFF"/>
+        <path d="M 86 61 Q 89 63 86 65" stroke="#222F3E" stroke-width="2" stroke-linecap="round" fill="none"/><circle cx="79" cy="64" r="4" fill="#FF6B6B" opacity="0.6"/>
+      <g transform="translate(86, 20)">
+        <text x="0" y="0" font-size="14" font-weight="900" fill="#FECA57">?</text>
+      </g>
+    </g>
+<g id="frame-3" transform="translate(384, 0)"><g stroke="#FF9FF3" stroke-width="2.2" stroke-linecap="round" fill="none">
+      <path d="M 78 50 C 92 48 112 44 122 46"/>
+      <path d="M 76 46 C 88 44.8 106 36.8 118 34.8"/>
+    </g><g transform="translate(32, 87.6) rotate(0)">
+      <path d="M 0 0 C -12 6, -18 16, -16 22 C -8 18, 0 10, 0 0 Z" fill="#FECA57"/>
+      <path d="M 0 0 C -8 12, -10 24, -4 26 C 2 20, 4 10, 0 0 Z" fill="#FF6B6B"/>
+      <path d="M 0 0 C 4 10, 6 22, 12 20 C 10 12, 4 6, 0 0 Z" fill="#FF9FF3"/>
+    </g><g stroke="#FECA57" stroke-width="2" stroke-linecap="round">
+      <line x1="70" y1="70" x2="66" y2="78"/>
+      <line x1="60" y1="78" x2="56" y2="86"/>
+      <line x1="50" y1="86" x2="46" y2="92"/>
+    </g><ellipse cx="40" cy="82.0" rx="12" ry="10" fill="url(#shrimpGrad)"/><ellipse cx="52" cy="73.6" rx="14" ry="12" fill="url(#shrimpGrad)"/><ellipse cx="64" cy="65.0" rx="15" ry="13" fill="url(#shrimpGrad)"/><ellipse cx="76" cy="58" rx="16" ry="14" fill="url(#shrimpGrad)"/>
+          <circle cx="82" cy="54" r="7" fill="#FFF"/>
+          <circle cx="83" cy="54" r="4" fill="#222F3E"/>
+          <circle cx="84" cy="52" r="1.8" fill="#FFF"/>
+        <path d="M 86 61 Q 89 63 86 65" stroke="#222F3E" stroke-width="2" stroke-linecap="round" fill="none"/><circle cx="79" cy="64" r="4" fill="#FF6B6B" opacity="0.6"/>
+      <g transform="translate(86, 20)">
+        <text x="0" y="0" font-size="14" font-weight="900" fill="#FECA57">?</text>
+      </g>
+    </g>
+
+</svg>

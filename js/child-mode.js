@@ -2,9 +2,42 @@ let isChildMode = false;
 let childStreak = 0; // 儿童模式连胜计数
 
 // --- 全局声音总控与音量管理 (SOUND MASTER CONTROLLER) ---
+function getPetSoundIconSvg(enabled) {
+    if (enabled) {
+        return `
+            <svg class="pet-sound-icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon>
+                <path d="M15.54 8.46a5 5 0 0 1 0 7.07"></path>
+                <path d="M19.07 4.93a10 10 0 0 1 0 14.14"></path>
+            </svg>
+        `.trim();
+    } else {
+        return `
+            <svg class="pet-sound-icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon>
+                <line x1="23" y1="9" x2="17" y2="15"></line>
+                <line x1="17" y1="9" x2="23" y2="15"></line>
+            </svg>
+        `.trim();
+    }
+}
+
+function updateSoundToggleButtonsUI() {
+    if (typeof PetSound === 'undefined') return;
+    const isEnabled = PetSound.isEnabled();
+    const iconSvg = getPetSoundIconSvg(isEnabled);
+    const soundBtns = document.querySelectorAll('.pet-quiz-sound-btn, .btn-sound-toggle');
+    soundBtns.forEach(btn => {
+        btn.innerHTML = iconSvg;
+        btn.classList.toggle('is-muted', !isEnabled);
+        btn.setAttribute('title', isEnabled ? '声音已开启 (点击静音)' : '已静音 (点击开启声音)');
+    });
+}
+
 function togglePetSound(e) {
     if (e && typeof e.stopPropagation === 'function') e.stopPropagation();
     PetSound.toggleSound();
+    updateSoundToggleButtonsUI();
 }
 
 // --- 伴学精灵个性习性与偏好管理 (PET HABIT & PERSONALITY CONTROLLER) ---
@@ -40,9 +73,30 @@ function setPetChattiness(level) {
     syncHabitControlsUI();
 }
 
+function getPetRenderStyle() {
+    return (window.PetEngine && PetEngine.Sprite) ? PetEngine.Sprite.getRenderMode() : 'sprite';
+}
+
+function setPetRenderStyle(mode) {
+    if (window.PetEngine && PetEngine.Sprite) {
+        PetEngine.Sprite.setRenderMode(mode);
+    }
+    if (typeof PetSound !== 'undefined' && PetSound.isEnabled()) {
+        PetSound.bubble();
+    }
+    syncHabitControlsUI();
+    if (window.roamingPet) {
+        window.roamingPet.render();
+    }
+    if (typeof updatePetWidgets === 'function') {
+        updatePetWidgets();
+    }
+}
+
 function syncHabitControlsUI() {
     const activity = getPetActivity();
     const chattiness = getPetChattiness();
+    const renderMode = getPetRenderStyle();
 
     // 更新活跃度按钮高亮与文字说明
     const actBtns = document.querySelectorAll('#activity-selector .habit-seg-btn');
@@ -105,6 +159,36 @@ const PetSound = {
             updatePetWidgets();
         }
         return next;
+    },
+
+    // 0. 纸张清脆翻折声 (纸灵锦专属轻柔折纸音)
+    paperRustle() {
+        if (!this.isEnabled()) return;
+        const ctx = this.getCtx();
+        if (!ctx) return;
+        try {
+            const now = ctx.currentTime;
+            const bufferSize = Math.floor(ctx.sampleRate * 0.12);
+            const buffer = ctx.createBuffer(1, bufferSize, ctx.sampleRate);
+            const data = buffer.getChannelData(0);
+            for (let i = 0; i < bufferSize; i++) {
+                data[i] = (Math.random() * 2 - 1) * Math.exp(-i / (ctx.sampleRate * 0.025));
+            }
+            const noise = ctx.createBufferSource();
+            noise.buffer = buffer;
+            const filter = ctx.createBiquadFilter();
+            filter.type = 'bandpass';
+            filter.frequency.setValueAtTime(3200, now);
+            filter.frequency.exponentialRampToValueAtTime(1800, now + 0.12);
+            filter.Q.value = 2.5;
+            const gain = ctx.createGain();
+            gain.gain.setValueAtTime(0.18, now);
+            gain.gain.exponentialRampToValueAtTime(0.005, now + 0.12);
+            noise.connect(filter);
+            filter.connect(gain);
+            gain.connect(ctx.destination);
+            noise.start(now);
+        } catch (e) {}
     },
 
     // 1. Q 弹水泡破灭音 (吐泡/短促互动)
@@ -473,6 +557,123 @@ const PetSound = {
         } catch (e) {}
     },
 
+    // 17. 纸灵龟：沉稳悠然划水音 (温和低频水流)
+    turtlePaddle() {
+        if (!this.isEnabled()) return;
+        const ctx = this.getCtx();
+        if (!ctx) return;
+        try {
+            const now = ctx.currentTime;
+            const osc = ctx.createOscillator();
+            const gain = ctx.createGain();
+            osc.type = 'sine';
+            osc.frequency.setValueAtTime(180, now);
+            osc.frequency.exponentialRampToValueAtTime(320, now + 0.16);
+            osc.frequency.exponentialRampToValueAtTime(140, now + 0.32);
+            gain.gain.setValueAtTime(0.08, now);
+            gain.gain.exponentialRampToValueAtTime(0.002, now + 0.32);
+            osc.connect(gain);
+            gain.connect(ctx.destination);
+            osc.start(now);
+            osc.stop(now + 0.33);
+        } catch (e) {}
+    },
+
+    // 18. 纸灵龟：坚固几何玄甲敲击音 (空灵折纸共鸣)
+    turtleShell() {
+        if (!this.isEnabled()) return;
+        const ctx = this.getCtx();
+        if (!ctx) return;
+        try {
+            const now = ctx.currentTime;
+            const osc = ctx.createOscillator();
+            const gain = ctx.createGain();
+            osc.type = 'triangle';
+            osc.frequency.setValueAtTime(420, now);
+            osc.frequency.exponentialRampToValueAtTime(210, now + 0.08);
+            gain.gain.setValueAtTime(0.22, now);
+            gain.gain.exponentialRampToValueAtTime(0.005, now + 0.08);
+            osc.connect(gain);
+            gain.connect(ctx.destination);
+            osc.start(now);
+            osc.stop(now + 0.09);
+        } catch (e) {}
+    },
+
+    // 19. 纸灵水母：空灵幻光脉冲音 (高频泛音脉冲)
+    jellyPulse() {
+        if (!this.isEnabled()) return;
+        const ctx = this.getCtx();
+        if (!ctx) return;
+        try {
+            const now = ctx.currentTime;
+            const osc = ctx.createOscillator();
+            const gain = ctx.createGain();
+            osc.type = 'sine';
+            osc.frequency.setValueAtTime(620, now);
+            osc.frequency.exponentialRampToValueAtTime(1180, now + 0.12);
+            gain.gain.setValueAtTime(0.12, now);
+            gain.gain.exponentialRampToValueAtTime(0.002, now + 0.22);
+            osc.connect(gain);
+            gain.connect(ctx.destination);
+            osc.start(now);
+            osc.stop(now + 0.23);
+        } catch (e) {}
+    },
+
+    // 20. 纸灵鲸：深海宏大鲸歌鸣唱 (深沉次低频和声)
+    whaleSong() {
+        if (!this.isEnabled()) return;
+        const ctx = this.getCtx();
+        if (!ctx) return;
+        try {
+            const now = ctx.currentTime;
+            const osc = ctx.createOscillator();
+            const gain = ctx.createGain();
+            osc.type = 'sine';
+            osc.frequency.setValueAtTime(140, now);
+            osc.frequency.linearRampToValueAtTime(260, now + 0.25);
+            osc.frequency.exponentialRampToValueAtTime(110, now + 0.55);
+            gain.gain.setValueAtTime(0.02, now);
+            gain.gain.linearRampToValueAtTime(0.18, now + 0.15);
+            gain.gain.exponentialRampToValueAtTime(0.003, now + 0.55);
+            osc.connect(gain);
+            gain.connect(ctx.destination);
+            osc.start(now);
+            osc.stop(now + 0.56);
+        } catch (e) {}
+    },
+
+    // 21. 纸灵鲸：水柱喷涌水花声
+    whaleSpout() {
+        if (!this.isEnabled()) return;
+        const ctx = this.getCtx();
+        if (!ctx) return;
+        try {
+            const now = ctx.currentTime;
+            const bufferSize = Math.floor(ctx.sampleRate * 0.25);
+            const buffer = ctx.createBuffer(1, bufferSize, ctx.sampleRate);
+            const data = buffer.getChannelData(0);
+            for (let i = 0; i < bufferSize; i++) {
+                data[i] = (Math.random() * 2 - 1) * Math.exp(-i / (ctx.sampleRate * 0.08));
+            }
+            const noise = ctx.createBufferSource();
+            noise.buffer = buffer;
+            const filter = ctx.createBiquadFilter();
+            filter.type = 'bandpass';
+            filter.frequency.setValueAtTime(1400, now);
+            filter.frequency.exponentialRampToValueAtTime(600, now + 0.25);
+            filter.Q.value = 1.8;
+            const gain = ctx.createGain();
+            gain.gain.setValueAtTime(0.15, now);
+            gain.gain.exponentialRampToValueAtTime(0.005, now + 0.25);
+            noise.connect(filter);
+            filter.connect(gain);
+            gain.connect(ctx.destination);
+            noise.start(now);
+        } catch (e) {}
+    },
+
     // 17. 睡着打盹小呼噜呼吸音
     petSnore() {
         if (!this.isEnabled()) return;
@@ -656,6 +857,42 @@ const PetVoice = {
             baseFreq: 320,
             waveType: 'sine',
             name: '皮皮章'
+        },
+        origami_koi: {
+            pitch: 1.62, // 清脆灵巧的和纸折叠仙音
+            rate: 1.15,
+            preferredVoices: ['Xiaoxiao', 'Yaoyao', 'Ting-Ting', 'Huihui', 'Desktop', 'Google 普通话', 'zh-CN'],
+            personaPrefix: '',
+            baseFreq: 640,
+            waveType: 'triangle',
+            name: '纸灵锦'
+        },
+        turtle: {
+            pitch: 0.90, // 稳重温和沉着慢速童音
+            rate: 0.92,
+            preferredVoices: ['Yunxi', 'Kangkang', 'Xiaoyi', 'Huihui', 'Desktop', 'Google 普通话', 'zh-CN'],
+            personaPrefix: '',
+            baseFreq: 380,
+            waveType: 'sine',
+            name: '纸灵龟'
+        },
+        jellyfish: {
+            pitch: 1.75, // 轻柔空灵梦幻飘逸萌音
+            rate: 1.05,
+            preferredVoices: ['Xiaoxiao', 'Yaoyao', 'Ting-Ting', 'Huihui', 'Desktop', 'Google 普通话', 'zh-CN'],
+            personaPrefix: '',
+            baseFreq: 720,
+            waveType: 'sine',
+            name: '纸灵水母'
+        },
+        whale: {
+            pitch: 0.72, // 宏大宽厚包容低音
+            rate: 0.95,
+            preferredVoices: ['Yunjian', 'Yunxi', 'Danny', 'Male', 'Desktop', 'Google 普通话', 'zh-CN'],
+            personaPrefix: '',
+            baseFreq: 240,
+            waveType: 'sine',
+            name: '纸灵鲸'
         }
     },
 
@@ -937,90 +1174,153 @@ window.speakText = function(text, petType, isAcademic = false) {
     PetVoice.speak(text, petType || 'fish');
 };
 
-// --- 海鲜宠物设定库 (五阶觉醒变身体系) ---
+// --- 伴学折纸灵兽库 (全量现代微立体几何折纸五阶觉醒体系) ---
 const SEAFOOD_PETS = {
     fish: {
         id: 'fish',
-        name: '小泡鱼',
-        speciesName: '泡泡灵鱼族',
-        avatar: '🐟',
-        favoriteFood: '海藻小饼干',
-        foodIcon: '🍪',
+        name: '纸灵锦',
+        speciesName: '几何灵鱼族',
+        avatar: '🎏',
+        favoriteFood: '五彩折纸笺',
+        foodIcon: '🎋',
         forms: [
-            { stage: 1, title: '萌宝泡泡鱼', avatar: '🐟', aura: 'aura-bubble', desc: '刚出生的小可爱，最爱吐圆滚滚的彩虹气泡。', quote: '咕噜咕噜~ 做题像吐泡泡一样简单！', unlockLevel: 1 },
-            { stage: 2, title: '彩纹热带鱼', avatar: '🐠', aura: 'aura-shimmer', desc: '披上绚丽彩衣，游动速度如离弦之箭。', quote: '游呀游~ 我发现正确答案藏在水草里啦！', unlockLevel: 3 },
-            { stage: 3, title: '刺刺河豚霸', avatar: '🐡', aura: 'aura-shield', desc: '遇到难题立刻鼓成威武刺球，谁也难不倒它！', quote: '气鼓鼓！所有难关都被我的水刺弹开！', unlockLevel: 5 },
-            { stage: 4, title: '幻光锦鲤仙', avatar: '🎏', aura: 'aura-rainbow', desc: '祥瑞金光护体，带来百分之百的答题福运。', quote: '锦鲤附体，逢考必过！小主人好运连连！', unlockLevel: 7 },
-            { stage: 5, title: '九霄海龙神', avatar: '🐉', aura: 'aura-dragon-gold', desc: '真龙觉醒！呼风唤雨，执掌深海万千智慧。', quote: '雷霆万钧！神龙现世，没有什么难题能阻挡我们！', unlockLevel: 10 }
+            { stage: 1, title: '萌动小纸苗', avatar: '⛵', aura: 'aura-origami-paper', desc: '由一张四方彩纸精心折叠而生的小纸苗，身形轻巧，随风起舞。', quote: '沙沙~ 每一折都叠满了智慧的灵光！', unlockLevel: 1 },
+            { stage: 2, title: '几何切面鱼', avatar: '🐟', aura: 'aura-origami-fold', desc: '六棱切面分明，光影交错，在题海中轻盈划出纸艺折线。', quote: '翻翻折折，看我把难题折成漂亮纸飞机！', unlockLevel: 3 },
+            { stage: 3, title: '立体千羽鱼', avatar: '🐠', aura: 'aura-origami-wing', desc: '双鳍如鹤翼舒展，十八面体立体几何折痕散发着温润纸光。', quote: '展翼飞游！智慧的光芒照亮了每一个折角！', unlockLevel: 5 },
+            { stage: 4, title: '烫金和风锦', avatar: '🎏', aura: 'aura-origami-gold', desc: '背覆金箔烫金折线，三十多道复杂精工折叠而成的祥瑞锦鲤。', quote: '祥瑞纸灵，吉庆有余！难题瞬间被裁切化解！', unlockLevel: 7 },
+            { stage: 5, title: '九天折纸龙', avatar: '🐉', aura: 'aura-origami-dragon', desc: '百层精密纸艺翻折而成的九天真龙，流转着全息几何星光与神圣纸环。', quote: '万纸归宗，化龙飞霄！小主人的智慧已登峰造极！', unlockLevel: 10 }
         ],
         quotes: [
-            '咕噜咕噜~ 做题像吐泡泡一样简单！',
-            '太香啦！小鱼饼干真好吃，再答对一题吧！',
-            '小主人好厉害，我们是海底最强拍档！',
-            '深呼吸，慢慢看题目，你一定行的~'
+            '沙沙~ 听到纸张轻柔翻折的声音了吗？那是思考的声音！',
+            '五彩折纸笺真香脆，再来折叠一道难题吧！',
+            '小主人指尖一动，智慧就像折纸一样千变万化！',
+            '折一折，叠一叠，满分答卷就在眼前~'
         ]
     },
     crab: {
         id: 'crab',
-        name: '机灵蟹',
-        speciesName: '霸王神蟹族',
+        name: '纸灵蟹',
+        speciesName: '几何霸甲族',
         avatar: '🦀',
-        favoriteFood: '香脆海苔',
+        favoriteFood: '香脆纸海苔',
         foodIcon: '🍘',
         forms: [
-            { stage: 1, title: '豆丁小青蟹', avatar: '🦀', aura: 'aura-bubble', desc: '挥舞小钳子横冲直撞的小可爱。', quote: '咔嚓咔嚓！我横着走也能答对！', unlockLevel: 1 },
-            { stage: 2, title: '铁甲重钳蟹', avatar: '🦞', aura: 'aura-iron', desc: '坚硬如铁的重甲，两只巨鳌能剪碎一切错题。', quote: '硬核剪刀手出击，错题通通剪碎！', unlockLevel: 3 },
-            { stage: 3, title: '黄金帝王蟹', avatar: '👑🦀', aura: 'aura-golden', desc: '头顶尊贵王冠，深海里最神气的小霸主。', quote: '戴上皇冠，小主人今天也是答题之王！', unlockLevel: 5 },
-            { stage: 4, title: '机甲泰坦蟹', avatar: '🤖🦀', aura: 'aura-cyber', desc: '能量矩阵充盈全身，挥舞等离子光刃双钳！', quote: '机甲变身启动！锁定正确答案，全弹发射！', unlockLevel: 7 },
-            { stage: 5, title: '星河裂空巨鳌', avatar: '🌌🦀', aura: 'aura-cosmic', desc: '巨鳌挥动能撕裂宇宙星云，深海古神级守护者。', quote: '星河在我螯间流转，小主人的智慧耀眼夺目！', unlockLevel: 10 }
+            { stage: 1, title: '方块小豆蟹', avatar: '🦀', aura: 'aura-origami-paper', desc: '方块折纸小萌蟹，小剪刀一开一合横着走！', quote: '咔擦！我用小纸剪排除所有的错题！', unlockLevel: 1 },
+            { stage: 2, title: '棱角双钳蟹', avatar: '🦀', aura: 'aura-origami-fold', desc: '八棱切面立体折叠重铠，双鳌剪裁如风。', quote: '多面棱角，坚不可摧！剪碎一切难题！', unlockLevel: 3 },
+            { stage: 3, title: '金冠赤甲帝王蟹', avatar: '👑🦀', aura: 'aura-origami-wing', desc: '头顶折纸金冠，身披红金折甲，威风凛凛的小霸主。', quote: '戴上折纸金王冠，小主人今天也是答题之王！', unlockLevel: 5 },
+            { stage: 4, title: '机甲多棱暴风蟹', avatar: '🤖🦀', aura: 'aura-origami-gold', desc: '钛晶多棱机甲折面，挥动等离子光刃折刀！', quote: '折纸机甲变身！光刃出鞘，锁定全对！', unlockLevel: 7 },
+            { stage: 5, title: '星穹裂空神鳌', avatar: '🌌🦀', aura: 'aura-origami-dragon', desc: '宇宙星系全息折面，双鳌撕裂星云的神圣守护神。', quote: '星穹在我鳌间翻折，小主人的智慧耀眼夺目！', unlockLevel: 10 }
         ],
         quotes: [
-            '咔嚓咔嚓！所有的难题都被我的大钳子剪碎啦！',
-            '举起大双钳为你欢呼！太棒了！',
-            '海苔脆脆，做题对对！继续前进！',
-            '横着走也能通关，小主人冲鸭！'
+            '咔嚓咔嚓！所有的难题都被我的折纸大剪刀剪碎啦！',
+            '举起折纸大双钳为你欢呼！太棒了！',
+            '纸海苔脆脆，做题全对！继续前进！',
+            '横着折也能通关，小主人冲鸭！'
         ]
     },
     shrimp: {
         id: 'shrimp',
-        name: '跳跳虾',
-        speciesName: '赤炎神虾族',
+        name: '纸灵虾',
+        speciesName: '几何疾风族',
         avatar: '🦐',
-        favoriteFood: '浮游布丁',
+        favoriteFood: '琥珀折叠布丁',
         foodIcon: '🍮',
         forms: [
-            { stage: 1, title: '软萌晶晶虾', avatar: '🦐', aura: 'aura-bubble', desc: '晶莹剔透，蹦蹦跳跳的小跟班。', quote: '蹦一蹦，长一寸，做做题，得满分！', unlockLevel: 1 },
-            { stage: 2, title: '黄金香脆虾', avatar: '🍤', aura: 'aura-crisp', desc: '金黄香脆，弹射起飞动力十足。', quote: '香香脆脆，答题全对！', unlockLevel: 3 },
-            { stage: 3, title: '炽热烈焰虾', avatar: '🦐🔥', aura: 'aura-fire', desc: '浑身包裹着热情似火的烈焰推进器。', quote: '热情燃烧！答题手速比海浪还要快！', unlockLevel: 5 },
-            { stage: 4, title: '超光速雷霆虾', avatar: '⚡🦐', aura: 'aura-thunder', desc: '化身金色闪电，在题海中瞬息穿梭。', quote: '雷光一闪，答案立刻浮现在脑海！', unlockLevel: 7 },
-            { stage: 5, title: '不死朱雀灵虾', avatar: '🪽🦐', aura: 'aura-phoenix', desc: '浴火涅槃，长出华美神羽，永远生机勃勃。', quote: '涅槃觉醒！每一次思考都是一次华丽蜕变！', unlockLevel: 10 }
+            { stage: 1, title: '弯折小纸虾', avatar: '🦐', aura: 'aura-origami-paper', desc: '晶莹三段式弯折小虾，轻巧灵动随时起飞。', quote: '折一折，弹一弹，做做题，得满分！', unlockLevel: 1 },
+            { stage: 2, title: '扇尾晶莹虾', avatar: '🍤', aura: 'aura-origami-fold', desc: '尾部如折纸百褶扇展开，弹射起飞动力十足。', quote: '百褶折扇，迎风起跃！做题如行云流水！', unlockLevel: 3 },
+            { stage: 3, title: '烈焰喷射虾', avatar: '🦐🔥', aura: 'aura-origami-wing', desc: '金红多棱推进羽翼，弹射手速超越海浪。', quote: '火箭折翼推进！答题手速比海浪还要快！', unlockLevel: 5 },
+            { stage: 4, title: '雷霆金羽神速虾', avatar: '⚡🦐', aura: 'aura-origami-gold', desc: '金色闪电折痕神翼，在题海中瞬息穿梭。', quote: '雷光一闪，答案立刻浮现在纸笺之上！', unlockLevel: 7 },
+            { stage: 5, title: '不死朱雀神灵虾', avatar: '🪽🦐', aura: 'aura-origami-dragon', desc: '浴火涅槃，长出华美九折凤尾，九霄不死真神。', quote: '朱雀觉醒！每一次思考都是一次华丽的折纸蜕变！', unlockLevel: 10 }
         ],
         quotes: [
-            '蹦蹦跳跳！答对一题我就长大一厘米！',
-            '哇呜！弹射起飞，小主人你太聪明啦！',
-            '布丁好甜呀~ 脑筋转得比海浪还快！',
-            '跳一跳，十年少，做做题，得满分！'
+            '折一折跳一跳！答对一题我就翻折长高一寸！',
+            '哇呜！纸翼弹射起飞，小主人你太聪明啦！',
+            '折叠布丁好甜呀~ 脑筋转得比风车还快！',
+            '纸片跳一跳，十年少，做做题，得满分！'
         ]
     },
     octopus: {
         id: 'octopus',
-        name: '皮皮章',
-        speciesName: '星穹墨章族',
+        name: '纸灵章',
+        speciesName: '几何智多星族',
         avatar: '🐙',
-        favoriteFood: '深海小丸子',
+        favoriteFood: '深海纸丸子',
         foodIcon: '🍡',
         forms: [
-            { stage: 1, title: '八爪小墨章', avatar: '🐙', aura: 'aura-bubble', desc: '喜欢吐出心形墨汁的小调皮。', quote: '一手写答案，七手为你热烈鼓掌！', unlockLevel: 1 },
-            { stage: 2, title: '深海大乌贼', avatar: '🦑', aura: 'aura-wave', desc: '在深海中神秘穿梭的探险家。', quote: '深海探秘，每一道题都是未知的宝藏！', unlockLevel: 3 },
-            { stage: 3, title: '魔术礼帽章', avatar: '🎩🐙', aura: 'aura-magic', desc: '戴上大礼帽，随时变出惊喜小道具。', quote: '叮！见证奇迹的时刻，这道题选对啦！', unlockLevel: 5 },
-            { stage: 4, title: '星象千面学者', avatar: '🔮🐙', aura: 'aura-arcane', desc: '奥术水晶球环绕，掌握古老海洋的知识秘卷。', quote: '星象告诉我，小主人今天有满分之兆！', unlockLevel: 7 },
-            { stage: 5, title: '深海深渊帝皇', avatar: '🔱🐙', aura: 'aura-abyss', desc: '手握海皇三叉戟，统御万千海洋生灵的智慧之神。', quote: '深渊共鸣！浩瀚智慧如汪洋大海，唯你独尊！', unlockLevel: 10 }
+            { stage: 1, title: '八角小纸章', avatar: '🐙', aura: 'aura-origami-paper', desc: '八角折纸穹顶小可爱，四对小纸爪为你点赞！', quote: '一手翻折写答案，七手为你热烈鼓掌！', unlockLevel: 1 },
+            { stage: 2, title: '棱面火箭乌贼', avatar: '🦑', aura: 'aura-origami-fold', desc: '流线型棱面火箭头，在深海中神秘穿梭。', quote: '深海探秘，每一道题都是折纸宝藏！', unlockLevel: 3 },
+            { stage: 3, title: '礼帽折纸魔术章', avatar: '🎩🐙', aura: 'aura-origami-wing', desc: '头戴折纸高礼帽，手持魔杖变出满分奇迹！', quote: '叮！见证奇迹的时刻，这道题选对啦！', unlockLevel: 5 },
+            { stage: 4, title: '奥术千面学者', avatar: '🔮🐙', aura: 'aura-origami-gold', desc: '二十面体奥术水晶折球环绕，掌握古老知识秘卷。', quote: '奥术纸笺告诉我，小主人今天有满分之兆！', unlockLevel: 7 },
+            { stage: 5, title: '深渊海皇三叉戟真章', avatar: '🔱🐙', aura: 'aura-origami-dragon', desc: '紫金折面神躯，手握折纸海皇三叉戟，统御万千生灵的智慧之神。', quote: '深渊共鸣！万纸归宗，浩瀚智慧唯你独尊！', unlockLevel: 10 }
         ],
         quotes: [
-            '我有八只触手，一手写答案，七手为你鼓掌！',
-            '咕嘟咕嘟，深海丸子真美味！',
-            '墨汁喷走所有烦恼，正确答案就在眼前！',
-            '智慧如海，小主人今天也是满分选手！'
+            '我有八只折纸触手，一手写答案，七手为你鼓掌！',
+            '咕嘟咕嘟，深海纸丸子真美味！',
+            '墨汁洗刷所有烦恼，正确答案就在折痕里！',
+            '智慧如海，小主人今天也是满分折纸大师！'
+        ]
+    },
+    turtle: {
+        id: 'turtle',
+        name: '纸灵龟',
+        speciesName: '几何玄甲族',
+        avatar: '🐢',
+        favoriteFood: '七彩折纸藻',
+        foodIcon: '🌿',
+        forms: [
+            { stage: 1, title: '多边形小萌龟', avatar: '🐢', aura: 'aura-origami-paper', desc: '由多块六边形折叠而成的小绿龟，性情沉稳慢悠悠。', quote: '慢条斯理，每一步折痕都扎扎实实！', unlockLevel: 1 },
+            { stage: 2, title: '六棱玄甲龟', avatar: '🐢🛡️', aura: 'aura-origami-fold', desc: '背负坚固的几何折纸玄甲，防御所有易错陷阱。', quote: '玄甲在身，粗心陷阱休想伤我分毫！', unlockLevel: 3 },
+            { stage: 3, title: '深海碧玉灵龟', avatar: '💎🐢', aura: 'aura-origami-wing', desc: '翡翠碧玉般温润的多面棱体，散发宁静护体光晕。', quote: '心平气和，智慧自如碧海波涛般深邃！', unlockLevel: 5 },
+            { stage: 4, title: '金纹镇海寿龟', avatar: '✨🐢', aura: 'aura-origami-gold', desc: '鎏金折痕密布重铠，沉着稳重如定海神针。', quote: '镇海定波，万千难题皆在掌握之中！', unlockLevel: 7 },
+            { stage: 5, title: '玄武神圣巨龟', avatar: '🏔️🐢', aura: 'aura-origami-dragon', desc: '背负几何仙山与神蛇环绕的四方神兽，坚不可摧。', quote: '玄武现世，不动如山！守护小主人稳夺满分！', unlockLevel: 10 }
+        ],
+        quotes: [
+            '慢慢走，走得稳，做题最忌心急哦！',
+            '七彩折纸藻清脆爽口，我的玄甲越来越厚实啦！',
+            '把心静下来，答案就在纸张纹理之间~',
+            '厚积薄发，每一次沉思都是向满分迈进！'
+        ]
+    },
+    jellyfish: {
+        id: 'jellyfish',
+        name: '纸灵水母',
+        speciesName: '几何幻光族',
+        avatar: '🪼',
+        favoriteFood: '荧光折纸晶',
+        foodIcon: '✨',
+        forms: [
+            { stage: 1, title: '半透小水母', avatar: '🪼', aura: 'aura-origami-paper', desc: '微透几何折伞伞帽，在水中一张一缩轻盈浮沉。', quote: '噗噗~ 轻轻浮起，灵感像气泡一样冒出来！', unlockLevel: 1 },
+            { stage: 2, title: '棱镜折光水母', avatar: '🎐🪼', aura: 'aura-origami-fold', desc: '棱镜般的八面切角，折射出梦幻的彩虹光晕。', quote: '彩虹折射，把错题阴霾通通驱散！', unlockLevel: 3 },
+            { stage: 3, title: '幻彩极光水母', avatar: '🌈🪼', aura: 'aura-origami-wing', desc: '飘曳着极光丝带折纸触角，梦幻灵动穿梭游弋。', quote: '极光闪耀！灵感如流星划过夜空！', unlockLevel: 5 },
+            { stage: 4, title: '深海幽蓝水母仙子', avatar: '🌌🪼', aura: 'aura-origami-gold', desc: '深海星空般静谧的琉璃折面，散落点点智慧荧光。', quote: '静谧深海，点亮智慧的指路明灯~', unlockLevel: 7 },
+            { stage: 5, title: '星河幻灵神水母', avatar: '✨🌌🪼', aura: 'aura-origami-dragon', desc: '宛如整座银河系聚缩而成的神圣幻光巨灵，通体流光溢彩。', quote: '星河同游，万物皆空明！智慧之光辉映天地！', unlockLevel: 10 }
+        ],
+        quotes: [
+            '噗噗噗~ 轻盈起舞，难题一点都压不倒我！',
+            '荧光折纸晶甜滋滋，小触角开心得打卷啦！',
+            '灵光一现！你看那道题的破绽被我看穿啦~',
+            '漂浮在题海之上，看风景格外惬意呢~'
+        ]
+    },
+    whale: {
+        id: 'whale',
+        name: '纸灵鲸',
+        speciesName: '几何巨澜族',
+        avatar: '🐳',
+        favoriteFood: '甘露折叠珠',
+        foodIcon: '💧',
+        forms: [
+            { stage: 1, title: '喷水小蓝鲸', avatar: '🐳', aura: 'aura-origami-paper', desc: '敦厚可爱的多面棱折纸小鲸鱼，头顶能喷出小小纸花。', quote: '呼噜噜~ 喷出智慧小喷泉！', unlockLevel: 1 },
+            { stage: 2, title: '多棱座头鲸', avatar: '🐋', aura: 'aura-origami-fold', desc: '胸鳍修长如折纸重翼，雄健在海浪中乘风破浪。', quote: '展翅劈波，题海无涯我作舟！', unlockLevel: 3 },
+            { stage: 3, title: '裂浪虎鲸领主', avatar: '🌊🐋', aura: 'aura-origami-wing', desc: '黑白分明的高反差立体几何棱角，深海霸气破浪。', quote: '破浪前行！没有能难倒我们的巨浪！', unlockLevel: 5 },
+            { stage: 4, title: '星瀚苍穹巨鲸', avatar: '🌌🐋', aura: 'aura-origami-gold', desc: '金光与星瀚交织的宏伟折躯，气吞万象波澜壮阔。', quote: '气吞八荒，题海之大任小主人遨游！', unlockLevel: 7 },
+            { stage: 5, title: '鲲鹏造化神圣巨鲸', avatar: '🌟🐋👑', aura: 'aura-origami-dragon', desc: '化而为鸟其名为鹏，御风九万里的宇宙级折纸造化神尊。', quote: '水击三千里，抟扶摇而上！小主人展翅高飞！', unlockLevel: 10 }
+        ],
+        quotes: [
+            '呜嗷——！深海鸣唱为你助威，加油冲刺！',
+            '甘露折叠珠真甘甜，喷出的水花都是智慧的味道！',
+            '心怀大海，眼前的难题不过是一朵小浪花！',
+            '乘风破浪，向着满分的新航程全速出发！'
         ]
     }
 };
@@ -1157,6 +1457,27 @@ const SlotSyntaxSynthesizer = {
                 '章鱼秘典翻开新一页，小主人学霸光环拉满！',
                 '八只吸盘紧紧抓住好运，万无一失！',
                 '变色魔法发动，全身泛起祥瑞琉璃紫光！'
+            ],
+            turtle: [
+                '七彩折纸藻让厚重玄甲泛起耀眼翡翠光环！',
+                '心平气和，坚韧玄甲防御力提升300%！',
+                '小纸龟探出小脑袋，稳稳咬住下一道满分！',
+                '定海神针般稳健，任何陷阱题目休想攻破玄甲！',
+                '一步一个脚印，小纸龟陪你稳扎稳打登顶满分！'
+            ],
+            jellyfish: [
+                '荧光折纸晶让整顶伞帽迸发梦幻极光！',
+                '灵感水泡如彩虹般咕嘟咕嘟升腾！',
+                '轻盈触须舒展，直接看穿了错题伪装！',
+                '深海琉璃光辉洒落，给小主人套上学霸护盾！',
+                '空灵幻光闪耀，答题如同漫步在梦幻银河！'
+            ],
+            whale: [
+                '甘露折叠珠让小座头鲸喷出高达十米的水花！',
+                '深海鲸歌回荡，答对题目经验值翻倍暴涨！',
+                '宏大双翼劈波斩浪，巨澜之势不可阻挡！',
+                '气吞山河，整片题海都被小主人的霸气折服！',
+                '宇宙鲲鹏展翅翱翔，直上九万里星穹！'
             ]
         },
         suffixes: [
@@ -1391,6 +1712,48 @@ const PET_HUMOR_BANK = {
             '深海神殿里藏着的每一滴智慧，都将化作小主人通关的法宝！🗝️',
             '三颗心脏都在说：小主人，你是世界上最聪明最棒的搭档！❤️',
             '别看我走起路来像跳踢踏舞，深海八阵图我都胸有成竹！🗺️'
+        ],
+        turtle: [
+            '别催别催，龟兔赛跑最后赢的可是我们乌龟哦！🐢',
+            '慢工出细活，每一道折痕折得平整，做题才不会粗心！🌿',
+            '我的玄甲硬邦邦，小主人的决心也硬邦邦！🛡️',
+            '深海长寿秘诀：多做对题，天天开心，多吃折纸藻！💚',
+            '小主人慢慢看题，有我的玄甲在，保你满分无忧！✨',
+            '探头，缩头，再探头！我已经闻到正确答案的香味啦！👃',
+            '做题最忌心浮气躁，像海龟一样深呼吸，稳住！🧘',
+            '走得慢没关系，只要方向正确，终点就在眼前！🏁',
+            '我的龟壳上刻着万卷天书，遇到不懂的随时问我！📜',
+            '把头缩进壳里不是胆小，那是在静心思考大招呢！🧠',
+            '定海神针在此！今天所有的难题波澜都归于平静！🌊',
+            '玄甲泛金光，小主人今天有满分福兆！🌟'
+        ],
+        jellyfish: [
+            '我是没有心脏的小水母，但我的整顶伞帽都装满了对你的喜欢！🪼',
+            '噗噗噗~ 轻飘飘浮起来，把所有的烦恼都变成水泡泡！🫧',
+            '极光丝带飘呀飘，在水里画出一道道彩虹！🌈',
+            '遇到难题不要慌，像水母一样轻盈换个方向就好啦！🎐',
+            '通体透明才坦荡，做题诚实又聪慧的小主人最可爱啦！💖',
+            '伞帽一张一缩，是在为你的精彩答题鼓掌呢！👏',
+            '荧光折纸晶真美味，感觉自己整只水母都在发光！✨',
+            '像蒲公英一样在题海里浮沉，好惬意呀~ 🎐',
+            '梦幻幻影闪烁，你看错题被我的幻光照得原形毕露！💡',
+            '随波逐流？不，我是在随着知识的洋流起舞！💃',
+            '夜光小水母为你点亮今晚的书桌，加油学霸！🕯️',
+            '灵感就和水母一样，噗的一下就冒出来啦！🎈'
+        ],
+        whale: [
+            '呼噜噜——！头顶喷出一束十米高的智慧小喷泉！🐳',
+            '我有一副大嗓门，深海鸣唱把所有好运都召唤过来！🎶',
+            '海阔凭鱼跃，天高任鸟飞，这片题海任由小主人驰骋！🌊',
+            '背脊厚实如山峰，累了就靠在我背上休息一下吧！🛋️',
+            '小主人，你看那朵浪花像不像为你庆祝满分绽放的烟花？🎆',
+            '心有多大，舞台就有多大！我们一起游向宇宙星海！🌌',
+            '鲲鹏展翅九万里，小主人的智慧扶摇直上！🚀',
+            '巨浪拍岸，气势如虹，再难的题目也难不倒巨澜纸灵！🌊',
+            '大蓝鲸吃得饱，肚量大，能容下天下所有的知识宝藏！💎',
+            '甘露折叠珠甘甜清爽，喷出彩虹让小主人心情美美哒！🌈',
+            '深海巡洋舰启航！目标：答题满分宝藏岛！🗺️',
+            '呜嗷——！用最宏亮的歌声为你喝彩，太棒啦！🎉'
         ]
     },
     riddles: [
@@ -1873,6 +2236,10 @@ const PetLanguageEngine = {
             body.classList.add('octopus-dash');
             PetSound.suctionPop();
             setTimeout(() => { if (body) body.classList.remove('octopus-dash'); }, 600);
+        } else if (petType === 'origami_koi') {
+            body.classList.add('origami-flutter');
+            PetSound.paperRustle();
+            setTimeout(() => { if (body) body.classList.remove('origami-flutter'); }, 650);
         } else {
             body.classList.add('pet-bounce');
             PetSound.bubble();
@@ -1903,7 +2270,7 @@ function getPetData() {
     }
     return {
         type: 'fish',
-        customName: '小泡鱼',
+        customName: '纸灵锦',
         exp: 0,
         feedCount: 0,
         level: 1,
@@ -2012,6 +2379,13 @@ function feedPetOnCorrectAnswer() {
     if ((pet.satiety ?? 85) >= 60) {
         expGain = Math.round(expGain * 1.2);
     }
+    // 检查学长照料经验加速光环 (+30% EXP)
+    if (window.PetEngine && PetEngine.Life && PetEngine.Life.getMentorshipBonus) {
+        const mentor = PetEngine.Life.getMentorshipBonus(pet.type);
+        if (mentor.active) {
+            expGain = Math.round(expGain * (1 + mentor.bonusRate));
+        }
+    }
 
     pet.exp = (pet.exp || 0) + expGain;
     pet.feedCount = (pet.feedCount || 0) + 1;
@@ -2052,6 +2426,7 @@ function feedPetOnCorrectAnswer() {
 
     lastFeedingInfo = {
         pet: pet,
+        expGain: expGain,
         leveledUp: newLvlInfo.level > oldLvlInfo.level,
         evolved: evolved,
         oldLevel: oldLvlInfo.level,
@@ -2127,8 +2502,49 @@ class RoamingPetEngine {
         this.autoWakeTimer = null;
         this.speechTimer = null;
         this.bubbleTimer = null;
+        this.glanceTimer = null;
         this.autonomousBanterTimer = null;
         this.lastIdleBanterCheck = Date.now();
+    }
+
+    triggerMotionAction(action, duration = 0) {
+        if (window.PetEngine && PetEngine.Sprite) {
+            PetEngine.Sprite.setAction(action, duration);
+        }
+    }
+
+    getSafeBounds() {
+        const w = window.innerWidth;
+        const h = window.innerHeight;
+        const inQuiz = this.isQuizViewActive();
+        let bottomNavHeight = 0;
+        if (inQuiz) {
+            const singleNav = document.getElementById('quiz-single-nav');
+            const fabArea = document.getElementById('quiz-fab-area');
+            if (singleNav && window.getComputedStyle(singleNav).display !== 'none') {
+                const rect = singleNav.getBoundingClientRect();
+                bottomNavHeight = Math.max(72, Math.round(rect.height || singleNav.offsetHeight || 72));
+            } else if (fabArea && window.getComputedStyle(fabArea).display !== 'none') {
+                const rect = fabArea.getBoundingClientRect();
+                bottomNavHeight = Math.max(72, Math.round(rect.height || fabArea.offsetHeight || 72));
+            }
+        }
+        const petSize = 68;
+        const safeMargin = 28; // 预留下边缘阴影、步态波浪动效与安全呼吸空间
+        const minX = 15;
+        const maxX = Math.max(minX, w - petSize - 15);
+        const minY = 65; // 避开顶部 Header 与大进度条
+        const maxY = Math.max(minY, h - bottomNavHeight - petSize - safeMargin);
+        return { minX, maxX, minY, maxY, inQuiz, bottomNavHeight, w, h };
+    }
+
+    // 即刻校准坐标至当前安全环带内（进入做题页或切换模式时即时调用，零时差避让）
+    clampToBounds() {
+        if (!this.container || this.isDragging) return;
+        const bounds = this.getSafeBounds();
+        this.x = Math.max(bounds.minX, Math.min(bounds.maxX, this.x));
+        this.y = Math.max(bounds.minY, Math.min(bounds.maxY, this.y));
+        this.applyPosition();
     }
 
     init() {
@@ -2144,19 +2560,23 @@ class RoamingPetEngine {
         this.sleepEl = document.getElementById('roaming-pet-sleep-badge');
 
         // 默认初始位置：根据生物习性决定初始水层
-        const w = window.innerWidth;
-        const h = window.innerHeight;
+        const bounds = this.getSafeBounds();
         const pet = getPetData();
-        this.x = Math.max(20, w - 90);
+        this.x = Math.max(bounds.minX, bounds.w - 90);
         if (pet.type === 'crab') {
-            this.y = h - 85; // 螃蟹底栖沙滩层
+            this.y = bounds.maxY; // 螃蟹底栖沙滩层
         } else {
-            this.y = Math.max(120, h - 180);
+            this.y = Math.max(120, bounds.maxY - 80);
+        }
+        // 真实自然随机朝向 (50% 几率初始面左或面右，避免偏向单一侧)
+        if (this.body) {
+            this.body.classList.toggle('flip-left', Math.random() > 0.5);
         }
         this.applyPosition();
 
         this.bindEvents();
         this.startWanderLoop();
+        this.scheduleNaturalGlance();
         this.resetSleepTimer();
         this.startBubbleParticles();
         if (typeof PetBanterEngine !== 'undefined') {
@@ -2194,11 +2614,17 @@ class RoamingPetEngine {
             const dy = curY - this.dragStartY;
 
             if (Math.hypot(dx, dy) > 8) {
-                this.hasMoved = true;
+                if (!this.hasMoved) {
+                    this.hasMoved = true;
+                    if (window.PetEngine && PetEngine.Sprite) {
+                        PetEngine.Sprite.setAction('drag');
+                    }
+                }
             }
 
-            this.x = Math.max(10, Math.min(window.innerWidth - 76, this.initialX + dx));
-            this.y = Math.max(60, Math.min(window.innerHeight - 80, this.initialY + dy));
+            const bounds = this.getSafeBounds();
+            this.x = Math.max(bounds.minX, Math.min(bounds.maxX, this.initialX + dx));
+            this.y = Math.max(bounds.minY, Math.min(bounds.maxY, this.initialY + dy));
             this.applyPosition();
         };
 
@@ -2206,6 +2632,9 @@ class RoamingPetEngine {
             if (!this.isDragging) return;
             this.isDragging = false;
             this.container.classList.remove('dragging');
+            if (window.PetEngine && PetEngine.Sprite) {
+                PetEngine.Sprite.setAction('idle');
+            }
             window.removeEventListener('pointermove', onPointerMove);
             window.removeEventListener('pointerup', onPointerUp);
             window.removeEventListener('pointercancel', onPointerUp);
@@ -2215,13 +2644,13 @@ class RoamingPetEngine {
                 this.poke();
             } else {
                 const pet = getPetData();
-                const h = window.innerHeight;
+                const bounds = this.getSafeBounds();
                 // 若靠近边缘，执行平滑贴边吸附
                 this.snapToEdgeIfNeeded();
                 // 真实重力沉底系统：若是机灵蟹且悬在高空且未吸附停泊，则受海洋重力自由落体沉回海底沙滩！
-                if (pet.type === 'crab' && !this.isDocked && this.y < h - 110) {
+                if (pet.type === 'crab' && !this.isDocked && this.y < bounds.maxY - 25) {
                     this.container.classList.add('gravity-falling');
-                    this.y = h - 85;
+                    this.y = bounds.maxY;
                     this.applyPosition();
                     setTimeout(() => {
                         if (this.container) this.container.classList.remove('gravity-falling');
@@ -2291,8 +2720,9 @@ class RoamingPetEngine {
 
         // 视口调整防出界
         window.addEventListener('resize', () => {
-            this.x = Math.max(10, Math.min(window.innerWidth - 76, this.x));
-            this.y = Math.max(60, Math.min(window.innerHeight - 80, this.y));
+            const bounds = this.getSafeBounds();
+            this.x = Math.max(bounds.minX, Math.min(bounds.maxX, this.x));
+            this.y = Math.max(bounds.minY, Math.min(bounds.maxY, this.y));
             this.applyPosition();
         });
     }
@@ -2306,26 +2736,25 @@ class RoamingPetEngine {
         if (this.isFleeing) return;
         this.isFleeing = true;
         PetSound.petFlee();
-        const w = window.innerWidth;
-        const h = window.innerHeight;
+        const bounds = this.getSafeBounds();
 
-        const distLeft = this.x;
-        const distRight = w - 75 - this.x;
-        const distTop = this.y - 70;
-        const distBottom = h - 75 - this.y;
+        const distLeft = this.x - bounds.minX;
+        const distRight = bounds.maxX - this.x;
+        const distTop = this.y - bounds.minY;
+        const distBottom = bounds.maxY - this.y;
 
         const minDist = Math.min(distLeft, distRight, distTop, distBottom);
         let targetX = this.x;
         let targetY = this.y;
 
         if (minDist === distLeft) {
-            targetX = 15;
+            targetX = bounds.minX;
         } else if (minDist === distRight) {
-            targetX = w - 75;
+            targetX = bounds.maxX;
         } else if (minDist === distTop) {
-            targetY = 70;
+            targetY = bounds.minY;
         } else {
-            targetY = h - 75;
+            targetY = bounds.maxY;
         }
 
         if (this.body) {
@@ -2353,6 +2782,38 @@ class RoamingPetEngine {
         if (!this.container) return;
         this.container.style.left = `${this.x}px`;
         this.container.style.top = `${this.y}px`;
+        this.adjustSpeechBubblePosition();
+    }
+
+    // 视口边界自适应避让算法 (Smart Speech Bubble Viewport Boundary Alignment)
+    adjustSpeechBubblePosition() {
+        if (!this.speechEl || this.speechEl.style.display === 'none') return;
+        const bubbleWidth = this.speechEl.offsetWidth || 160;
+        const idealLeft = 34 - bubbleWidth / 2;
+        const minLeft = 12 - this.x;
+        const maxLeft = window.innerWidth - 12 - bubbleWidth - this.x;
+        const clampedLeft = Math.max(minLeft, Math.min(maxLeft, idealLeft));
+        const arrowLeft = Math.max(14, Math.min(bubbleWidth - 14, 34 - clampedLeft));
+
+        this.speechEl.style.left = `${clampedLeft}px`;
+        this.speechEl.style.transform = 'none';
+        this.speechEl.style.setProperty('--arrow-left', `${arrowLeft}px`);
+        this.speechEl.classList.toggle('bubble-below', this.y < 85);
+    }
+
+    // 闲歇自然左顾右盼 (仿生有机动物习性，消除机械朝向偏好)
+    scheduleNaturalGlance() {
+        if (this.glanceTimer) clearTimeout(this.glanceTimer);
+        const delay = 6000 + Math.random() * 5000;
+        this.glanceTimer = setTimeout(() => {
+            if (isChildMode && !this.isDragging && !this.isSleeping && this.body) {
+                if (Math.random() < 0.42) {
+                    const currentFlip = this.body.classList.contains('flip-left');
+                    this.body.classList.toggle('flip-left', !currentFlip);
+                }
+            }
+            this.scheduleNaturalGlance();
+        }, delay);
     }
 
     snapToEdgeIfNeeded() {
@@ -2387,10 +2848,11 @@ class RoamingPetEngine {
             return;
         }
 
-        const w = window.innerWidth;
-        const h = window.innerHeight;
+        const bounds = this.getSafeBounds();
+        const w = bounds.w;
+        const h = bounds.h;
         const pet = getPetData();
-        const inQuiz = this.isQuizViewActive();
+        const inQuiz = bounds.inQuiz;
 
         if (this.container) {
             this.container.classList.toggle('in-quiz-mode', inQuiz);
@@ -2400,7 +2862,7 @@ class RoamingPetEngine {
 
         if (inQuiz) {
             // === 答题界面：外围安全环带巡游模式 (Perimeter Safety Ring Cruise) ===
-            // 绝不侵入做题核心区与选项按钮，在四周环带自然游曳
+            // 绝不侵入做题核心区与选项按钮，并在四周环带自然游曳，严禁潜入底部固定导航栏
             const zones = (pet.type === 'crab') 
                 ? ['bottom', 'left', 'right'] // 螃蟹不爬在顶部答题栏，沿底边或贴左右边框
                 : ['top', 'bottom', 'left', 'right'];
@@ -2410,22 +2872,28 @@ class RoamingPetEngine {
             let targetY = this.y;
 
             if (chosenZone === 'top') {
-                targetX = 20 + Math.random() * (w - 105);
-                targetY = 70 + Math.random() * 25;
+                targetX = bounds.minX + Math.random() * (bounds.maxX - bounds.minX);
+                targetY = bounds.minY + Math.random() * 25;
             } else if (chosenZone === 'bottom') {
-                targetX = 20 + Math.random() * (w - 105);
-                targetY = h - (75 + Math.random() * 15);
+                targetX = bounds.minX + Math.random() * (bounds.maxX - bounds.minX);
+                targetY = bounds.maxY - Math.random() * 20; // 悬浮于导航栏上方安全区
             } else if (chosenZone === 'left') {
-                targetX = 15;
-                targetY = 85 + Math.random() * (h - 180);
+                targetX = bounds.minX;
+                targetY = bounds.minY + 20 + Math.random() * Math.max(40, bounds.maxY - bounds.minY - 40);
             } else {
-                targetX = w - 75;
-                targetY = 85 + Math.random() * (h - 180);
+                targetX = bounds.maxX;
+                targetY = bounds.minY + 20 + Math.random() * Math.max(40, bounds.maxY - bounds.minY - 40);
             }
 
-            const isLeft = targetX < this.x;
-            if (this.body) {
-                this.body.classList.toggle('flip-left', isLeft);
+            if (Math.abs(targetX - this.x) > 6) {
+                const isLeft = targetX < this.x;
+                if (this.body) {
+                    this.body.classList.toggle('flip-left', isLeft);
+                }
+            } else if (chosenZone === 'left') {
+                if (this.body) this.body.classList.remove('flip-left'); // 左墙面朝右（场内）
+            } else if (chosenZone === 'right') {
+                if (this.body) this.body.classList.add('flip-left'); // 右墙面朝左（场内）
             }
 
             if (pet.type === 'crab') {
@@ -2435,12 +2903,16 @@ class RoamingPetEngine {
                 }
                 if (this.body) {
                     this.body.classList.add(isWall ? 'crab-climbing' : 'crab-stepping');
+                    if (isWall) {
+                        this.body.classList.toggle('flip-left', chosenZone === 'right');
+                    }
                 }
                 if (isWall) {
                     PetSound.crabClimb();
                 } else {
                     PetSound.crabScuttle();
                 }
+                this.triggerMotionAction(isWall ? 'climb' : 'move', isWall ? 3400 : 1350);
                 this.x = targetX;
                 this.y = targetY;
                 this.applyPosition();
@@ -2459,6 +2931,7 @@ class RoamingPetEngine {
                     this.body.classList.add('shrimp-snap');
                 }
                 PetSound.shrimpSnap();
+                this.triggerMotionAction('move', 2500);
                 this.x = targetX;
                 this.y = targetY;
                 this.applyPosition();
@@ -2477,6 +2950,7 @@ class RoamingPetEngine {
                     this.body.classList.add('octopus-dash');
                 }
                 PetSound.octopusJet();
+                this.triggerMotionAction('move', 3600);
                 this.x = targetX;
                 this.y = targetY;
                 this.applyPosition();
@@ -2487,11 +2961,58 @@ class RoamingPetEngine {
                 }, 3600);
                 nextDelay = 8000 + Math.random() * 4000;
 
+            } else if (pet.type === 'turtle') {
+                // 纸灵龟稳健巡游
+                if (this.container) this.container.classList.add('motion-turtle-paddle');
+                if (this.body) this.body.classList.add('fish-cruising');
+                PetSound.turtlePaddle();
+                this.triggerMotionAction('move', 4200);
+                this.x = targetX;
+                this.y = targetY;
+                this.applyPosition();
+
+                setTimeout(() => {
+                    if (this.container) this.container.classList.remove('motion-turtle-paddle');
+                    if (this.body) this.body.classList.remove('fish-cruising');
+                }, 4200);
+                nextDelay = 8500 + Math.random() * 4000;
+
+            } else if (pet.type === 'jellyfish') {
+                // 纸灵水母脉冲浮游
+                if (this.container) this.container.classList.add('motion-jelly-pulse');
+                PetSound.jellyPulse();
+                this.triggerMotionAction('move', 3800);
+                this.x = targetX;
+                this.y = targetY;
+                this.applyPosition();
+
+                setTimeout(() => {
+                    if (this.container) this.container.classList.remove('motion-jelly-pulse');
+                }, 3800);
+                nextDelay = 8000 + Math.random() * 3500;
+
+            } else if (pet.type === 'whale') {
+                // 纸灵鲸宏大破浪巡游
+                if (this.container) this.container.classList.add('motion-whale-cruise');
+                if (this.body) this.body.classList.add('fish-cruising');
+                PetSound.whaleSong();
+                this.triggerMotionAction('move', 4600);
+                this.x = targetX;
+                this.y = targetY;
+                this.applyPosition();
+
+                setTimeout(() => {
+                    if (this.container) this.container.classList.remove('motion-whale-cruise');
+                    if (this.body) this.body.classList.remove('fish-cruising');
+                }, 4600);
+                nextDelay = 9000 + Math.random() * 4500;
+
             } else {
                 // fish
                 if (this.container) this.container.classList.add('motion-fish-swim');
                 if (this.body) this.body.classList.add('fish-cruising');
                 PetSound.fishGlide();
+                this.triggerMotionAction('move', 4000);
                 this.x = targetX;
                 this.y = targetY;
                 this.applyPosition();
@@ -2505,25 +3026,29 @@ class RoamingPetEngine {
 
         } else {
             // === 首页/仪表盘：真实全屏生态拟真活动 (Full-screen Authentic Habitat) ===
-            const minX = 18;
-            const maxX = w - 85;
-            const minY = 68;
-            const maxY = h - 80;
+            const minX = bounds.minX;
+            const maxX = bounds.maxX;
+            const minY = bounds.minY;
+            const maxY = bounds.maxY;
 
             if (pet.type === 'crab') {
                 // 🦀 1. 机灵蟹：海底沙滩横行小碎步 + 侧壁垂直攀爬 (Floor Scuttle & Side-Wall Climb)
-                const isNearLeftWall = this.x <= 35;
-                const isNearRightWall = this.x >= w - 90;
-                const isNearFloor = this.y >= h - 110;
+                const isNearLeftWall = this.x <= minX + 20;
+                const isNearRightWall = this.x >= maxX - 15;
+                const isNearFloor = this.y >= maxY - 30;
 
                 // 遇到侧壁且在底端时，有 55% 几率沿玻璃侧壁垂直向上攀爬！
                 if ((isNearLeftWall || isNearRightWall) && isNearFloor && Math.random() < 0.55) {
                     const climbY = minY + Math.random() * (h * 0.45);
-                    const wallX = isNearLeftWall ? 16 : (w - 76);
+                    const wallX = isNearLeftWall ? minX : maxX;
 
                     if (this.container) this.container.classList.add('motion-crab-climb');
-                    if (this.body) this.body.classList.add('crab-climbing');
+                    if (this.body) {
+                        this.body.classList.add('crab-climbing');
+                        this.body.classList.toggle('flip-left', !isNearLeftWall);
+                    }
                     PetSound.crabClimb();
+                    this.triggerMotionAction('climb', 3400);
 
                     this.x = wallX;
                     this.y = climbY;
@@ -2537,9 +3062,12 @@ class RoamingPetEngine {
 
                 } else if (!isNearFloor && (isNearLeftWall || isNearRightWall)) {
                     // 若在高处壁面，顺着墙壁爬下海底沙滩
-                    const descendY = h - (78 + Math.random() * 12);
+                    const descendY = maxY - Math.random() * 8;
                     if (this.container) this.container.classList.add('motion-crab-climb');
-                    if (this.body) this.body.classList.add('crab-climbing');
+                    if (this.body) {
+                        this.body.classList.add('crab-climbing');
+                        this.body.classList.toggle('flip-left', !isNearLeftWall);
+                    }
                     PetSound.crabClimb();
 
                     this.y = descendY;
@@ -2558,7 +3086,7 @@ class RoamingPetEngine {
                     let targetX = this.x + stepDist;
 
                     if (targetX < minX) {
-                        targetX = 18;
+                        targetX = minX;
                         this.crabDirection = 1;
                     } else if (targetX > maxX) {
                         targetX = maxX;
@@ -2567,7 +3095,7 @@ class RoamingPetEngine {
                         this.crabDirection = -this.crabDirection;
                     }
 
-                    const targetY = h - (78 + Math.random() * 12);
+                    const targetY = maxY - Math.random() * 8;
 
                     if (this.body) {
                         this.body.classList.toggle('flip-left', targetX < this.x);
@@ -2577,6 +3105,7 @@ class RoamingPetEngine {
                         this.container.classList.add('motion-crab-step');
                     }
                     PetSound.crabScuttle();
+                    this.triggerMotionAction('move', 1350);
 
                     this.x = targetX;
                     this.y = targetY;
@@ -2622,6 +3151,7 @@ class RoamingPetEngine {
                     this.container.classList.add('motion-shrimp-pop');
                 }
                 PetSound.shrimpSnap();
+                this.triggerMotionAction('move', 3000);
 
                 this.x = leapX;
                 this.y = leapY;
@@ -2661,6 +3191,7 @@ class RoamingPetEngine {
                     this.container.classList.add('motion-octopus-jet');
                 }
                 PetSound.octopusJet();
+                this.triggerMotionAction('move', 3800);
 
                 this.x = (this.x + targetX) / 2;
                 this.y = (this.y + targetY) / 2;
@@ -2685,6 +3216,87 @@ class RoamingPetEngine {
 
                 nextDelay = 6500 + Math.random() * 4000;
 
+            } else if (pet.type === 'turtle') {
+                // 🐢 5. 纸灵龟：沉稳悠然慢划水，悬浮沉思 (Steady & Calm Paddle)
+                const targetX = minX + Math.random() * (maxX - minX);
+                const targetY = minY + 30 + Math.random() * (maxY - minY - 30);
+
+                if (Math.abs(targetX - this.x) > 6 && this.body) {
+                    this.body.classList.toggle('flip-left', targetX < this.x);
+                }
+                if (this.container) this.container.classList.add('motion-turtle-paddle');
+                PetSound.turtlePaddle();
+                this.triggerMotionAction('move', 4500);
+
+                this.x = targetX;
+                this.y = targetY;
+                this.applyPosition();
+
+                setTimeout(() => {
+                    if (this.container) this.container.classList.remove('motion-turtle-paddle');
+                }, 4500);
+                nextDelay = 7500 + Math.random() * 4000;
+
+            } else if (pet.type === 'jellyfish') {
+                // 🪼 6. 纸灵水母：轻盈向上脉冲弹起，随后随洋流优雅飘沉 (Ethereal Pulse & Drift)
+                const dir = (this.x > w - 100) ? -1 : (this.x < 50 ? 1 : (Math.random() > 0.5 ? 1 : -1));
+                const targetX = Math.max(minX, Math.min(maxX, this.x + dir * (30 + Math.random() * 45)));
+                const pulseY = Math.max(minY + 20, this.y - (30 + Math.random() * 45));
+
+                if (Math.abs(targetX - this.x) > 6 && this.body) {
+                    this.body.classList.toggle('flip-left', targetX < this.x);
+                }
+                if (this.container) this.container.classList.add('motion-jelly-pulse');
+                PetSound.jellyPulse();
+                this.triggerMotionAction('move', 2500);
+
+                this.x = targetX;
+                this.y = pulseY;
+                this.applyPosition();
+
+                setTimeout(() => {
+                    if (this.container) {
+                        this.container.classList.remove('motion-jelly-pulse');
+                        this.container.classList.add('motion-jelly-float');
+                    }
+                    this.y = Math.min(maxY - 15, this.y + 25 + Math.random() * 35);
+                    this.applyPosition();
+
+                    setTimeout(() => {
+                        if (this.container) this.container.classList.remove('motion-jelly-float');
+                    }, 2800);
+                }, 1400);
+                nextDelay = 7000 + Math.random() * 3500;
+
+            } else if (pet.type === 'whale') {
+                // 🐳 7. 纸灵鲸：宽阔洋流巡航，偶现海面智慧喷泉 (Majestic Open-sea Cruise)
+                const targetX = minX + Math.random() * (maxX - minX);
+                const targetY = minY + 30 + Math.random() * (maxY - minY - 30);
+
+                const isLeft = targetX < this.x;
+                if (Math.abs(targetX - this.x) > 6 && this.body) {
+                    this.body.classList.toggle('flip-left', isLeft);
+                    this.body.classList.add('fish-cruising');
+                }
+                if (this.container) this.container.classList.add('motion-whale-cruise');
+                PetSound.whaleSong();
+                this.triggerMotionAction('move', 4800);
+
+                this.x = targetX;
+                this.y = targetY;
+                this.applyPosition();
+
+                // 28% 概率喷射水花泡泡
+                if (Math.random() < 0.28) {
+                    setTimeout(() => PetSound.whaleSpout(), 1200);
+                }
+
+                setTimeout(() => {
+                    if (this.container) this.container.classList.remove('motion-whale-cruise');
+                    if (this.body) this.body.classList.remove('fish-cruising');
+                }, 4800);
+                nextDelay = 8000 + Math.random() * 4500;
+
             } else {
                 // 🐟 4. 小泡鱼：全屏流线正弦游弋与动态俯仰 (Full-screen Streamlined Cruising)
                 const targetX = minX + Math.random() * (maxX - minX);
@@ -2705,6 +3317,7 @@ class RoamingPetEngine {
                     this.container.classList.add('motion-fish-swim');
                 }
                 PetSound.fishGlide();
+                this.triggerMotionAction('move', 4100);
 
                 this.x = targetX;
                 this.y = targetY;
@@ -2784,15 +3397,16 @@ class RoamingPetEngine {
         const activeForm = getPetActiveForm(pet);
         const petDef = SEAFOOD_PETS[pet.type] || SEAFOOD_PETS.fish;
 
-        // 根据生物学特性触发专属应激防御动作与音效
+        // 根据折纸生物学特性触发专属应激防御动作与清脆纸音
+        PetSound.paperRustle();
         if (pet.type === 'crab') {
-            // 机灵蟹：双螯双剪！咔嚓！咔嚓！
+            // 纸灵蟹：双螯折纸剪裁！
             PetSound.crabSnip();
             if (this.body) {
-                this.body.classList.remove('crab-pinch', 'pet-somersault', 'pet-bounce');
+                this.body.classList.remove('crab-pinch', 'pet-somersault', 'pet-bounce', 'origami-flutter');
                 void this.body.offsetWidth;
-                this.body.classList.add('crab-pinch');
-                setTimeout(() => { if (this.body) this.body.classList.remove('crab-pinch'); }, 650);
+                this.body.classList.add('origami-flutter', 'crab-pinch');
+                setTimeout(() => { if (this.body) this.body.classList.remove('crab-pinch', 'origami-flutter'); }, 650);
             }
             // 快速横移逃跑一段
             const w = window.innerWidth;
@@ -2801,27 +3415,27 @@ class RoamingPetEngine {
             this.applyPosition();
 
         } else if (pet.type === 'shrimp') {
-            // 跳跳虾：弓背反向暴弹起飞！
+            // 纸灵虾：折翼弹射起飞！
             PetSound.shrimpSnap();
             if (this.body) {
-                this.body.classList.remove('shrimp-snap', 'pet-somersault', 'pet-bounce');
+                this.body.classList.remove('shrimp-snap', 'pet-somersault', 'pet-bounce', 'origami-flutter');
                 void this.body.offsetWidth;
-                this.body.classList.add('shrimp-snap');
-                setTimeout(() => { if (this.body) this.body.classList.remove('shrimp-snap'); }, 750);
+                this.body.classList.add('origami-flutter', 'shrimp-snap');
+                setTimeout(() => { if (this.body) this.body.classList.remove('shrimp-snap', 'origami-flutter'); }, 750);
             }
             // 向上暴跃
             this.y = Math.max(120, this.y - 40);
             this.applyPosition();
 
         } else if (pet.type === 'octopus') {
-            // 皮皮章：喷射黑紫色墨汁烟雾逃生！
+            // 纸灵章：折纸烟雾与触手翻折！
             PetSound.octopusJet();
             PetSound.inkDiffuse();
             if (this.body) {
-                this.body.classList.remove('octopus-dash', 'pet-somersault', 'pet-bounce');
+                this.body.classList.remove('octopus-dash', 'pet-somersault', 'pet-bounce', 'origami-flutter');
                 void this.body.offsetWidth;
-                this.body.classList.add('octopus-dash');
-                setTimeout(() => { if (this.body) this.body.classList.remove('octopus-dash'); }, 700);
+                this.body.classList.add('origami-flutter', 'octopus-dash');
+                setTimeout(() => { if (this.body) this.body.classList.remove('octopus-dash', 'origami-flutter'); }, 700);
             }
 
             // 产生真实墨汁烟雾
@@ -2835,18 +3449,49 @@ class RoamingPetEngine {
             }, 1600);
 
             // 借墨雾后撤
-            this.y = Math.min(window.innerHeight - 90, this.y + 35);
+            this.y = Math.min(this.getSafeBounds().maxY, this.y + 35);
             this.applyPosition();
 
+        } else if (pet.type === 'turtle') {
+            // 纸灵龟：玄甲护体与探头
+            PetSound.turtleShell();
+            if (this.body) {
+                this.body.classList.remove('origami-flutter', 'pet-bounce');
+                void this.body.offsetWidth;
+                this.body.classList.add('origami-flutter');
+                setTimeout(() => { if (this.body) this.body.classList.remove('origami-flutter'); }, 650);
+            }
+
+        } else if (pet.type === 'jellyfish') {
+            // 纸灵水母：空灵幻光脉冲
+            PetSound.jellyPulse();
+            if (this.body) {
+                this.body.classList.remove('origami-flutter', 'pet-bounce');
+                void this.body.offsetWidth;
+                this.body.classList.add('origami-flutter');
+                setTimeout(() => { if (this.body) this.body.classList.remove('origami-flutter'); }, 650);
+            }
+
+        } else if (pet.type === 'whale') {
+            // 纸灵鲸：宏大鲸歌与纸花喷泉
+            PetSound.whaleSong();
+            PetSound.whaleSpout();
+            if (this.body) {
+                this.body.classList.remove('origami-flutter', 'pet-bounce');
+                void this.body.offsetWidth;
+                this.body.classList.add('origami-flutter');
+                setTimeout(() => { if (this.body) this.body.classList.remove('origami-flutter'); }, 650);
+            }
+
         } else {
-            // 小泡鱼：摆尾急速游窜 + 连珠水泡
+            // 纸灵锦：折纸翻折回旋起舞
             PetSound.fishDart();
             PetSound.multiBubble();
             if (this.body) {
-                this.body.classList.remove('fish-dash', 'pet-somersault', 'pet-bounce');
+                this.body.classList.remove('fish-dash', 'pet-somersault', 'pet-bounce', 'origami-flutter');
                 void this.body.offsetWidth;
-                this.body.classList.add('fish-dash');
-                setTimeout(() => { if (this.body) this.body.classList.remove('fish-dash'); }, 650);
+                this.body.classList.add('origami-flutter', 'fish-dash');
+                setTimeout(() => { if (this.body) this.body.classList.remove('fish-dash', 'origami-flutter'); }, 650);
             }
             // 吐一串惊扰气泡
             for (let i = 0; i < 3; i++) {
@@ -2895,13 +3540,15 @@ class RoamingPetEngine {
         this.scheduleAutonomousBanter(25000 + Math.random() * 10000);
     }
 
-    // 显示气泡台词 (支持自适应阅读时长)
+    // 显示气泡台词 (支持自适应阅读时长与边界自动避让)
     say(text, customDuration) {
         if (!this.speechEl) return;
         const textSpan = document.getElementById('roaming-pet-speech-text');
         if (textSpan) textSpan.innerText = text;
 
         this.speechEl.style.display = 'block';
+        this.adjustSpeechBubblePosition();
+
         if (this.speechTimer) clearTimeout(this.speechTimer);
         const duration = customDuration || Math.max(3800, (text || '').length * 240);
         this.speechTimer = setTimeout(() => {
@@ -2912,6 +3559,7 @@ class RoamingPetEngine {
     // 答对冲刺进食动画
     feedRush(foodIcon) {
         this.wakeUp();
+        this.triggerMotionAction('celebrate', 2500);
         PetSound.eat();
         const pet = getPetData();
         const foodEl = document.getElementById('roaming-pet-food-flying');
@@ -3032,8 +3680,9 @@ class RoamingPetEngine {
         if (this.isDocked) {
             this.isDocked = false;
             const pet = getPetData();
-            this.x = w / 2 - 34;
-            this.y = (pet.type === 'crab') ? (window.innerHeight - 85) : (window.innerHeight - 150);
+            const bounds = this.getSafeBounds();
+            this.x = bounds.w / 2 - 34;
+            this.y = (pet.type === 'crab') ? bounds.maxY : Math.max(120, bounds.maxY - 70);
             this.stepAutonomousRoutine();
         } else {
             this.isDocked = true;
@@ -3049,6 +3698,9 @@ class RoamingPetEngine {
         if (!this.body) return;
         if (streak >= 3) {
             this.body.classList.add('streak-active');
+            if (window.PetEngine && PetEngine.Sprite) {
+                PetEngine.Sprite.setAction('celebrate', 3500);
+            }
             const cheer = (typeof PetLanguageEngine !== 'undefined')
                 ? PetLanguageEngine.getStreakCheer(streak)
                 : `🔥 ${streak}连胜！狂热变身形态！冲呀！`;
@@ -3068,10 +3720,19 @@ class RoamingPetEngine {
         const pet = getPetData();
         const activeForm = getPetActiveForm(pet);
         const lvlInfo = getPetLevelInfo(pet.exp || 0);
+        const effectiveStage = (pet.equippedStage !== null && pet.equippedStage !== undefined && pet.equippedStage <= lvlInfo.stageIndex)
+            ? pet.equippedStage
+            : (activeForm && activeForm.stage ? activeForm.stage - 1 : lvlInfo.stageIndex);
 
         if (this.avatarEl) {
-            if (window.PetEngine && PetEngine.Vector) {
-                this.avatarEl.innerHTML = PetEngine.Vector.renderSvg(pet.type, lvlInfo.stageIndex, {
+            if (window.PetEngine && PetEngine.renderAvatar) {
+                this.avatarEl.innerHTML = PetEngine.renderAvatar(pet.type, effectiveStage, {
+                    emotion: (window.PetEngine && PetEngine.Emotion) ? PetEngine.Emotion.currentEmotion : 'normal',
+                    width: 68,
+                    height: 68
+                });
+            } else if (window.PetEngine && PetEngine.Vector) {
+                this.avatarEl.innerHTML = PetEngine.renderAvatar(pet.type, effectiveStage, {
                     emotion: (window.PetEngine && PetEngine.Emotion) ? PetEngine.Emotion.currentEmotion : 'normal',
                     width: 68,
                     height: 68
@@ -3094,9 +3755,9 @@ class RoamingPetEngine {
         }
 
         // 螃蟹底栖校准：若当前是螃蟹且悬在高处且未吸附停泊，自动归位到底部沙滩海床
-        const h = window.innerHeight;
-        if (pet.type === 'crab' && !this.isDragging && !this.isDocked && this.y < h - 110) {
-            this.y = h - 85;
+        const bounds = this.getSafeBounds();
+        if (pet.type === 'crab' && !this.isDragging && !this.isDocked && this.y < bounds.maxY - 25) {
+            this.y = bounds.maxY;
             this.applyPosition();
         }
 
@@ -3247,12 +3908,15 @@ function updatePetWidgets() {
     const petDef = SEAFOOD_PETS[pet.type] || SEAFOOD_PETS.fish;
     const lvlInfo = getPetLevelInfo(pet.exp || 0);
     const activeForm = getPetActiveForm(pet);
+    const effectiveStage = (pet.equippedStage !== null && pet.equippedStage !== undefined && pet.equippedStage <= lvlInfo.stageIndex)
+        ? pet.equippedStage
+        : (activeForm && activeForm.stage ? activeForm.stage - 1 : lvlInfo.stageIndex);
 
     // 1. 首页宠物状态卡片
     const homeBadge = document.getElementById('child-pet-home-badge');
     if (homeBadge) {
         const vectorAvatar = (window.PetEngine && PetEngine.Vector)
-            ? PetEngine.Vector.renderSvg(pet.type, lvlInfo.stageIndex, { width: 44, height: 44 })
+            ? PetEngine.renderAvatar(pet.type, effectiveStage, { width: 44, height: 44 })
             : `<span style="font-size:32px;">${activeForm.avatar}</span>`;
 
         homeBadge.innerHTML = `
@@ -3262,6 +3926,7 @@ function updatePetWidgets() {
             <div class="pet-badge-info" onclick="openPetModal()">
                 <div style="font-weight:bold; font-size:15px; color:var(--text-main); display:flex; align-items:center; gap:6px;">
                     <span>${pet.customName || petDef.name}</span>
+                    ${pet.rebirthCount > 0 ? `<span class="pet-rebirth-badge" style="font-size:10px; padding:1px 5px;" title="涅槃转生次数">🌟×${pet.rebirthCount}</span>` : ''}
                     <span class="pet-level-tag">Lv.${lvlInfo.level} · ${activeForm.title}</span>
                 </div>
                 <div style="font-size:12px; color:var(--text-sub); margin-top:2px; display:flex; align-items:center; gap:6px; flex-wrap:wrap;">
@@ -3272,8 +3937,8 @@ function updatePetWidgets() {
                 <div class="pet-exp-bar"><div class="pet-exp-fill" style="width:${Math.min(100, Math.round(((pet.exp - lvlInfo.minExp) / (lvlInfo.nextExp - lvlInfo.minExp)) * 100))}%;"></div></div>
             </div>
             <div style="display:flex; align-items:center; gap:6px; flex-shrink:0;">
-                <button class="btn btn-ghost btn-sound-toggle" onclick="togglePetSound(event)" title="声音开关" style="width:34px; height:34px; padding:0; border-radius:50%; font-size:15px; display:inline-flex; align-items:center; justify-content:center; border:1.5px solid rgba(255,112,166,0.4); cursor:pointer;">
-                    ${PetSound.isEnabled() ? '🔊' : '🔇'}
+                <button class="btn btn-ghost btn-sound-toggle ${PetSound.isEnabled() ? '' : 'is-muted'}" onclick="togglePetSound(event)" title="${PetSound.isEnabled() ? '声音已开启 (点击静音)' : '已静音 (点击开启声音)'}">
+                    ${getPetSoundIconSvg(PetSound.isEnabled())}
                 </button>
                 <button class="btn btn-ghost btn-aquarium-entry" onclick="openPetModal()">水族馆 🐠</button>
             </div>
@@ -3284,8 +3949,8 @@ function updatePetWidgets() {
     // 2. 答题界面伴学胶囊挂件 (内置于标题栏居中)
     const quizWidget = document.getElementById('child-pet-quiz-widget');
     if (quizWidget) {
-        const compactSvg = (window.PetEngine && PetEngine.Vector)
-            ? PetEngine.Vector.renderSvg(pet.type, lvlInfo.stageIndex, { width: 24, height: 24 })
+        const compactSvg = (window.PetEngine && PetEngine.renderAvatar)
+            ? PetEngine.renderAvatar(pet.type, effectiveStage, { width: 24, height: 24 })
             : activeForm.avatar;
         const skillDef = (window.PetEngine && PetEngine.Skills) ? PetEngine.Skills.getSkillDef(pet.type) : null;
         const skillHtml = skillDef ? `
@@ -3302,7 +3967,9 @@ function updatePetWidgets() {
             <div class="pet-quiz-avatar" onclick="speakPetQuote()" title="轻触听我说说话！">${compactSvg}</div>
             <div class="pet-quiz-name" title="${activeForm.title} (Lv.${lvlInfo.level})">${activeForm.title}</div>
             ${skillHtml}
-            <button class="btn btn-ghost pet-quiz-sound-btn" onclick="togglePetSound(event)" title="声音开关">${PetSound.isEnabled() ? '🔊' : '🔇'}</button>
+            <button class="btn btn-ghost pet-quiz-sound-btn ${PetSound.isEnabled() ? '' : 'is-muted'}" onclick="togglePetSound(event)" title="${PetSound.isEnabled() ? '声音已开启 (点击静音)' : '已静音 (点击开启声音)'}" aria-label="声音开关">
+                ${getPetSoundIconSvg(PetSound.isEnabled())}
+            </button>
         `;
         quizWidget.style.display = 'inline-flex';
     }
@@ -3339,7 +4006,7 @@ function triggerEvolutionModal(pet, newForm) {
 
     if (preAvatarEl) {
         if (window.PetEngine && PetEngine.Vector) {
-            preAvatarEl.innerHTML = PetEngine.Vector.renderSvg(pet.type, oldStage, { width: 100, height: 100 });
+            preAvatarEl.innerHTML = PetEngine.renderAvatar(pet.type, oldStage, { width: 100, height: 100 });
         } else {
             preAvatarEl.innerText = preForm.avatar;
         }
@@ -3353,7 +4020,7 @@ function triggerEvolutionModal(pet, newForm) {
 
     if (newAvatarEl) {
         if (window.PetEngine && PetEngine.Vector) {
-            newAvatarEl.innerHTML = PetEngine.Vector.renderSvg(pet.type, newForm.stage - 1, { width: 120, height: 120, emotion: 'celebrate' });
+            newAvatarEl.innerHTML = PetEngine.renderAvatar(pet.type, newForm.stage - 1, { width: 120, height: 120, emotion: 'celebrate' });
         } else {
             newAvatarEl.innerText = newForm.avatar;
         }
@@ -3440,21 +4107,37 @@ function renderAquariumModal() {
     const petDef = SEAFOOD_PETS[activeType] || SEAFOOD_PETS.fish;
     const lvlInfo = getPetLevelInfo(currentPet.exp || 0);
 
-    // 1. 顶部 4 大海鲜物种卡片 (一键切换伴学伙伴)
+    const allPets = (window.PetEngine && PetEngine.Life && PetEngine.Life.getAllPets)
+        ? PetEngine.Life.getAllPets()
+        : { [activeType]: currentPet };
+
+    // 1. 顶部 4 大海鲜物种卡片 (独立成长与等级展示)
     const gridContainer = document.getElementById('pet-selector-grid');
     if (gridContainer) {
         gridContainer.innerHTML = '';
         Object.values(SEAFOOD_PETS).forEach(p => {
             const isActive = (activeType === p.id);
+            const pRecord = allPets[p.id] || { exp: 0, level: 1 };
+            const pLvl = getPetLevelInfo(pRecord.exp || 0);
+            const displayName = pRecord.customName || p.name;
+            const rebirthTag = (pRecord.rebirthCount > 0) ? `<span class="pet-rebirth-badge" title="转生次数">🌟×${pRecord.rebirthCount}</span>` : '';
+
             const card = document.createElement('div');
             card.className = `pet-selector-card ${isActive ? 'active' : ''}`;
             card.onclick = () => switchCompanionPet(p.id);
+            const stageToRender = (pRecord.equippedStage !== null && pRecord.equippedStage !== undefined && pRecord.equippedStage <= pLvl.stageIndex)
+                ? pRecord.equippedStage
+                : Math.min(0, pLvl.stageIndex);
             const cardSvg = (window.PetEngine && PetEngine.Vector)
-                ? PetEngine.Vector.renderSvg(p.id, 0, { width: 34, height: 34 })
+                ? PetEngine.renderAvatar(p.id, stageToRender, { width: 34, height: 34 })
                 : p.avatar;
             card.innerHTML = `
                 <div class="pet-card-icon" style="display:flex; align-items:center; justify-content:center; width:34px; height:34px;">${cardSvg}</div>
-                <div class="pet-card-name">${p.name}</div>
+                <div class="pet-card-name" style="display:flex; align-items:center; justify-content:center; gap:3px;">
+                    <span>${displayName}</span>
+                    ${rebirthTag}
+                </div>
+                <div class="pet-card-level">Lv.${pLvl.level} · ${pLvl.title}</div>
                 <div class="pet-card-status">${isActive ? '伴学中 ⭐' : '选我 🐾'}</div>
             `;
             gridContainer.appendChild(card);
@@ -3467,18 +4150,35 @@ function renderAquariumModal() {
         tabsContainer.innerHTML = '';
     }
 
-    // 2. 渲染头部物种简介卡
+    // 2. 渲染头部物种简介卡与学长传承光环
     const headerEl = document.getElementById('aquarium-header-card');
     if (headerEl) {
+        const equippedStage = (currentPet.equippedStage !== null && currentPet.equippedStage !== undefined && currentPet.equippedStage <= lvlInfo.stageIndex)
+            ? currentPet.equippedStage
+            : lvlInfo.stageIndex;
         const headerSvg = (window.PetEngine && PetEngine.Vector)
-            ? PetEngine.Vector.renderSvg(activeType, lvlInfo.stageIndex, { width: 54, height: 54 })
+            ? PetEngine.renderAvatar(activeType, equippedStage, { width: 54, height: 54 })
             : `<div style="font-size:38px;">${petDef.avatar}</div>`;
+
+        let mentorBanner = '';
+        if (window.PetEngine && PetEngine.Life && PetEngine.Life.getMentorshipBonus) {
+            const mentor = PetEngine.Life.getMentorshipBonus(activeType);
+            if (mentor.active) {
+                mentorBanner = `<div style="font-size:11px; margin-top:5px; background:rgba(255,112,166,0.12); color:#FF70A6; border-radius:6px; padding:2px 8px; font-weight:600; display:inline-block;">✨ 触发【${mentor.mentorPetName}】学长传承：伴学享 +30% EXP 加速！</div>`;
+            }
+        }
+
+        const displayName = currentPet.customName || petDef.name;
+        const rebirthTag = (currentPet.rebirthCount > 0) ? `<span class="pet-rebirth-badge" title="涅槃转生次数">🌟×${currentPet.rebirthCount} 转</span>` : '';
+
         headerEl.innerHTML = `
             <div style="width:54px; height:54px; flex-shrink:0;">${headerSvg}</div>
             <div style="flex-grow:1; text-align:left;">
-                <div style="font-weight:bold; font-size:15px; color:var(--text-main); display:flex; align-items:center; gap:6px;">
-                    <span>${petDef.name}</span>
+                <div style="font-weight:bold; font-size:15px; color:var(--text-main); display:flex; align-items:center; gap:6px; flex-wrap:wrap;">
+                    <span>${displayName}</span>
+                    ${rebirthTag}
                     <span style="font-size:12px; color:var(--text-sub); font-weight:normal;">(${petDef.speciesName})</span>
+                    <span style="font-size:12px; background:rgba(255,112,166,0.12); color:#FF70A6; padding:1px 6px; border-radius:6px; font-weight:bold;">Lv.${lvlInfo.level} · ${lvlInfo.title}</span>
                 </div>
                 <div style="font-size:12px; color:var(--text-sub); margin-top:3px; display:flex; align-items:center; gap:6px; flex-wrap:wrap;">
                     <span>喜好：${petDef.foodIcon} ${petDef.favoriteFood}</span>
@@ -3486,6 +4186,11 @@ function renderAquariumModal() {
                     <span class="pet-shells-pill">🐚 ${currentPet.shells ?? 20}</span>
                     <span style="color:#FF70A6; font-weight:bold;">💖 羁绊 Lv.${currentPet.bondLevel ?? 1}</span>
                 </div>
+                <div class="pet-header-actions">
+                    <button type="button" class="pet-header-action-btn" onclick="openPetRenameModal('${activeType}')">✏️ 改名</button>
+                    <button type="button" class="pet-header-action-btn btn-rebirth" onclick="openPetRebirthModal('${activeType}')">💫 涅槃重生</button>
+                </div>
+                ${mentorBanner}
             </div>
         `;
     }
@@ -3521,7 +4226,7 @@ function renderAquariumModal() {
             }
 
             const stageSvg = (window.PetEngine && PetEngine.Vector)
-                ? PetEngine.Vector.renderSvg(activeType, idx, { width: 44, height: 44 })
+                ? PetEngine.renderAvatar(activeType, idx, { width: 44, height: 44 })
                 : `<span>${form.avatar}</span>`;
             card.innerHTML = `
                 <div class="evo-stage-avatar-box" style="display:flex; align-items:center; justify-content:center;">
@@ -3532,7 +4237,7 @@ function renderAquariumModal() {
                         ${form.title}
                         <span style="font-size:11px; font-weight:normal; color:var(--text-sub);">(第${form.stage}阶)</span>
                     </div>
-                    <div class="evo-stage-desc">${isUnlocked ? form.desc : '提升答题等级即可觉醒此形态！'}</div>
+                    <div class="evo-stage-desc">${isUnlocked ? form.desc : '提升当前灵兽等级即可觉醒此形态！'}</div>
                 </div>
                 <div class="evo-stage-action">
                     ${actionHtml}
@@ -3552,38 +4257,307 @@ function renderAquariumModal() {
 // 一键切换伴学宠物
 function switchCompanionPet(petId) {
     if (!SEAFOOD_PETS[petId]) return;
-    const pet = getPetData();
-    if (pet.type !== petId) {
+    if (window.PetEngine && PetEngine.Life && PetEngine.Life.switchActivePet) {
+        PetEngine.Life.switchActivePet(petId);
+    } else {
+        const pet = getPetData();
         pet.type = petId;
-        pet.customName = SEAFOOD_PETS[petId].name;
+        if (!pet.customName) pet.customName = SEAFOOD_PETS[petId].name;
         pet.equippedStage = null; // 重置为当前最高解锁形态
         savePetData(pet);
-        PetSound.cheer();
-
-        if (window.roamingPet) {
-            window.roamingPet.render();
-            window.roamingPet.startWanderLoop();
-            // 切换物种后，将下一次自主闲聊重置为 12~18 秒（让新宠物尽快开口展示自己的语言系统）
-            window.roamingPet.scheduleAutonomousBanter(12000 + Math.random() * 4000);
-        }
-        updatePetWidgets();
-
-        // 四大伴学宠物专属报到入场台词与专属声线
-        const welcomeQuotes = {
-            crab: '太棒啦！机灵蟹前来报到！横着走谁也难不倒我们！🦀',
-            shrimp: '太棒啦！跳跳虾小火箭发射！嗖的一下，做题全对！🚀',
-            octopus: '太棒啦！皮皮章智多星在此！八只手帮你抓牢所有的正确答案！🐙',
-            fish: '太棒啦！小泡鱼好搭档来啦！今天也要开开心心！🫧'
-        };
-        const welcomeText = welcomeQuotes[petId] || `太棒啦！从现在开始，${SEAFOOD_PETS[petId].name}就是你的伴学好搭档啦！`;
-
-        if (window.roamingPet) {
-            window.roamingPet.say(welcomeText, 4500);
-        }
-        PetVoice.speak(welcomeText, petId);
     }
+    PetSound.paperRustle();
+    PetSound.cheer();
+
+    if (window.roamingPet) {
+        window.roamingPet.render();
+        window.roamingPet.clampToBounds();
+        window.roamingPet.startWanderLoop();
+        // 切换物种后，将下一次自主闲聊重置为 12~18 秒（让新宠物尽快开口展示自己的语言系统）
+        window.roamingPet.scheduleAutonomousBanter(12000 + Math.random() * 4000);
+    }
+    updatePetWidgets();
+
     aquariumSelectedFamily = petId;
     renderAquariumModal();
+
+    // 检查此灵兽是否从未被命名且经验为0（初次诞生）
+    const pData = (window.PetEngine && PetEngine.Life) ? PetEngine.Life.getData(petId) : getPetData();
+    if (pData && !pData.isNamed && (pData.exp || 0) === 0) {
+        setTimeout(() => {
+            openPetBirthModal(petId);
+        }, 350);
+        return;
+    }
+
+    // 七大伴学折纸灵兽专属报到入场台词与专属声线
+    const petDef = SEAFOOD_PETS[petId];
+    const petName = (pData && pData.customName) || petDef.name;
+    const welcomeQuotes = {
+        fish: `太棒啦！${petName}随风飞来！指尖翻折，带你飞跃题海！🎏`,
+        crab: `太棒啦！${petName}前来报到！咔嚓双鳌剪碎一切错题！🦀`,
+        shrimp: `太棒啦！${petName}折翼起飞！嗖的一下弹射前进，做题全对！🦐`,
+        octopus: `太棒啦！${petName}智多星在此！八条折纸触手为你抓牢满分！🐙`,
+        turtle: `太棒啦！${petName}稳步登场！玄甲护体，从容稳夺高分！🐢`,
+        jellyfish: `太棒啦！${petName}轻盈飘来！幻光聚焦，难题通通消散！🪼`,
+        whale: `太棒啦！${petName}破浪而至！巨浪翻涌，带你驰骋题海！🐳`
+    };
+    const welcomeText = welcomeQuotes[petId] || `太棒啦！从现在开始，${petName}就是你的伴学好搭档啦！`;
+
+    if (window.roamingPet) {
+        window.roamingPet.say(welcomeText, 4500);
+    }
+    PetVoice.speak(welcomeText, petId);
+}
+
+// --- 灵兽诞生与命名仪式控制器 (PET BIRTH & NAMING CONTROLLER) ---
+let currentNamingPetType = 'fish';
+let currentNamingMode = 'birth'; // 'birth' or 'rename'
+
+function openPetBirthModal(petType) {
+    const type = petType || aquariumSelectedFamily || 'fish';
+    currentNamingPetType = type;
+    currentNamingMode = 'birth';
+
+    const modal = document.getElementById('modal-pet-naming');
+    if (!modal) return;
+
+    const petDef = SEAFOOD_PETS[type] || SEAFOOD_PETS.fish;
+    const titleEl = document.getElementById('pet-naming-title');
+    const descEl = document.getElementById('pet-naming-desc');
+    const inputEl = document.getElementById('pet-naming-input');
+    const avatarEl = document.getElementById('pet-naming-avatar');
+    const confirmBtn = document.getElementById('btn-pet-naming-confirm');
+
+    if (titleEl) titleEl.innerText = `🎉 伴学新伙伴诞生啦！`;
+    if (descEl) descEl.innerText = `快给这只初入江湖的【${petDef.speciesName}】起个专属名字吧~ 留空将使用默认名字【${petDef.name}】哦！`;
+    if (inputEl) {
+        inputEl.value = '';
+        inputEl.placeholder = `例如：${petDef.name} / 泡泡 / 小金金`;
+    }
+    if (confirmBtn) confirmBtn.innerText = '开启伴学 🐾';
+
+    if (avatarEl) {
+        const svg = (window.PetEngine && PetEngine.Vector)
+            ? PetEngine.renderAvatar(type, 0, { width: 68, height: 68 })
+            : `<div style="font-size:46px;">${petDef.avatar}</div>`;
+        avatarEl.innerHTML = svg;
+    }
+
+    modal.style.display = 'flex';
+    setTimeout(() => { if (inputEl) inputEl.focus(); }, 150);
+}
+
+function openPetRenameModal(petType) {
+    const type = petType || aquariumSelectedFamily || 'fish';
+    currentNamingPetType = type;
+    currentNamingMode = 'rename';
+
+    const modal = document.getElementById('modal-pet-naming');
+    if (!modal) return;
+
+    const petDef = SEAFOOD_PETS[type] || SEAFOOD_PETS.fish;
+    const pData = (window.PetEngine && PetEngine.Life) ? PetEngine.Life.getData(type) : getPetData();
+    const titleEl = document.getElementById('pet-naming-title');
+    const descEl = document.getElementById('pet-naming-desc');
+    const inputEl = document.getElementById('pet-naming-input');
+    const avatarEl = document.getElementById('pet-naming-avatar');
+    const confirmBtn = document.getElementById('btn-pet-naming-confirm');
+
+    if (titleEl) titleEl.innerText = `✏️ 为灵兽修改专属昵称`;
+    if (descEl) descEl.innerText = `为你的【${petDef.speciesName}】起个新名字吧~ 留空将恢复为默认名字【${petDef.name}】哦！`;
+    if (inputEl) {
+        inputEl.value = (pData && pData.customName && pData.customName !== petDef.name) ? pData.customName : '';
+        inputEl.placeholder = petDef.name;
+    }
+    if (confirmBtn) confirmBtn.innerText = '保存修改 🐾';
+
+    if (avatarEl) {
+        const lvlInfo = getPetLevelInfo(pData.exp || 0);
+        const stageIndex = (pData.equippedStage !== null && pData.equippedStage !== undefined) ? pData.equippedStage : lvlInfo.stageIndex;
+        const svg = (window.PetEngine && PetEngine.Vector)
+            ? PetEngine.renderAvatar(type, stageIndex, { width: 68, height: 68 })
+            : `<div style="font-size:46px;">${petDef.avatar}</div>`;
+        avatarEl.innerHTML = svg;
+    }
+
+    modal.style.display = 'flex';
+    setTimeout(() => { if (inputEl) inputEl.focus(); }, 150);
+}
+
+function closePetNamingModal() {
+    const modal = document.getElementById('modal-pet-naming');
+    if (modal) modal.style.display = 'none';
+}
+
+function confirmPetNaming() {
+    const inputEl = document.getElementById('pet-naming-input');
+    const inputName = inputEl ? inputEl.value.trim() : '';
+    const petDef = SEAFOOD_PETS[currentNamingPetType] || SEAFOOD_PETS.fish;
+    const finalName = inputName || petDef.name;
+
+    if (window.PetEngine && PetEngine.Life && PetEngine.Life.renamePet) {
+        PetEngine.Life.renamePet(currentNamingPetType, finalName);
+    } else {
+        const pet = getPetData();
+        pet.customName = finalName;
+        pet.isNamed = true;
+        savePetData(pet);
+    }
+
+    closePetNamingModal();
+    PetSound.cheer();
+    updatePetWidgets();
+    renderAquariumModal();
+
+    const cheers = {
+        fish: `太棒啦！我是【${finalName}】，以后多多关照哦！🎏`,
+        crab: `咔嚓！【${finalName}】正式报到！一起剪灭所有难题！🦀`,
+        shrimp: `嗖的一声！【${finalName}】出战，弹射全对！🦐`,
+        octopus: `智慧无限！【${finalName}】将为你抓牢所有知识点！🐙`,
+        turtle: `稳扎稳打！【${finalName}】玄甲在此，定海安澜！🐢`,
+        jellyfish: `空灵幻彩！【${finalName}】亮起智慧之光，照亮答案！🪼`,
+        whale: `鲸波万里！【${finalName}】伴你乘风破浪，向满分出发！🐳`
+    };
+    const cheerMsg = cheers[currentNamingPetType] || `太棒啦！从现在起我叫【${finalName}】啦！`;
+    if (window.roamingPet) {
+        window.roamingPet.say(cheerMsg, 4500);
+    }
+    PetVoice.speak(cheerMsg, currentNamingPetType);
+}
+
+// --- 灵兽涅槃重生仪式控制器 (PET REBIRTH CONTROLLER) ---
+let currentRebirthPetType = 'fish';
+
+function openPetRebirthModal(petType) {
+    const type = petType || aquariumSelectedFamily || 'fish';
+    currentRebirthPetType = type;
+
+    const modal = document.getElementById('modal-pet-rebirth');
+    if (!modal) return;
+
+    const petDef = SEAFOOD_PETS[type] || SEAFOOD_PETS.fish;
+    const pData = (window.PetEngine && PetEngine.Life) ? PetEngine.Life.getData(type) : getPetData();
+    const lvlInfo = getPetLevelInfo(pData.exp || 0);
+    const currentName = pData.customName || petDef.name;
+    const currentRebirthCount = pData.rebirthCount || 0;
+    const nextRebirthCount = currentRebirthCount + 1;
+
+    const avatarBox = document.getElementById('pet-rebirth-avatar-box');
+    if (avatarBox) {
+        const stageIndex = (pData.equippedStage !== null && pData.equippedStage !== undefined) ? pData.equippedStage : lvlInfo.stageIndex;
+        const svg = (window.PetEngine && PetEngine.Vector)
+            ? PetEngine.renderAvatar(type, stageIndex, { width: 72, height: 72 })
+            : `<div style="font-size:50px;">${petDef.avatar}</div>`;
+        avatarBox.innerHTML = svg;
+    }
+
+    const summaryEl = document.getElementById('pet-rebirth-summary');
+    if (summaryEl) {
+        summaryEl.innerHTML = `
+            <div style="font-weight:bold; color:var(--text-main); margin-bottom:6px; font-size:14px; display:flex; align-items:center; justify-content:space-between;">
+                <span>当前状态：Lv.${lvlInfo.level} · ${lvlInfo.title}</span>
+                <span class="pet-rebirth-badge">现已历练 ${currentRebirthCount} 转</span>
+            </div>
+            <div style="color:var(--text-sub); font-size:12px;">
+                🌟 涅槃重生后，【${currentName}】将点亮<b>第 ${nextRebirthCount} 颗转生星印 (🌟×${nextRebirthCount})</b>！<br>
+                🌱 等级和经验将回归 <b>Lv.1 幼年萌动形态</b>，重新享受答题喂养、逐阶变身的乐趣！<br>
+                🐚 全队共享的 <b>${pData.shells || 20} 个深海贝壳币</b>完全保留，不受任何影响。
+            </div>
+        `;
+    }
+
+    const nameInput = document.getElementById('pet-rebirth-name-input');
+    if (nameInput) {
+        nameInput.value = currentName;
+        nameInput.placeholder = petDef.name;
+    }
+
+    modal.style.display = 'flex';
+    setTimeout(() => { if (nameInput) nameInput.focus(); }, 150);
+}
+
+function closePetRebirthModal() {
+    const modal = document.getElementById('modal-pet-rebirth');
+    if (modal) modal.style.display = 'none';
+}
+
+function confirmPetRebirth() {
+    const nameInput = document.getElementById('pet-rebirth-name-input');
+    const inputName = nameInput ? nameInput.value.trim() : '';
+
+    let rebornData = null;
+    if (window.PetEngine && PetEngine.Life && PetEngine.Life.rebirthPet) {
+        rebornData = PetEngine.Life.rebirthPet(currentRebirthPetType, inputName);
+    } else {
+        const pet = getPetData();
+        pet.exp = 0;
+        pet.level = 1;
+        pet.feedCount = 0;
+        pet.equippedStage = null;
+        pet.rebirthCount = (pet.rebirthCount || 0) + 1;
+        if (inputName) pet.customName = inputName;
+        pet.satiety = 85;
+        savePetData(pet);
+        rebornData = pet;
+    }
+
+    closePetRebirthModal();
+    PetSound.cheer();
+
+    // 播放全屏纸花欢庆
+    const confettiContainer = document.getElementById('evolution-confetti-container');
+    if (confettiContainer) {
+        confettiContainer.innerHTML = '';
+        for (let i = 0; i < 40; i++) {
+            const piece = document.createElement('div');
+            piece.className = 'confetti-piece';
+            piece.style.left = `${Math.random() * 100}%`;
+            piece.style.backgroundColor = ['#FF70A6', '#FFB703', '#70C1B3', '#9D4EDD', '#00BBF9'][Math.floor(Math.random() * 5)];
+            piece.style.animationDelay = `${Math.random() * 0.8}s`;
+            piece.style.animationDuration = `${1.5 + Math.random()}s`;
+            confettiContainer.appendChild(piece);
+        }
+        setTimeout(() => { if (confettiContainer) confettiContainer.innerHTML = ''; }, 3000);
+    }
+
+    updatePetWidgets();
+    renderAquariumModal();
+
+    const petDef = SEAFOOD_PETS[currentRebirthPetType] || SEAFOOD_PETS.fish;
+    const petName = (rebornData && rebornData.customName) || petDef.name;
+    const rebirthCount = (rebornData && rebornData.rebirthCount) || 1;
+    const rebirthMsg = `✨ 破茧重生！我是全新的【${petName}】(第${rebirthCount}转生)！让我们重回幼年形态，开启更精彩的答题大冒险吧！`;
+
+    if (window.roamingPet) {
+        window.roamingPet.render();
+        window.roamingPet.say(rebirthMsg, 5000);
+    }
+    PetVoice.speak(rebirthMsg, currentRebirthPetType);
+}
+
+// 随心切换穿戴形态
+function equipPetForm(stageIndex) {
+    const pet = getPetData();
+    const lvlInfo = getPetLevelInfo(pet.exp || 0);
+    if (stageIndex > lvlInfo.stageIndex) return; // 未解锁不能穿戴
+
+    pet.equippedStage = stageIndex;
+    savePetData(pet);
+    PetSound.bubble();
+
+    const activeForm = getPetActiveForm(pet);
+    if (window.roamingPet) {
+        window.roamingPet.render();
+        window.roamingPet.clampToBounds();
+        window.roamingPet.poke();
+    }
+    updatePetWidgets();
+    renderAquariumModal();
+
+    if (typeof window.speakText === 'function') {
+        window.speakText(`变身完毕！现在我是${activeForm.title}啦！`, pet.type);
+    }
 }
 
 // 随心切换穿戴形态
@@ -3655,6 +4629,15 @@ function enableChildMode(enable) {
         if (window.roamingPet) {
             window.roamingPet.show();
         }
+
+        const petData = getPetData();
+        if (petData && !petData.isNamed && (petData.exp || 0) === 0) {
+            setTimeout(() => {
+                if (isChildMode && typeof openPetBirthModal === 'function') {
+                    openPetBirthModal(petData.type || 'fish');
+                }
+            }, 600);
+        }
     } else {
         html.removeAttribute('data-mode');
         localStorage.setItem('app_mode', 'normal');
@@ -3672,6 +4655,8 @@ function enableChildMode(enable) {
 }
 
 // --- 儿童模式答题即时反馈（集成海鲜萌宠喂食动画） ---
+let childSessionWrongQuestions = []; // 儿童模式本轮溜走的小水母错题集
+
 function showChildFeedback() {
     const feedback = document.getElementById('child-feedback');
     if (!feedback) return;
@@ -3688,8 +4673,11 @@ function showChildFeedback() {
             levelUpBanner = `<div class="pet-levelup-banner">🎉 哇！升级啦！变成【${lastFeedingInfo.levelTitle}】！</div>`;
         }
 
+        const effectiveStage = (pet.equippedStage !== null && pet.equippedStage !== undefined && pet.equippedStage <= lvlInfo.stageIndex)
+            ? pet.equippedStage
+            : (activeForm && activeForm.stage ? activeForm.stage - 1 : lvlInfo.stageIndex);
         const feedbackSvg = (window.PetEngine && PetEngine.Vector)
-            ? PetEngine.Vector.renderSvg(pet.type, lvlInfo.stageIndex, { width: 52, height: 52, emotion: 'celebrate' })
+            ? PetEngine.renderAvatar(pet.type, effectiveStage, { width: 52, height: 52, emotion: 'celebrate' })
             : activeForm.avatar;
 
         feedbackPetEl.innerHTML = `
@@ -3699,7 +4687,7 @@ function showChildFeedback() {
             </div>
             <div style="font-weight:bold; font-size:18px; color:var(--text-main); margin-top:10px;">
                 ${pet.customName || petDef.name} 饱餐了一顿！
-                <span style="color:#FF70A6; font-size:16px;">+10 EXP</span>
+                <span style="color:#FF70A6; font-size:16px;">+${(lastFeedingInfo && lastFeedingInfo.expGain) ? lastFeedingInfo.expGain : 10} EXP</span>
             </div>
             ${levelUpBanner}
             <div class="pet-exp-bar" style="width:200px; margin:10px auto 0 auto;">
@@ -3718,17 +4706,27 @@ function showChildFeedback() {
     feedback.style.display = 'flex';
 
     if (childFeedbackTimeout) clearTimeout(childFeedbackTimeout);
-    childFeedbackTimeout = setTimeout(nextChildQuestion, 2000);
+    childFeedbackTimeout = setTimeout(nextChildQuestion, 1600); // 1.6s 欢庆咀嚼后自动巡航进入下一题
 }
 
-// 儿童模式专用：下一题
+// 儿童模式专用：下一题 (支持单题沉浸模式与长卷兼容)
 function nextChildQuestion() {
     const feedback = document.getElementById('child-feedback');
-    if (!feedback || feedback.style.display === 'none') return;
-
     if (childFeedbackTimeout) clearTimeout(childFeedbackTimeout);
-    feedback.style.display = 'none';
+    if (feedback) feedback.style.display = 'none';
 
+    // 优先单题沉浸模式自动推进
+    if (typeof quizDisplayMode !== 'undefined' && quizDisplayMode === 'single') {
+        if (currentSingleIndex < currentQuiz.length - 1) {
+            renderSingleQuestion(currentSingleIndex + 1, 'right');
+            saveWipQuiz();
+        } else {
+            showChildVictoryModal();
+        }
+        return;
+    }
+
+    // 长列表降级兼容处理
     const nextIdx = lastVisibleQuestionIndex + 1;
     if (nextIdx < currentQuiz.length) {
         const nextEl = document.getElementById(`q-${nextIdx}`);
@@ -3738,12 +4736,109 @@ function nextChildQuestion() {
             saveWipQuiz();
         }
     } else {
-        clearWipQuiz();
-        const pet = getPetData();
-        const petDef = SEAFOOD_PETS[pet.type] || SEAFOOD_PETS.fish;
-        alert(`哇！所有的题目都做完啦！${pet.customName || petDef.name} 吃得饱饱的，为你骄傲！`);
-        history.back();
+        showChildVictoryModal();
     }
+}
+
+// 儿童模式探险通关大奖状与结算控制器
+function showChildVictoryModal() {
+    clearWipQuiz();
+    const pet = getPetData();
+    const petDef = SEAFOOD_PETS[pet.type] || SEAFOOD_PETS.fish;
+    const lvlInfo = getPetLevelInfo(pet.exp);
+    const activeForm = getPetActiveForm(pet);
+    const modal = document.getElementById('modal-child-victory');
+
+    if (!modal) {
+        alert(`🎉 哇！所有的宝藏题目都探险完成啦！${pet.customName || petDef.name} 吃得饱饱的，为你骄傲！`);
+        history.back();
+        return;
+    }
+
+    let correctCount = currentQuiz ? currentQuiz.length : 0;
+    if (typeof quizFeedbackMode !== 'undefined' && quizFeedbackMode === 'exam' && currentQuiz) {
+        childSessionWrongQuestions = [];
+        correctCount = 0;
+        currentQuiz.forEach((q, idx) => {
+            const uAns = userAnswers[idx];
+            if (uAns && uAns === q.a) {
+                correctCount++;
+            } else {
+                childSessionWrongQuestions.push(q);
+            }
+        });
+        if (typeof addPetExp === 'function' && correctCount > 0) {
+            addPetExp(correctCount * 10);
+        }
+    }
+
+    if (typeof PetSound !== 'undefined') {
+        PetSound.cheer();
+    }
+
+    const petContainer = document.getElementById('child-victory-pet-avatar');
+    if (petContainer) {
+        const effectiveStage = (pet.equippedStage !== null && pet.equippedStage !== undefined && pet.equippedStage <= lvlInfo.stageIndex)
+            ? pet.equippedStage
+            : (activeForm && activeForm.stage ? activeForm.stage - 1 : lvlInfo.stageIndex);
+        const avatarSvg = (window.PetEngine && PetEngine.Vector)
+            ? PetEngine.renderAvatar(pet.type, effectiveStage, { width: 110, height: 110, emotion: 'celebrate' })
+            : `<div style="font-size:64px;">${petDef.avatar}</div>`;
+        petContainer.innerHTML = avatarSvg;
+    }
+
+    const totalCountEl = document.getElementById('child-victory-total');
+    const expGainedEl = document.getElementById('child-victory-exp');
+    const titleEl = document.getElementById('child-victory-title');
+    const subtitleEl = document.getElementById('child-victory-subtitle');
+    if (totalCountEl) totalCountEl.innerText = currentQuiz ? currentQuiz.length : 0;
+    if (expGainedEl) expGainedEl.innerText = correctCount * 10;
+    if (titleEl) {
+        titleEl.innerText = (typeof quizFeedbackMode !== 'undefined' && quizFeedbackMode === 'exam')
+            ? '海底勇士大挑战结算！'
+            : '海底探险小勇士通关！';
+    }
+    if (subtitleEl) {
+        if (typeof quizFeedbackMode !== 'undefined' && quizFeedbackMode === 'exam') {
+            subtitleEl.innerText = `${pet.customName || petDef.name} 陪你完成了勇士大挑战，成功解开 ${correctCount} / ${currentQuiz.length} 道宝藏！✨`;
+        } else {
+            subtitleEl.innerText = `${pet.customName || petDef.name} 陪你收集了满满一袋小珍珠，太棒啦！✨`;
+        }
+    }
+
+    const retryBtn = document.getElementById('btn-child-retry-wrong');
+    const retryCountEl = document.getElementById('child-retry-count');
+    if (retryBtn) {
+        if (childSessionWrongQuestions && childSessionWrongQuestions.length > 0) {
+            retryBtn.style.display = 'inline-flex';
+            if (retryCountEl) retryCountEl.innerText = childSessionWrongQuestions.length;
+        } else {
+            retryBtn.style.display = 'none';
+        }
+    }
+
+    modal.style.display = 'flex';
+}
+
+function startChildRetryWrongQuiz() {
+    if (!childSessionWrongQuestions || childSessionWrongQuestions.length === 0) return;
+    const modal = document.getElementById('modal-child-victory');
+    if (modal) modal.style.display = 'none';
+
+    currentQuiz = [...childSessionWrongQuestions];
+    childSessionWrongQuestions = [];
+    userAnswers = {};
+    currentSingleIndex = 0;
+    lastVisibleQuestionIndex = 0;
+
+    renderQuizItems();
+    saveWipQuiz();
+}
+
+function closeChildVictoryAndExit() {
+    const modal = document.getElementById('modal-child-victory');
+    if (modal) modal.style.display = 'none';
+    history.back();
 }
 
 window.addEventListener('DOMContentLoaded', () => {

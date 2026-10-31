@@ -1,0 +1,132 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 128" width="512" height="128">
+  <defs>
+    
+    <linearGradient id="octoGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#C77DFF"/>
+      <stop offset="60%" stop-color="#9D4EDD"/>
+      <stop offset="100%" stop-color="#5A189A"/>
+    </linearGradient>
+
+  </defs>
+  <g id="frame-0" transform="translate(0, 0)"><path d="M 40 76.0 Q 40.0 94.0 40.0 108.0" 
+          stroke="url(#octoGrad)" stroke-width="7" stroke-linecap="round" fill="none"/>
+          <circle cx="40.0" cy="94.0" r="2" fill="#E0AAFF" opacity="0.8"/>
+        <path d="M 50 76.0 Q 56.88661847263542 94.0 55.738848727196185 108.0" 
+          stroke="url(#octoGrad)" stroke-width="7" stroke-linecap="round" fill="none"/>
+          <circle cx="53.44330923631771" cy="94.0" r="2" fill="#E0AAFF" opacity="0.8"/>
+        <path d="M 59 76.0 Q 68.59590658919845 94.0 66.99658882433204 108.0" 
+          stroke="url(#octoGrad)" stroke-width="7" stroke-linecap="round" fill="none"/>
+          <circle cx="63.797953294599225" cy="94.0" r="2" fill="#E0AAFF" opacity="0.8"/>
+        <path d="M 69 76.0 Q 75.48444653329105 94.0 74.40370544440921 108.0" 
+          stroke="url(#octoGrad)" stroke-width="7" stroke-linecap="round" fill="none"/>
+          <circle cx="72.24222326664552" cy="94.0" r="2" fill="#E0AAFF" opacity="0.8"/>
+        <path d="M 78 76.0 Q 77.43960822309523 94.0 77.53300685257936 108.0" 
+          stroke="url(#octoGrad)" stroke-width="7" stroke-linecap="round" fill="none"/>
+          <circle cx="77.71980411154762" cy="94.0" r="2" fill="#E0AAFF" opacity="0.8"/>
+        <path d="M 88 76.0 Q 80.73469604504389 94.0 81.94558003753657 108.0" 
+          stroke="url(#octoGrad)" stroke-width="7" stroke-linecap="round" fill="none"/>
+          <circle cx="84.36734802252195" cy="94.0" r="2" fill="#E0AAFF" opacity="0.8"/>
+        
+      <ellipse cx="64" cy="56.0" rx="28" ry="24" fill="url(#octoGrad)"/>
+      <path d="M 50 42.0 Q 64 36.0 78 42.0" stroke="#FFF" stroke-width="2.5" stroke-linecap="round" fill="none" opacity="0.4"/>
+    
+          <circle cx="54" cy="58.0" r="8.5" fill="#FFF"/>
+          <circle cx="74" cy="58.0" r="8.5" fill="#FFF"/>
+          <circle cx="55" cy="58.0" r="5" fill="#10002B"/>
+          <circle cx="75" cy="58.0" r="5" fill="#10002B"/>
+          <circle cx="56" cy="56.0" r="2" fill="#FFF"/>
+          <circle cx="76" cy="56.0" r="2" fill="#FFF"/>
+        <circle cx="48" cy="67.0" r="4.5" fill="#FF70A6" opacity="0.75"/>
+               <circle cx="80" cy="67.0" r="4.5" fill="#FF70A6" opacity="0.75"/><ellipse cx="64" cy="66.0" rx="3.5" ry="4.5" fill="#10002B"/></g>
+<g id="frame-1" transform="translate(128, 0)"><path d="M 40 79.0 Q 49.6 97.0 48.0 111.0" 
+          stroke="url(#octoGrad)" stroke-width="7" stroke-linecap="round" fill="none"/>
+          <circle cx="44.8" cy="97.0" r="2" fill="#E0AAFF" opacity="0.8"/>
+        <path d="M 50 79.0 Q 56.68838440973279 97.0 55.573653674777326 111.0" 
+          stroke="url(#octoGrad)" stroke-width="7" stroke-linecap="round" fill="none"/>
+          <circle cx="53.344192204866395" cy="97.0" r="2" fill="#E0AAFF" opacity="0.8"/>
+        <path d="M 59 79.0 Q 58.71968458590763 97.0 58.76640382158969 111.0" 
+          stroke="url(#octoGrad)" stroke-width="7" stroke-linecap="round" fill="none"/>
+          <circle cx="58.859842292953815" cy="97.0" r="2" fill="#E0AAFF" opacity="0.8"/>
+        <path d="M 69 79.0 Q 61.92102033080404 97.0 63.100850275670034 111.0" 
+          stroke="url(#octoGrad)" stroke-width="7" stroke-linecap="round" fill="none"/>
+          <circle cx="65.46051016540203" cy="97.0" r="2" fill="#E0AAFF" opacity="0.8"/>
+        <path d="M 78 79.0 Q 68.41637015237038 97.0 70.01364179364198 111.0" 
+          stroke="url(#octoGrad)" stroke-width="7" stroke-linecap="round" fill="none"/>
+          <circle cx="73.20818507618519" cy="97.0" r="2" fill="#E0AAFF" opacity="0.8"/>
+        <path d="M 88 79.0 Q 81.72502123970932 97.0 82.7708510330911 111.0" 
+          stroke="url(#octoGrad)" stroke-width="7" stroke-linecap="round" fill="none"/>
+          <circle cx="84.86251061985466" cy="97.0" r="2" fill="#E0AAFF" opacity="0.8"/>
+        
+      <ellipse cx="64" cy="59.0" rx="28" ry="24" fill="url(#octoGrad)"/>
+      <path d="M 50 45.0 Q 64 39.0 78 45.0" stroke="#FFF" stroke-width="2.5" stroke-linecap="round" fill="none" opacity="0.4"/>
+    
+          <circle cx="54" cy="61.0" r="8.5" fill="#FFF"/>
+          <circle cx="74" cy="61.0" r="8.5" fill="#FFF"/>
+          <circle cx="55" cy="61.0" r="5" fill="#10002B"/>
+          <circle cx="75" cy="61.0" r="5" fill="#10002B"/>
+          <circle cx="56" cy="59.0" r="2" fill="#FFF"/>
+          <circle cx="76" cy="59.0" r="2" fill="#FFF"/>
+        <circle cx="48" cy="70.0" r="4.5" fill="#FF70A6" opacity="0.75"/>
+               <circle cx="80" cy="70.0" r="4.5" fill="#FF70A6" opacity="0.75"/><ellipse cx="64" cy="69.0" rx="3.5" ry="4.5" fill="#10002B"/></g>
+<g id="frame-2" transform="translate(256, 0)"><path d="M 40 76.0 Q 40.0 94.0 40.0 108.0" 
+          stroke="url(#octoGrad)" stroke-width="7" stroke-linecap="round" fill="none"/>
+          <circle cx="40.0" cy="94.0" r="2" fill="#E0AAFF" opacity="0.8"/>
+        <path d="M 50 76.0 Q 43.11338152736458 94.0 44.26115127280382 108.0" 
+          stroke="url(#octoGrad)" stroke-width="7" stroke-linecap="round" fill="none"/>
+          <circle cx="46.55669076368229" cy="94.0" r="2" fill="#E0AAFF" opacity="0.8"/>
+        <path d="M 59 76.0 Q 49.40409341080155 94.0 51.00341117566796 108.0" 
+          stroke="url(#octoGrad)" stroke-width="7" stroke-linecap="round" fill="none"/>
+          <circle cx="54.202046705400775" cy="94.0" r="2" fill="#E0AAFF" opacity="0.8"/>
+        <path d="M 69 76.0 Q 62.51555346670895 94.0 63.596294555590795 108.0" 
+          stroke="url(#octoGrad)" stroke-width="7" stroke-linecap="round" fill="none"/>
+          <circle cx="65.75777673335448" cy="94.0" r="2" fill="#E0AAFF" opacity="0.8"/>
+        <path d="M 78 76.0 Q 78.56039177690477 94.0 78.46699314742064 108.0" 
+          stroke="url(#octoGrad)" stroke-width="7" stroke-linecap="round" fill="none"/>
+          <circle cx="78.28019588845238" cy="94.0" r="2" fill="#E0AAFF" opacity="0.8"/>
+        <path d="M 88 76.0 Q 95.26530395495611 94.0 94.05441996246343 108.0" 
+          stroke="url(#octoGrad)" stroke-width="7" stroke-linecap="round" fill="none"/>
+          <circle cx="91.63265197747805" cy="94.0" r="2" fill="#E0AAFF" opacity="0.8"/>
+        
+      <ellipse cx="64" cy="56.0" rx="28" ry="24" fill="url(#octoGrad)"/>
+      <path d="M 50 42.0 Q 64 36.0 78 42.0" stroke="#FFF" stroke-width="2.5" stroke-linecap="round" fill="none" opacity="0.4"/>
+    
+          <circle cx="54" cy="58.0" r="8.5" fill="#FFF"/>
+          <circle cx="74" cy="58.0" r="8.5" fill="#FFF"/>
+          <circle cx="55" cy="58.0" r="5" fill="#10002B"/>
+          <circle cx="75" cy="58.0" r="5" fill="#10002B"/>
+          <circle cx="56" cy="56.0" r="2" fill="#FFF"/>
+          <circle cx="76" cy="56.0" r="2" fill="#FFF"/>
+        <circle cx="48" cy="67.0" r="4.5" fill="#FF70A6" opacity="0.75"/>
+               <circle cx="80" cy="67.0" r="4.5" fill="#FF70A6" opacity="0.75"/><ellipse cx="64" cy="66.0" rx="3.5" ry="4.5" fill="#10002B"/></g>
+<g id="frame-3" transform="translate(384, 0)"><path d="M 40 73.0 Q 30.4 91.0 32.0 105.0" 
+          stroke="url(#octoGrad)" stroke-width="7" stroke-linecap="round" fill="none"/>
+          <circle cx="35.2" cy="91.0" r="2" fill="#E0AAFF" opacity="0.8"/>
+        <path d="M 50 73.0 Q 43.31161559026721 91.0 44.426346325222674 105.0" 
+          stroke="url(#octoGrad)" stroke-width="7" stroke-linecap="round" fill="none"/>
+          <circle cx="46.655807795133605" cy="91.0" r="2" fill="#E0AAFF" opacity="0.8"/>
+        <path d="M 59 73.0 Q 59.280315414092364 91.0 59.2335961784103 105.0" 
+          stroke="url(#octoGrad)" stroke-width="7" stroke-linecap="round" fill="none"/>
+          <circle cx="59.140157707046185" cy="91.0" r="2" fill="#E0AAFF" opacity="0.8"/>
+        <path d="M 69 73.0 Q 76.07897966919596 91.0 74.89914972432996 105.0" 
+          stroke="url(#octoGrad)" stroke-width="7" stroke-linecap="round" fill="none"/>
+          <circle cx="72.53948983459797" cy="91.0" r="2" fill="#E0AAFF" opacity="0.8"/>
+        <path d="M 78 73.0 Q 87.58362984762962 91.0 85.98635820635802 105.0" 
+          stroke="url(#octoGrad)" stroke-width="7" stroke-linecap="round" fill="none"/>
+          <circle cx="82.79181492381481" cy="91.0" r="2" fill="#E0AAFF" opacity="0.8"/>
+        <path d="M 88 73.0 Q 94.27497876029068 91.0 93.2291489669089 105.0" 
+          stroke="url(#octoGrad)" stroke-width="7" stroke-linecap="round" fill="none"/>
+          <circle cx="91.13748938014534" cy="91.0" r="2" fill="#E0AAFF" opacity="0.8"/>
+        
+      <ellipse cx="64" cy="53.0" rx="28" ry="24" fill="url(#octoGrad)"/>
+      <path d="M 50 39.0 Q 64 33.0 78 39.0" stroke="#FFF" stroke-width="2.5" stroke-linecap="round" fill="none" opacity="0.4"/>
+    
+          <circle cx="54" cy="55.0" r="8.5" fill="#FFF"/>
+          <circle cx="74" cy="55.0" r="8.5" fill="#FFF"/>
+          <circle cx="55" cy="55.0" r="5" fill="#10002B"/>
+          <circle cx="75" cy="55.0" r="5" fill="#10002B"/>
+          <circle cx="56" cy="53.0" r="2" fill="#FFF"/>
+          <circle cx="76" cy="53.0" r="2" fill="#FFF"/>
+        <circle cx="48" cy="64.0" r="4.5" fill="#FF70A6" opacity="0.75"/>
+               <circle cx="80" cy="64.0" r="4.5" fill="#FF70A6" opacity="0.75"/><ellipse cx="64" cy="63.0" rx="3.5" ry="4.5" fill="#10002B"/></g>
+
+</svg>

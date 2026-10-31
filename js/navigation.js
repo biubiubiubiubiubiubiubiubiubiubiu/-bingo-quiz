@@ -27,6 +27,10 @@
                     if (typeof updatePetWidgets === 'function') updatePetWidgets();
                     break;
             }
+
+            if (window.roamingPet && typeof window.roamingPet.clampToBounds === 'function') {
+                window.roamingPet.clampToBounds();
+            }
         }
 
         // --- Navigation & History (核心修改版) ---

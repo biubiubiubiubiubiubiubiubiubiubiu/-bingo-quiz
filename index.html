@@ -312,7 +312,26 @@
             <!-- 儿童模式海鲜萌宠答题伴学小组件 (内置于标题栏居中) -->
             <div id="child-pet-quiz-widget" class="child-pet-quiz-widget" style="display:none;" onclick="speakPetQuote()" title="轻触听我说说话！"></div>
 
-            <div style="display:flex; align-items:center; gap:6px; flex-shrink:0;">
+            <div style="display:flex; align-items:center; gap:4px; flex-shrink:0;">
+                <!-- 答题卡快速入口 -->
+                <button class="btn btn-ghost btn-icon m3-icon-btn btn-quiz-palette m3-ripple" id="btn-quiz-palette" onclick="toggleAnswerPalette()" title="答题卡 (P)">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <rect x="3" y="3" width="7" height="7"></rect>
+                        <rect x="14" y="3" width="7" height="7"></rect>
+                        <rect x="14" y="14" width="7" height="7"></rect>
+                        <rect x="3" y="14" width="7" height="7"></rect>
+                    </svg>
+                </button>
+                <!-- 视图切换: 单题沉浸 vs 长卷列表 -->
+                <button class="btn btn-ghost btn-icon m3-icon-btn btn-quiz-view-mode m3-ripple" id="btn-quiz-view-mode" onclick="toggleDisplayMode()" title="切换单题/长卷模式">
+                    <svg class="icon-view-single" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="3" width="16" height="18" rx="2"></rect><line x1="8" y1="8" x2="16" y2="8"></line><line x1="8" y1="12" x2="16" y2="12"></line></svg>
+                    <svg class="icon-view-list" style="display:none;" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="8" y1="6" x2="21" y2="6"></line><line x1="8" y1="12" x2="21" y2="12"></line><line x1="8" y1="18" x2="21" y2="18"></line><line x1="3" y1="6" x2="3.01" y2="6"></line><line x1="3" y1="12" x2="3.01" y2="12"></line><line x1="3" y1="18" x2="3.01" y2="18"></line></svg>
+                </button>
+                <!-- 模式切换: 即练即判 vs 全卷模拟 (仅非模拟考生效) -->
+                <button class="btn btn-ghost btn-icon m3-icon-btn btn-quiz-feedback-mode m3-ripple" id="btn-quiz-feedback-mode" onclick="toggleFeedbackMode()" title="切换即练即判/全卷模式">
+                    <svg class="icon-mode-instant" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg>
+                    <svg class="icon-mode-exam" style="display:none;" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line></svg>
+                </button>
                 <button class="btn btn-ghost btn-icon m3-icon-btn btn-theme-toggle m3-ripple" onclick="toggleTheme()" title="切换主题">
                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                         stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
@@ -333,9 +352,59 @@
             <div id="quiz-container"></div>
         </div>
 
-        <!-- 提交按钮区 (M3 Bottom Sheet FAB Area) -->
+        <!-- 单题模式底部固定控制栏 (Single Question Bottom Bar) -->
+        <div id="quiz-single-nav" style="display:none;">
+            <button class="btn btn-ghost m3-btn--tonal m3-ripple nav-prev-btn" id="btn-nav-prev" onclick="prevSingleQuestion()" title="上一题 (←)">
+                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"></polyline></svg>
+                <span>上一题</span>
+            </button>
+
+            <button class="btn btn-ghost btn-icon m3-icon-btn nav-flag-btn" id="btn-nav-flag" onclick="toggleFlagCurrentQuestion()" title="标记本题 (F)">
+                <span class="flag-icon">📌</span>
+            </button>
+
+            <button class="btn btn-ghost m3-btn--tonal m3-ripple nav-palette-btn" onclick="toggleAnswerPalette()" title="答题卡 (P)">
+                <span id="nav-palette-badge">1 / 20</span>
+            </button>
+
+            <button class="btn btn-primary m3-btn--filled m3-ripple nav-next-btn" id="btn-nav-next" onclick="nextSingleQuestion()" title="下一题 (→)">
+                <span>下一题</span>
+                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg>
+            </button>
+        </div>
+
+        <!-- 提交按钮区 (M3 Bottom Sheet FAB Area, 仅在长卷模式下展示) -->
         <div id="quiz-fab-area">
             <button class="btn btn-success m3-btn--success m3-ripple" onclick="submitPaper()">汪！交卷！</button>
+        </div>
+    </div>
+
+    <!-- 答题卡抽屉 (Answer Palette Sheet) -->
+    <div class="modal-mask" id="answer-palette-drawer" style="display:none;" onclick="handlePaletteBackdropClick(event)">
+        <div class="palette-sheet m3-card m3-card--elevated" onclick="event.stopPropagation()">
+            <div class="palette-header">
+                <div class="palette-title-area">
+                    <h3 class="palette-title">📋 答题卡</h3>
+                    <div class="palette-subtitle" id="palette-summary-text">已答 0 / 0 · 📌 标记 0</div>
+                </div>
+                <button class="btn btn-ghost btn-icon m3-icon-btn" onclick="toggleAnswerPalette()" title="关闭答题卡">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                        <line x1="18" y1="6" x2="6" y2="18"></line>
+                        <line x1="6" y1="6" x2="18" y2="18"></line>
+                    </svg>
+                </button>
+            </div>
+            
+            <div class="palette-legend" id="palette-legend"></div>
+
+            <div class="palette-grid-scroll">
+                <div class="palette-grid" id="palette-grid"></div>
+            </div>
+
+            <div class="palette-footer" id="palette-footer">
+                <button class="btn btn-ghost m3-btn--tonal m3-ripple" onclick="toggleAnswerPalette()">继续作答</button>
+                <button class="btn btn-success m3-btn--success m3-ripple" id="btn-palette-submit" onclick="submitPaper()">汪！交卷！</button>
+            </div>
         </div>
     </div>
 
@@ -375,10 +444,54 @@
         <div class="modal-box m3-dialog" style="text-align:center;">
             <h2 class="m3-dialog__headline">啃完啦！</h2>
             <div style="font-size:52px; font-weight:800; color:var(--md-sys-color-primary); margin:8px 0;" id="result-score">90</div>
-            <p class="m3-body-medium" style="color:var(--text-sub); margin-bottom: 20px;">智力值评估</p>
-            <div class="m3-dialog__actions" style="justify-content:center; gap:12px;">
+            <p class="m3-body-medium" style="color:var(--text-sub); margin-bottom: 12px;">智力值评估</p>
+            <div class="score-details" id="score-details" style="display:flex; justify-content:space-around; margin:12px 0 20px 0; font-size:14px; color:var(--text-sub); background:var(--md-sys-color-surface-container); padding:10px 12px; border-radius:12px;">
+                <div>共 <strong id="score-total-count" style="color:var(--md-sys-color-primary);">0</strong> 题</div>
+                <div>啃对 <strong id="score-correct-count" style="color:var(--md-sys-color-success);">0</strong> 题</div>
+                <div>啃错 <strong id="score-wrong-count" style="color:var(--md-sys-color-error);">0</strong> 题</div>
+            </div>
+            <div class="m3-dialog__actions" style="justify-content:center; gap:10px; flex-wrap:wrap;">
+                <button class="btn btn-warning m3-btn--filled m3-ripple" id="btn-retry-wrong" onclick="startRetryWrongQuiz()" style="display:none; width:100%; margin-bottom:6px;">🦴 消灭本次错题 (<span id="retry-wrong-count">0</span>)</button>
                 <button class="btn btn-ghost m3-btn--tonal m3-ripple" onclick="finishExamAndExit()">回狗窝</button>
                 <button class="btn btn-primary m3-btn--filled m3-ripple" onclick="enterReviewMode()">回味一下</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal: 儿童探险通关大奖状 (Child Victory Certificate) -->
+    <div class="modal-mask" id="modal-child-victory" style="display:none;">
+        <div class="modal-box child-victory-card m3-card m3-card--elevated" style="text-align:center; max-width:480px; padding:24px 20px; border-radius:32px;">
+            <div class="child-victory-ribbon">🏆 探险小勇士荣誉奖状 🏆</div>
+            
+            <div id="child-victory-pet-avatar" style="width:110px; height:110px; margin:16px auto 8px auto; display:flex; align-items:center; justify-content:center;"></div>
+            
+            <h2 id="child-victory-title" style="font-size:24px; font-weight:800; color:var(--text-main); margin:6px 0 8px 0;">探险通关啦！</h2>
+            <p id="child-victory-subtitle" style="font-size:15px; color:var(--text-sub); line-height:1.5; margin-bottom:18px;">
+                小灵兽吃得饱饱的，为你收集了满满一袋小珍珠！
+            </p>
+
+            <div class="child-victory-stats" style="display:flex; justify-content:space-around; background:var(--bg-card); padding:12px; border-radius:20px; border:2px dashed var(--bg-input); margin-bottom:20px;">
+                <div>
+                    <div style="font-size:13px; color:var(--text-sub);">解开宝藏</div>
+                    <div style="font-size:22px; font-weight:800; color:var(--primary);"><span id="child-victory-total">0</span> 题</div>
+                </div>
+                <div>
+                    <div style="font-size:13px; color:var(--text-sub);">灵兽成长</div>
+                    <div style="font-size:22px; font-weight:800; color:#FF70A6;">+<span id="child-victory-exp">0</span> EXP</div>
+                </div>
+                <div>
+                    <div style="font-size:13px; color:var(--text-sub);">获得勋章</div>
+                    <div style="font-size:22px; font-weight:800; color:#FFB703;">⭐ 金星</div>
+                </div>
+            </div>
+
+            <div style="display:flex; flex-direction:column; gap:10px;">
+                <button class="btn btn-warning m3-btn--filled m3-ripple" id="btn-child-retry-wrong" onclick="startChildRetryWrongQuiz()" style="display:none; width:100%; height:48px; font-size:16px; font-weight:bold; border-radius:9999px;">
+                    🪼 再抓一次溜走的小水母 (<span id="child-retry-count">0</span>)
+                </button>
+                <button class="btn btn-primary m3-btn--filled m3-ripple" onclick="closeChildVictoryAndExit()" style="width:100%; height:48px; font-size:16px; font-weight:bold; border-radius:9999px;">
+                    🎉 带着宝藏回伴学乐园！
+                </button>
             </div>
         </div>
     </div>
@@ -443,12 +556,12 @@
     <div class="modal-mask" id="modal-pet-selection" style="display:none;">
         <div class="modal-box pet-aquarium-modal" style="max-width:580px; width:94vw; max-height:92vh; display:flex; flex-direction:column; padding:18px;">
             <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px; flex-shrink:0;">
-                <h3 style="margin:0; font-size:18px;">🐠 海底水族馆 · 伙伴与变身</h3>
+                <h3 style="margin:0; font-size:18px;">🎏 纸艺水族馆 · 几何折纸伙伴与变身</h3>
                 <button class="btn btn-ghost btn-icon" onclick="closePetModal()" style="font-size:16px;">✕</button>
             </div>
             
             <div class="aquarium-modal-body" style="flex:1; overflow-y:auto; padding-right:4px;">
-                <!-- 顶部 4 大海鲜萌宠卡片 (点击即刻切换伴学伙伴) -->
+                <!-- 顶部 4 大几何折纸萌宠卡片 (点击即刻切换伴学伙伴) -->
                 <div style="font-weight:bold; font-size:13px; color:var(--text-sub); margin-bottom:8px; text-align:left;">
                     🐾 点击卡片直接选为伴学伙伴
                 </div>
@@ -499,8 +612,56 @@
                 <div class="evolution-tree-grid" id="aquarium-evolution-tree"></div>
             </div>
             
-            <div style="margin-top:12px; flex-shrink:0;">
-                <button class="btn btn-primary" style="width:100%; border-radius:18px; height:42px; font-size:14px;" onclick="closePetModal()">完成 🐾</button>
+            <div style="margin-top:12px; flex-shrink:0; display:flex; gap:10px;">
+                <button class="btn btn-ghost" style="flex:1; border-radius:18px; height:42px; font-size:13px; border:1px dashed var(--border-color);" onclick="window.forceUpdateAppCache ? window.forceUpdateAppCache() : window.location.reload(true)" title="当界面或素材未更新时点击清空缓存并立即重载">🔄 刷新最新版本</button>
+                <button class="btn btn-primary" style="flex:2; border-radius:18px; height:42px; font-size:14px;" onclick="closePetModal()">完成 🐾</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal: 灵兽初生命名 / 改名仪式 -->
+    <div class="modal-mask" id="modal-pet-naming" style="display:none; z-index:300;">
+        <div class="modal-box pet-naming-modal" style="max-width:400px; width:90vw; padding:24px; text-align:center; position:relative;">
+            <div class="naming-sparkle-decor" style="position:absolute; top:12px; right:16px; font-size:20px;">✨</div>
+            <div id="pet-naming-avatar" style="width:72px; height:72px; margin:0 auto 12px auto; display:flex; align-items:center; justify-content:center;"></div>
+            <h3 id="pet-naming-title" style="margin:0 0 6px 0; font-size:20px; color:var(--text-main);">🎉 伴学新伙伴诞生啦！</h3>
+            <p id="pet-naming-desc" style="font-size:13px; color:var(--text-sub); margin:0 0 16px 0; line-height:1.5;">快给这只可爱的纸灵生灵起个专属昵称吧~ 留空将使用默认名字哦！</p>
+            
+            <div style="position:relative; margin-bottom:18px;">
+                <input type="text" id="pet-naming-input" class="pet-name-input" maxlength="10" placeholder="例如：纸灵锦 / 泡泡 / 小金金" style="width:100%; box-sizing:border-box; padding:12px 16px; border-radius:16px; border:2px solid var(--border-color); font-size:16px; text-align:center; font-weight:bold; background:var(--bg-input); color:var(--text-main); outline:none; transition:all 0.2s;" onkeydown="if(event.key==='Enter') confirmPetNaming()">
+                <div style="font-size:11px; color:var(--text-sub); margin-top:6px;">建议 2~6 个字，支持中英文</div>
+            </div>
+
+            <div style="display:flex; gap:10px;">
+                <button type="button" class="btn btn-ghost" style="flex:1; border-radius:16px; height:42px; font-size:13px;" onclick="closePetNamingModal()">取消</button>
+                <button type="button" class="btn btn-primary" id="btn-pet-naming-confirm" style="flex:2; border-radius:16px; height:42px; font-size:14px; font-weight:bold;" onclick="confirmPetNaming()">确定命名 🐾</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal: 灵兽涅槃重生仪式 -->
+    <div class="modal-mask" id="modal-pet-rebirth" style="display:none; z-index:300;">
+        <div class="modal-box pet-rebirth-modal" style="max-width:440px; width:92vw; padding:24px; text-align:center; position:relative; overflow:hidden;">
+            <div class="rebirth-halo-bg"></div>
+            <div id="pet-rebirth-avatar-box" style="width:78px; height:78px; margin:0 auto 12px auto; display:flex; align-items:center; justify-content:center; position:relative;"></div>
+            <h3 style="margin:0 0 6px 0; font-size:21px; color:var(--text-main); display:flex; align-items:center; justify-content:center; gap:6px;">
+                <span>💫 涅槃重生 · 破茧再启程</span>
+            </h3>
+            
+            <div class="rebirth-summary-card" id="pet-rebirth-summary" style="background:var(--bg-input); border-radius:16px; padding:12px 14px; margin:14px 0; text-align:left; font-size:13px; line-height:1.6; border:1px solid var(--border-color);">
+                <!-- 动态填充当前灵兽等级与转生后荣誉星印预测 -->
+            </div>
+
+            <div style="margin-bottom:18px; text-align:left;">
+                <label for="pet-rebirth-name-input" style="font-size:12px; font-weight:bold; color:var(--text-main); margin-bottom:6px; display:block;">
+                    🏷️ 为重生的宝宝起个新名字 (留空沿用原名/默认名)：
+                </label>
+                <input type="text" id="pet-rebirth-name-input" class="pet-name-input" maxlength="10" placeholder="留空则沿用原名" style="width:100%; box-sizing:border-box; padding:10px 14px; border-radius:14px; border:2px solid var(--border-color); font-size:15px; text-align:center; font-weight:bold; background:var(--bg-card); color:var(--text-main); outline:none;" onkeydown="if(event.key==='Enter') confirmPetRebirth()">
+            </div>
+
+            <div style="display:flex; gap:10px;">
+                <button type="button" class="btn btn-ghost" style="flex:1; border-radius:16px; height:42px; font-size:13px;" onclick="closePetRebirthModal()">我再想想</button>
+                <button type="button" class="btn btn-primary btn-rebirth-confirm" id="btn-pet-rebirth-confirm" style="flex:2; border-radius:16px; height:42px; font-size:14px; font-weight:bold; background:linear-gradient(135deg, #FFB703, #FB8500); border:none; color:#FFF; box-shadow:0 4px 14px rgba(251,133,0,0.35);" onclick="confirmPetRebirth()">确定涅槃重生 🌟</button>
             </div>
         </div>
     </div>

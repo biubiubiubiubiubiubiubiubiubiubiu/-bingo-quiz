@@ -1,0 +1,185 @@
+{
+  "version": "1.0.0",
+  "basePath": "./assets/pets/",
+  "defaultMode": "sprite",
+  "species": {
+    "fish": {
+      "name": "小泡鱼",
+      "frameWidth": 128,
+      "frameHeight": 128,
+      "actions": {
+        "idle": {
+          "frames": 4,
+          "fps": 4,
+          "file": "fish/idle.svg",
+          "loop": true
+        },
+        "move": {
+          "frames": 6,
+          "fps": 8,
+          "file": "fish/move.svg",
+          "loop": true
+        },
+        "think": {
+          "frames": 4,
+          "fps": 3,
+          "file": "fish/think.svg",
+          "loop": true
+        },
+        "celebrate": {
+          "frames": 6,
+          "fps": 9,
+          "file": "fish/celebrate.svg",
+          "loop": true
+        },
+        "sleep": {
+          "frames": 3,
+          "fps": 2,
+          "file": "fish/sleep.svg",
+          "loop": true
+        },
+        "drag": {
+          "frames": 4,
+          "fps": 8,
+          "file": "fish/drag.svg",
+          "loop": true
+        }
+      }
+    },
+    "crab": {
+      "name": "机灵蟹",
+      "frameWidth": 128,
+      "frameHeight": 128,
+      "actions": {
+        "idle": {
+          "frames": 4,
+          "fps": 4,
+          "file": "crab/idle.svg",
+          "loop": true
+        },
+        "move": {
+          "frames": 6,
+          "fps": 8,
+          "file": "crab/move.svg",
+          "loop": true
+        },
+        "think": {
+          "frames": 4,
+          "fps": 3,
+          "file": "crab/think.svg",
+          "loop": true
+        },
+        "celebrate": {
+          "frames": 6,
+          "fps": 9,
+          "file": "crab/celebrate.svg",
+          "loop": true
+        },
+        "sleep": {
+          "frames": 3,
+          "fps": 2,
+          "file": "crab/sleep.svg",
+          "loop": true
+        },
+        "drag": {
+          "frames": 4,
+          "fps": 8,
+          "file": "crab/drag.svg",
+          "loop": true
+        },
+        "climb": {
+          "frames": 6,
+          "fps": 6,
+          "file": "crab/climb.svg",
+          "loop": true
+        }
+      }
+    },
+    "shrimp": {
+      "name": "跳跳虾",
+      "frameWidth": 128,
+      "frameHeight": 128,
+      "actions": {
+        "idle": {
+          "frames": 4,
+          "fps": 4,
+          "file": "shrimp/idle.svg",
+          "loop": true
+        },
+        "move": {
+          "frames": 6,
+          "fps": 9,
+          "file": "shrimp/move.svg",
+          "loop": true
+        },
+        "think": {
+          "frames": 4,
+          "fps": 3,
+          "file": "shrimp/think.svg",
+          "loop": true
+        },
+        "celebrate": {
+          "frames": 6,
+          "fps": 9,
+          "file": "shrimp/celebrate.svg",
+          "loop": true
+        },
+        "sleep": {
+          "frames": 3,
+          "fps": 2,
+          "file": "shrimp/sleep.svg",
+          "loop": true
+        },
+        "drag": {
+          "frames": 4,
+          "fps": 8,
+          "file": "shrimp/drag.svg",
+          "loop": true
+        }
+      }
+    },
+    "octopus": {
+      "name": "皮皮章",
+      "frameWidth": 128,
+      "frameHeight": 128,
+      "actions": {
+        "idle": {
+          "frames": 4,
+          "fps": 4,
+          "file": "octopus/idle.svg",
+          "loop": true
+        },
+        "move": {
+          "frames": 6,
+          "fps": 7,
+          "file": "octopus/move.svg",
+          "loop": true
+        },
+        "think": {
+          "frames": 4,
+          "fps": 3,
+          "file": "octopus/think.svg",
+          "loop": true
+        },
+        "celebrate": {
+          "frames": 6,
+          "fps": 9,
+          "file": "octopus/celebrate.svg",
+          "loop": true
+        },
+        "sleep": {
+          "frames": 3,
+          "fps": 2,
+          "file": "octopus/sleep.svg",
+          "loop": true
+        },
+        "drag": {
+          "frames": 4,
+          "fps": 8,
+          "file": "octopus/drag.svg",
+          "loop": true
+        }
+      }
+    }
+  }
+}

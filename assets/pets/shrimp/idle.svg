@@ -1,0 +1,76 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 128" width="512" height="128">
+  <defs>
+    
+    <linearGradient id="shrimpGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#FF9FF3"/>
+      <stop offset="50%" stop-color="#FECA57"/>
+      <stop offset="100%" stop-color="#FF6B6B"/>
+    </linearGradient>
+
+  </defs>
+  <g id="frame-0" transform="translate(0, 0)"><g stroke="#FF9FF3" stroke-width="2.2" stroke-linecap="round" fill="none">
+      <path d="M 78 48.0 C 92 32.0 112 28.0 122 30.0"/>
+      <path d="M 76 44.0 C 88 26.0 106 18.0 118 16.0"/>
+    </g><g transform="translate(32, 90.0) rotate(0.0)">
+      <path d="M 0 0 C -12 6, -18 16, -16 22 C -8 18, 0 10, 0 0 Z" fill="#FECA57"/>
+      <path d="M 0 0 C -8 12, -10 24, -4 26 C 2 20, 4 10, 0 0 Z" fill="#FF6B6B"/>
+      <path d="M 0 0 C 4 10, 6 22, 12 20 C 10 12, 4 6, 0 0 Z" fill="#FF9FF3"/>
+    </g><g stroke="#FECA57" stroke-width="2" stroke-linecap="round">
+      <line x1="70" y1="68.0" x2="66" y2="76.0"/>
+      <line x1="60" y1="76.0" x2="56" y2="84.0"/>
+      <line x1="50" y1="84.0" x2="46" y2="90.0"/>
+    </g><ellipse cx="40" cy="84.0" rx="12" ry="10" fill="url(#shrimpGrad)"/><ellipse cx="52" cy="74.0" rx="14" ry="12" fill="url(#shrimpGrad)"/><ellipse cx="64" cy="64.0" rx="15" ry="13" fill="url(#shrimpGrad)"/><ellipse cx="76" cy="56.0" rx="16" ry="14" fill="url(#shrimpGrad)"/>
+          <circle cx="82" cy="52.0" r="7" fill="#FFF"/>
+          <circle cx="83" cy="52.0" r="4" fill="#222F3E"/>
+          <circle cx="84" cy="50.0" r="1.8" fill="#FFF"/>
+        <path d="M 86 59.0 Q 89 61.0 86 63.0" stroke="#222F3E" stroke-width="2" stroke-linecap="round" fill="none"/><circle cx="79" cy="62.0" r="4" fill="#FF6B6B" opacity="0.6"/></g>
+<g id="frame-1" transform="translate(128, 0)"><g stroke="#FF9FF3" stroke-width="2.2" stroke-linecap="round" fill="none">
+      <path d="M 78 51.0 C 92 41.0 112 37.0 122 39.0"/>
+      <path d="M 76 47.0 C 88 36.2 106 28.2 118 26.2"/>
+    </g><g transform="translate(32, 93.0) rotate(8.0)">
+      <path d="M 0 0 C -12 6, -18 16, -16 22 C -8 18, 0 10, 0 0 Z" fill="#FECA57"/>
+      <path d="M 0 0 C -8 12, -10 24, -4 26 C 2 20, 4 10, 0 0 Z" fill="#FF6B6B"/>
+      <path d="M 0 0 C 4 10, 6 22, 12 20 C 10 12, 4 6, 0 0 Z" fill="#FF9FF3"/>
+    </g><g stroke="#FECA57" stroke-width="2" stroke-linecap="round">
+      <line x1="70" y1="71.0" x2="66" y2="79.0"/>
+      <line x1="60" y1="79.0" x2="56" y2="87.0"/>
+      <line x1="50" y1="87.0" x2="46" y2="93.0"/>
+    </g><ellipse cx="40" cy="87.0" rx="12" ry="10" fill="url(#shrimpGrad)"/><ellipse cx="52" cy="77.0" rx="14" ry="12" fill="url(#shrimpGrad)"/><ellipse cx="64" cy="67.0" rx="15" ry="13" fill="url(#shrimpGrad)"/><ellipse cx="76" cy="59.0" rx="16" ry="14" fill="url(#shrimpGrad)"/>
+          <circle cx="82" cy="55.0" r="7" fill="#FFF"/>
+          <circle cx="83" cy="55.0" r="4" fill="#222F3E"/>
+          <circle cx="84" cy="53.0" r="1.8" fill="#FFF"/>
+        <path d="M 86 62.0 Q 89 64.0 86 66.0" stroke="#222F3E" stroke-width="2" stroke-linecap="round" fill="none"/><circle cx="79" cy="65.0" r="4" fill="#FF6B6B" opacity="0.6"/></g>
+<g id="frame-2" transform="translate(256, 0)"><g stroke="#FF9FF3" stroke-width="2.2" stroke-linecap="round" fill="none">
+      <path d="M 78 48.0 C 92 32.0 112 28.0 122 30.0"/>
+      <path d="M 76 44.0 C 88 26.0 106 18.0 118 16.0"/>
+    </g><g transform="translate(32, 90.0) rotate(9.797174393178826e-16)">
+      <path d="M 0 0 C -12 6, -18 16, -16 22 C -8 18, 0 10, 0 0 Z" fill="#FECA57"/>
+      <path d="M 0 0 C -8 12, -10 24, -4 26 C 2 20, 4 10, 0 0 Z" fill="#FF6B6B"/>
+      <path d="M 0 0 C 4 10, 6 22, 12 20 C 10 12, 4 6, 0 0 Z" fill="#FF9FF3"/>
+    </g><g stroke="#FECA57" stroke-width="2" stroke-linecap="round">
+      <line x1="70" y1="68.0" x2="66" y2="76.0"/>
+      <line x1="60" y1="76.0" x2="56" y2="84.0"/>
+      <line x1="50" y1="84.0" x2="46" y2="90.0"/>
+    </g><ellipse cx="40" cy="84.0" rx="12" ry="10" fill="url(#shrimpGrad)"/><ellipse cx="52" cy="74.0" rx="14" ry="12" fill="url(#shrimpGrad)"/><ellipse cx="64" cy="64.0" rx="15" ry="13" fill="url(#shrimpGrad)"/><ellipse cx="76" cy="56.0" rx="16" ry="14" fill="url(#shrimpGrad)"/>
+          <circle cx="82" cy="52.0" r="7" fill="#FFF"/>
+          <circle cx="83" cy="52.0" r="4" fill="#222F3E"/>
+          <circle cx="84" cy="50.0" r="1.8" fill="#FFF"/>
+        <path d="M 86 59.0 Q 89 61.0 86 63.0" stroke="#222F3E" stroke-width="2" stroke-linecap="round" fill="none"/><circle cx="79" cy="62.0" r="4" fill="#FF6B6B" opacity="0.6"/></g>
+<g id="frame-3" transform="translate(384, 0)"><g stroke="#FF9FF3" stroke-width="2.2" stroke-linecap="round" fill="none">
+      <path d="M 78 45.0 C 92 23.0 112 19.0 122 21.0"/>
+      <path d="M 76 41.0 C 88 15.8 106 7.800000000000001 118 5.800000000000001"/>
+    </g><g transform="translate(32, 87.0) rotate(-8.0)">
+      <path d="M 0 0 C -12 6, -18 16, -16 22 C -8 18, 0 10, 0 0 Z" fill="#FECA57"/>
+      <path d="M 0 0 C -8 12, -10 24, -4 26 C 2 20, 4 10, 0 0 Z" fill="#FF6B6B"/>
+      <path d="M 0 0 C 4 10, 6 22, 12 20 C 10 12, 4 6, 0 0 Z" fill="#FF9FF3"/>
+    </g><g stroke="#FECA57" stroke-width="2" stroke-linecap="round">
+      <line x1="70" y1="65.0" x2="66" y2="73.0"/>
+      <line x1="60" y1="73.0" x2="56" y2="81.0"/>
+      <line x1="50" y1="81.0" x2="46" y2="87.0"/>
+    </g><ellipse cx="40" cy="81.0" rx="12" ry="10" fill="url(#shrimpGrad)"/><ellipse cx="52" cy="71.0" rx="14" ry="12" fill="url(#shrimpGrad)"/><ellipse cx="64" cy="61.0" rx="15" ry="13" fill="url(#shrimpGrad)"/><ellipse cx="76" cy="53.0" rx="16" ry="14" fill="url(#shrimpGrad)"/>
+          <circle cx="82" cy="49.0" r="7" fill="#FFF"/>
+          <circle cx="83" cy="49.0" r="4" fill="#222F3E"/>
+          <circle cx="84" cy="47.0" r="1.8" fill="#FFF"/>
+        <path d="M 86 56.0 Q 89 58.0 86 60.0" stroke="#222F3E" stroke-width="2" stroke-linecap="round" fill="none"/><circle cx="79" cy="59.0" r="4" fill="#FF6B6B" opacity="0.6"/></g>
+
+</svg>

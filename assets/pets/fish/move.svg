@@ -1,0 +1,122 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 768 128" width="768" height="128">
+  <defs>
+    
+    <linearGradient id="fishGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#48CAE4"/>
+      <stop offset="60%" stop-color="#0096C7"/>
+      <stop offset="100%" stop-color="#023E8A"/>
+    </linearGradient>
+    <linearGradient id="fishFin" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#FFD166"/>
+      <stop offset="100%" stop-color="#F77F00"/>
+    </linearGradient>
+    <filter id="glow" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="2" result="blur"/>
+      <feComposite in="SourceGraphic" in2="blur" operator="over"/>
+    </filter>
+
+  </defs>
+  <g id="frame-0" transform="translate(0, 0)"><g transform="translate(36, 64.0) rotate(0.0)">
+      <path d="M 0 0 C -18 -22, -30 -16, -24 0 C -30 16, -18 22, 0 0 Z" fill="url(#fishFin)" opacity="0.95"/>
+      <path d="M 0 0 C -14 -12, -22 -8, -18 0 C -22 8, -14 12, 0 0 Z" fill="#FFEAA7" opacity="0.6"/>
+    </g><g transform="translate(64, 41.0) rotate(-9.0)">
+      <path d="M -12 0 C -4 -16, 14 -14, 16 0 Z" fill="url(#fishFin)" opacity="0.9"/>
+    </g>
+      <ellipse cx="64" cy="64.0" rx="32" ry="25" fill="url(#fishGrad)"/>
+      <path d="M 52 70.0 C 68 87.0, 82 85.0, 86 74.0 C 82 81.0, 68 83.0, 52 70.0 Z" fill="#FFEAA7" opacity="0.4"/>
+      <path d="M 48 54.0 C 64 46.0, 80 48.0, 88 58.0" stroke="#FFF" stroke-width="2.5" stroke-linecap="round" fill="none" opacity="0.4"/>
+    <circle cx="78" cy="73.0" r="5.5" fill="#FF70A6" opacity="0.75"/><g transform="translate(60, 70.0) rotate(-15.0)">
+      <ellipse cx="6" cy="4" rx="10" ry="6" fill="url(#fishFin)" opacity="0.95"/>
+    </g>
+          <circle cx="82" cy="60.0" r="9" fill="#FFF"/>
+          <circle cx="82" cy="60.0" r="5" fill="#03045E"/>
+          <circle cx="83.0" cy="58.0" r="2" fill="#FFF"/>
+          <circle cx="80.0" cy="62.0" r="1" fill="#FFF"/>
+        <path d="M 91 68.0 Q 95 70.0 91 72.0" stroke="#03045E" stroke-width="2.5" stroke-linecap="round" fill="none"/><path d="M 24 64.0 Q 14 60.0 6 64.0" stroke="#80E5FF" stroke-width="2" stroke-linecap="round" opacity="0.3" fill="none"/></g>
+<g id="frame-1" transform="translate(128, 0)"><g transform="translate(36, 67.46410161513775) rotate(15.588457268119894)">
+      <path d="M 0 0 C -18 -22, -30 -16, -24 0 C -30 16, -18 22, 0 0 Z" fill="url(#fishFin)" opacity="0.95"/>
+      <path d="M 0 0 C -14 -12, -22 -8, -18 0 C -22 8, -14 12, 0 0 Z" fill="#FFEAA7" opacity="0.6"/>
+    </g><g transform="translate(64, 44.46410161513775) rotate(-4.500000000000001)">
+      <path d="M -12 0 C -4 -16, 14 -14, 16 0 Z" fill="url(#fishFin)" opacity="0.9"/>
+    </g>
+      <ellipse cx="64" cy="67.46410161513775" rx="32" ry="25" fill="url(#fishGrad)"/>
+      <path d="M 52 73.46410161513775 C 68 90.46410161513775, 82 88.46410161513775, 86 77.46410161513775 C 82 84.46410161513775, 68 86.46410161513775, 52 73.46410161513775 Z" fill="#FFEAA7" opacity="0.4"/>
+      <path d="M 48 57.46410161513775 C 64 49.46410161513775, 80 51.46410161513775, 88 61.46410161513775" stroke="#FFF" stroke-width="2.5" stroke-linecap="round" fill="none" opacity="0.4"/>
+    <circle cx="78" cy="76.46410161513775" r="5.5" fill="#FF70A6" opacity="0.75"/><g transform="translate(60, 73.46410161513775) rotate(-7.500000000000002)">
+      <ellipse cx="6" cy="4" rx="10" ry="6" fill="url(#fishFin)" opacity="0.95"/>
+    </g>
+          <circle cx="82" cy="63.46410161513775" r="9" fill="#FFF"/>
+          <circle cx="82" cy="63.46410161513775" r="5" fill="#03045E"/>
+          <circle cx="83.0" cy="61.46410161513775" r="2" fill="#FFF"/>
+          <circle cx="80.0" cy="65.46410161513775" r="1" fill="#FFF"/>
+        <path d="M 91 71.46410161513775 Q 95 73.46410161513775 91 75.46410161513775" stroke="#03045E" stroke-width="2.5" stroke-linecap="round" fill="none"/><path d="M 24 67.46410161513775 Q 14 63.46410161513775 6 67.46410161513775" stroke="#80E5FF" stroke-width="2" stroke-linecap="round" opacity="0.5598076211353316" fill="none"/></g>
+<g id="frame-2" transform="translate(256, 0)"><g transform="translate(36, 67.46410161513775) rotate(15.588457268119896)">
+      <path d="M 0 0 C -18 -22, -30 -16, -24 0 C -30 16, -18 22, 0 0 Z" fill="url(#fishFin)" opacity="0.95"/>
+      <path d="M 0 0 C -14 -12, -22 -8, -18 0 C -22 8, -14 12, 0 0 Z" fill="#FFEAA7" opacity="0.6"/>
+    </g><g transform="translate(64, 44.46410161513775) rotate(4.499999999999997)">
+      <path d="M -12 0 C -4 -16, 14 -14, 16 0 Z" fill="url(#fishFin)" opacity="0.9"/>
+    </g>
+      <ellipse cx="64" cy="67.46410161513775" rx="32" ry="25" fill="url(#fishGrad)"/>
+      <path d="M 52 73.46410161513775 C 68 90.46410161513775, 82 88.46410161513775, 86 77.46410161513775 C 82 84.46410161513775, 68 86.46410161513775, 52 73.46410161513775 Z" fill="#FFEAA7" opacity="0.4"/>
+      <path d="M 48 57.46410161513775 C 64 49.46410161513775, 80 51.46410161513775, 88 61.46410161513775" stroke="#FFF" stroke-width="2.5" stroke-linecap="round" fill="none" opacity="0.4"/>
+    <circle cx="78" cy="76.46410161513775" r="5.5" fill="#FF70A6" opacity="0.75"/><g transform="translate(60, 73.46410161513775) rotate(7.4999999999999964)">
+      <ellipse cx="6" cy="4" rx="10" ry="6" fill="url(#fishFin)" opacity="0.95"/>
+    </g>
+          <circle cx="82" cy="63.46410161513775" r="9" fill="#FFF"/>
+          <circle cx="82" cy="63.46410161513775" r="5" fill="#03045E"/>
+          <circle cx="83.0" cy="61.46410161513775" r="2" fill="#FFF"/>
+          <circle cx="80.0" cy="65.46410161513775" r="1" fill="#FFF"/>
+        <path d="M 91 71.46410161513775 Q 95 73.46410161513775 91 75.46410161513775" stroke="#03045E" stroke-width="2.5" stroke-linecap="round" fill="none"/><path d="M 24 67.46410161513775 Q 14 63.46410161513775 6 67.46410161513775" stroke="#80E5FF" stroke-width="2" stroke-linecap="round" opacity="0.5598076211353316" fill="none"/></g>
+<g id="frame-3" transform="translate(384, 0)"><g transform="translate(36, 64.0) rotate(2.204364238465236e-15)">
+      <path d="M 0 0 C -18 -22, -30 -16, -24 0 C -30 16, -18 22, 0 0 Z" fill="url(#fishFin)" opacity="0.95"/>
+      <path d="M 0 0 C -14 -12, -22 -8, -18 0 C -22 8, -14 12, 0 0 Z" fill="#FFEAA7" opacity="0.6"/>
+    </g><g transform="translate(64, 41.0) rotate(9.0)">
+      <path d="M -12 0 C -4 -16, 14 -14, 16 0 Z" fill="url(#fishFin)" opacity="0.9"/>
+    </g>
+      <ellipse cx="64" cy="64.0" rx="32" ry="25" fill="url(#fishGrad)"/>
+      <path d="M 52 70.0 C 68 87.0, 82 85.0, 86 74.0 C 82 81.0, 68 83.0, 52 70.0 Z" fill="#FFEAA7" opacity="0.4"/>
+      <path d="M 48 54.0 C 64 46.0, 80 48.0, 88 58.0" stroke="#FFF" stroke-width="2.5" stroke-linecap="round" fill="none" opacity="0.4"/>
+    <circle cx="78" cy="73.0" r="5.5" fill="#FF70A6" opacity="0.75"/><g transform="translate(60, 70.0) rotate(15.0)">
+      <ellipse cx="6" cy="4" rx="10" ry="6" fill="url(#fishFin)" opacity="0.95"/>
+    </g>
+          <circle cx="82" cy="60.0" r="9" fill="#FFF"/>
+          <circle cx="82" cy="60.0" r="5" fill="#03045E"/>
+          <circle cx="83.0" cy="58.0" r="2" fill="#FFF"/>
+          <circle cx="80.0" cy="62.0" r="1" fill="#FFF"/>
+        <path d="M 91 68.0 Q 95 70.0 91 72.0" stroke="#03045E" stroke-width="2.5" stroke-linecap="round" fill="none"/><path d="M 24 64.0 Q 14 60.0 6 64.0" stroke="#80E5FF" stroke-width="2" stroke-linecap="round" opacity="0.30000000000000004" fill="none"/></g>
+<g id="frame-4" transform="translate(512, 0)"><g transform="translate(36, 60.53589838486224) rotate(-15.588457268119893)">
+      <path d="M 0 0 C -18 -22, -30 -16, -24 0 C -30 16, -18 22, 0 0 Z" fill="url(#fishFin)" opacity="0.95"/>
+      <path d="M 0 0 C -14 -12, -22 -8, -18 0 C -22 8, -14 12, 0 0 Z" fill="#FFEAA7" opacity="0.6"/>
+    </g><g transform="translate(64, 37.53589838486224) rotate(4.500000000000004)">
+      <path d="M -12 0 C -4 -16, 14 -14, 16 0 Z" fill="url(#fishFin)" opacity="0.9"/>
+    </g>
+      <ellipse cx="64" cy="60.53589838486224" rx="32" ry="25" fill="url(#fishGrad)"/>
+      <path d="M 52 66.53589838486224 C 68 83.53589838486224, 82 81.53589838486224, 86 70.53589838486224 C 82 77.53589838486224, 68 79.53589838486224, 52 66.53589838486224 Z" fill="#FFEAA7" opacity="0.4"/>
+      <path d="M 48 50.53589838486224 C 64 42.53589838486224, 80 44.53589838486224, 88 54.53589838486224" stroke="#FFF" stroke-width="2.5" stroke-linecap="round" fill="none" opacity="0.4"/>
+    <circle cx="78" cy="69.53589838486224" r="5.5" fill="#FF70A6" opacity="0.75"/><g transform="translate(60, 66.53589838486224) rotate(7.500000000000007)">
+      <ellipse cx="6" cy="4" rx="10" ry="6" fill="url(#fishFin)" opacity="0.95"/>
+    </g>
+          <circle cx="82" cy="56.53589838486224" r="9" fill="#FFF"/>
+          <circle cx="82" cy="56.53589838486224" r="5" fill="#03045E"/>
+          <circle cx="83.0" cy="54.53589838486224" r="2" fill="#FFF"/>
+          <circle cx="80.0" cy="58.53589838486224" r="1" fill="#FFF"/>
+        <path d="M 91 64.53589838486224 Q 95 66.53589838486224 91 68.53589838486224" stroke="#03045E" stroke-width="2.5" stroke-linecap="round" fill="none"/><path d="M 24 60.53589838486224 Q 14 56.53589838486224 6 60.53589838486224" stroke="#80E5FF" stroke-width="2" stroke-linecap="round" opacity="0.04019237886466848" fill="none"/></g>
+<g id="frame-5" transform="translate(640, 0)"><g transform="translate(36, 60.53589838486224) rotate(-15.588457268119903)">
+      <path d="M 0 0 C -18 -22, -30 -16, -24 0 C -30 16, -18 22, 0 0 Z" fill="url(#fishFin)" opacity="0.95"/>
+      <path d="M 0 0 C -14 -12, -22 -8, -18 0 C -22 8, -14 12, 0 0 Z" fill="#FFEAA7" opacity="0.6"/>
+    </g><g transform="translate(64, 37.53589838486224) rotate(-4.499999999999994)">
+      <path d="M -12 0 C -4 -16, 14 -14, 16 0 Z" fill="url(#fishFin)" opacity="0.9"/>
+    </g>
+      <ellipse cx="64" cy="60.53589838486224" rx="32" ry="25" fill="url(#fishGrad)"/>
+      <path d="M 52 66.53589838486224 C 68 83.53589838486224, 82 81.53589838486224, 86 70.53589838486224 C 82 77.53589838486224, 68 79.53589838486224, 52 66.53589838486224 Z" fill="#FFEAA7" opacity="0.4"/>
+      <path d="M 48 50.53589838486224 C 64 42.53589838486224, 80 44.53589838486224, 88 54.53589838486224" stroke="#FFF" stroke-width="2.5" stroke-linecap="round" fill="none" opacity="0.4"/>
+    <circle cx="78" cy="69.53589838486224" r="5.5" fill="#FF70A6" opacity="0.75"/><g transform="translate(60, 66.53589838486224) rotate(-7.49999999999999)">
+      <ellipse cx="6" cy="4" rx="10" ry="6" fill="url(#fishFin)" opacity="0.95"/>
+    </g>
+          <circle cx="82" cy="56.53589838486224" r="9" fill="#FFF"/>
+          <circle cx="82" cy="56.53589838486224" r="5" fill="#03045E"/>
+          <circle cx="83.0" cy="54.53589838486224" r="2" fill="#FFF"/>
+          <circle cx="80.0" cy="58.53589838486224" r="1" fill="#FFF"/>
+        <path d="M 91 64.53589838486224 Q 95 66.53589838486224 91 68.53589838486224" stroke="#03045E" stroke-width="2.5" stroke-linecap="round" fill="none"/><path d="M 24 60.53589838486224 Q 14 56.53589838486224 6 60.53589838486224" stroke="#80E5FF" stroke-width="2" stroke-linecap="round" opacity="0.04019237886466831" fill="none"/></g>
+
+</svg>
