@@ -13,6 +13,9 @@ const PetEngine = (function() {
 
     // --- 1. 纯矢量程序化 SVG 渲染库 (PET VECTOR RENDERER) ---
     const PetVector = {
+        // 全局实例计数器，保证各 SVG 渐变与滤镜 ID 绝对唯一，彻底杜绝隐藏视图造成的 ID 遮蔽
+        uidCounter: 0,
+
         // 当前全局光标视线方向 (归一化 -1 到 1)
         gaze: { x: 0, y: 0 },
         isBlinking: false,
@@ -20,12 +23,39 @@ const PetEngine = (function() {
         speakingPhase: 0,
         speakingInterval: null,
 
+        // 各物种五阶实体底色表 (Solid Base Color Palette - 保证极端渲染下绝对不镂空)
+        BASE_COLORS: {
+            fish: ['#00B4D8', '#0077B6', '#E76F51', '#D62828', '#03045E'],
+            crab: ['#FF4D6D', '#C92A2A', '#D4A373', '#0D1B2A', '#5A189A'],
+            shrimp: ['#FF85A1', '#FB8500', '#C1121F', '#0077B6', '#9D0208'],
+            octopus: ['#7B2CBF', '#007200', '#3C096C', '#03045E', '#3D0066']
+        },
+
+        // 各物种五阶高光渐变色表
+        GRAD_STOPS: {
+            fish: {
+                start: ['#72EFDD', '#48CAE4', '#FFD166', '#FF9F1C', '#00F5D4'],
+                end: ['#00B4D8', '#0077B6', '#E76F51', '#D62828', '#03045E']
+            },
+            crab: {
+                start: ['#FF85A1', '#FF6B6B', '#FFD166', '#00F5D4', '#E0AAFF'],
+                end: ['#FF4D6D', '#C92A2A', '#D4A373', '#0D1B2A', '#5A189A']
+            },
+            shrimp: {
+                start: ['#FFB4A2', '#FFB703', '#FF4D6D', '#FFEA00', '#FF758F'],
+                end: ['#E5989B', '#FB8500', '#C1121F', '#0077B6', '#9D0208']
+            },
+            octopus: {
+                start: ['#C77DFF', '#70E000', '#9D4EDD', '#48CAE4', '#FFD166'],
+                end: ['#7B2CBF', '#007200', '#3C096C', '#03045E', '#3D0066']
+            }
+        },
+
         init() {
             // 监听全局指针移动，用于眼睛平滑视线跟随
             window.addEventListener('pointermove', (e) => {
                 const w = window.innerWidth || 800;
                 const h = window.innerHeight || 600;
-                // 计算相对屏幕中心的视线角度
                 this.gaze.x = Math.max(-1, Math.min(1, ((e.clientX / w) - 0.5) * 2.2));
                 this.gaze.y = Math.max(-1, Math.min(1, ((e.clientY / h) - 0.5) * 2.2));
                 this.schedulePupilUpdate();
@@ -95,7 +125,6 @@ const PetEngine = (function() {
         updateLiveSvgMouth() {
             const mouths = document.querySelectorAll('.pet-vector-mouth');
             mouths.forEach(m => {
-                const species = m.getAttribute('data-species') || 'fish';
                 const openD = m.getAttribute('data-open-d') || '';
                 const closeD = m.getAttribute('data-close-d') || '';
                 if (this.speakingPhase > 0 && openD) {
@@ -118,20 +147,27 @@ const PetEngine = (function() {
             const w = opts.width || 68;
             const h = opts.height || 68;
 
+            // 分配本实例专属唯一自增 UID，彻底规避跨组件 ID 冲突
+            const uid = ++this.uidCounter;
+            const gradId = `pet-grad-${species}-${s}-${uid}`;
+            const filterId = `pet-glow-${species}-${uid}`;
+            const baseColor = (this.BASE_COLORS[species] && this.BASE_COLORS[species][s]) || '#00B4D8';
+            const gradConfig = (this.GRAD_STOPS[species]) || this.GRAD_STOPS.fish;
+
             let content = '';
             switch (species) {
                 case 'crab':
-                    content = this.buildCrabSvg(s, emotion);
+                    content = this.buildCrabSvg(s, emotion, gradId, filterId, baseColor);
                     break;
                 case 'shrimp':
-                    content = this.buildShrimpSvg(s, emotion);
+                    content = this.buildShrimpSvg(s, emotion, gradId, filterId, baseColor);
                     break;
                 case 'octopus':
-                    content = this.buildOctopusSvg(s, emotion);
+                    content = this.buildOctopusSvg(s, emotion, gradId, filterId, baseColor);
                     break;
                 case 'fish':
                 default:
-                    content = this.buildFishSvg(s, emotion);
+                    content = this.buildFishSvg(s, emotion, gradId, filterId, baseColor);
                     break;
             }
 
@@ -140,40 +176,28 @@ const PetEngine = (function() {
                  viewBox="0 0 100 100" width="${w}" height="${h}" 
                  xmlns="http://www.w3.org/2000/svg" style="display:block; overflow:visible;">
                 <defs>
-                    <!-- 通用渐变与发光滤镜 -->
-                    <filter id="pet-glow-${species}" x="-20%" y="-20%" width="140%" height="140%">
+                    <!-- 实例私有发光滤镜 -->
+                    <filter id="${filterId}" x="-20%" y="-20%" width="140%" height="140%">
                         <feGaussianBlur stdDeviation="3.5" result="blur" />
                         <feComposite in="SourceGraphic" in2="blur" operator="over" />
                     </filter>
-                    <radialGradient id="fish-body-grad-${s}" cx="40%" cy="35%" r="65%">
-                        <stop offset="0%" stop-color="${['#72EFDD', '#48CAE4', '#FFD166', '#FF9F1C', '#00F5D4'][s]}" />
-                        <stop offset="100%" stop-color="${['#00B4D8', '#0077B6', '#E76F51', '#D62828', '#03045E'][s]}" />
-                    </radialGradient>
-                    <radialGradient id="crab-body-grad-${s}" cx="40%" cy="30%" r="65%">
-                        <stop offset="0%" stop-color="${['#FF85A1', '#FF6B6B', '#FFD166', '#00F5D4', '#E0AAFF'][s]}" />
-                        <stop offset="100%" stop-color="${['#FF4D6D', '#C92A2A', '#D4A373', '#0D1B2A', '#5A189A'][s]}" />
-                    </radialGradient>
-                    <radialGradient id="shrimp-body-grad-${s}" cx="45%" cy="30%" r="65%">
-                        <stop offset="0%" stop-color="${['#FFB4A2', '#FFB703', '#FF4D6D', '#FFEA00', '#FF758F'][s]}" />
-                        <stop offset="100%" stop-color="${['#E5989B', '#FB8500', '#C1121F', '#0077B6', '#9D0208'][s]}" />
-                    </radialGradient>
-                    <radialGradient id="octo-body-grad-${s}" cx="40%" cy="30%" r="65%">
-                        <stop offset="0%" stop-color="${['#C77DFF', '#70E000', '#9D4EDD', '#48CAE4', '#FFD166'][s]}" />
-                        <stop offset="100%" stop-color="${['#7B2CBF', '#007200', '#3C096C', '#03045E', '#3D0066'][s]}" />
+                    <!-- 实例私有光泽径向渐变 -->
+                    <radialGradient id="${gradId}" cx="40%" cy="35%" r="65%">
+                        <stop offset="0%" stop-color="${gradConfig.start[s]}" />
+                        <stop offset="100%" stop-color="${gradConfig.end[s]}" />
                     </radialGradient>
                 </defs>
                 ${content}
             </svg>`.trim();
         },
 
-        // --- 1.1 小泡鱼矢量组件 (FISH: 萌宝泡泡鱼 -> 彩纹热带鱼 -> 刺刺河豚霸 -> 幻光锦鲤仙 -> 九霄海龙神) ---
-        buildFishSvg(stage, emotion) {
+        // --- 1.1 小泡鱼矢量组件 (FISH) ---
+        buildFishSvg(stage, emotion, gradId, filterId, baseColor) {
             const isSleeping = emotion === 'sleep';
             const isThinking = emotion === 'thinking';
             const isComfort = emotion === 'comfort';
             const isCelebrate = emotion === 'celebrate';
 
-            // 附肢与尾鳍
             let extraDecor = '';
             if (stage === 1) { // 彩纹
                 extraDecor = `<path d="M46 32 C54 44 54 58 46 70" stroke="#FFF" stroke-width="3" stroke-linecap="round" fill="none" opacity="0.75" />
@@ -192,27 +216,29 @@ const PetEngine = (function() {
                 `;
             } else if (stage === 4) { // 九霄海龙神龙角与灵珠
                 extraDecor = `
-                    <!-- 金色龙角 -->
                     <path d="M40 25 C36 12 28 8 20 6 C24 16 32 20 38 27 Z" fill="#FFD166" />
                     <path d="M52 23 C56 10 64 6 72 4 C68 14 60 18 54 25 Z" fill="#FFD166" />
-                    <!-- 龙须 -->
                     <path d="M74 56 C84 62 88 52 94 48" stroke="#FFD166" stroke-width="2.5" fill="none" stroke-linecap="round" />
-                    <!-- 灵珠 -->
-                    <circle cx="86" cy="30" r="6" fill="#00F5D4" filter="url(#pet-glow-fish)" />
+                    <circle cx="86" cy="30" r="6" fill="#00F5D4" filter="url(#${filterId})" />
                 `;
             }
 
-            // 尾巴摆动
+            // 尾巴摆动 (双层：底层纯色基色 + 顶层独立渐变)
             const tail = `
                 <g class="pet-fin-wag">
-                    <path d="M25 50 C12 34 2 38 6 50 C2 62 12 66 25 50 Z" fill="url(#fish-body-grad-${stage})" opacity="0.9" />
-                    <path d="M45 24 C55 12 68 18 64 26 Z" fill="url(#fish-body-grad-${stage})" opacity="0.8" />
+                    <path d="M25 50 C12 34 2 38 6 50 C2 62 12 66 25 50 Z" fill="${baseColor}" opacity="0.9" />
+                    <path d="M25 50 C12 34 2 38 6 50 C2 62 12 66 25 50 Z" fill="url(#${gradId})" opacity="0.9" />
+                    <path d="M45 24 C55 12 68 18 64 26 Z" fill="${baseColor}" opacity="0.8" />
+                    <path d="M45 24 C55 12 68 18 64 26 Z" fill="url(#${gradId})" opacity="0.8" />
                 </g>
             `;
 
-            // 鱼身主体
+            // 鱼身主体 (双层：底层纯色基色 + 顶层独立渐变)
+            const rx = stage === 2 ? 34 : 32;
+            const ry = stage === 2 ? 34 : 27;
             const body = `
-                <ellipse cx="50" cy="50" rx="${stage === 2 ? 34 : 32}" ry="${stage === 2 ? 34 : 27}" fill="url(#fish-body-grad-${stage})" />
+                <ellipse cx="50" cy="50" rx="${rx}" ry="${ry}" fill="${baseColor}" />
+                <ellipse cx="50" cy="50" rx="${rx}" ry="${ry}" fill="url(#${gradId})" />
                 <path d="M35 34 C44 30 58 30 65 35" stroke="#FFF" stroke-width="2" stroke-linecap="round" fill="none" opacity="0.45" />
             `;
 
@@ -227,11 +253,10 @@ const PetEngine = (function() {
                 <circle cx="67" cy="42" r="9" fill="#FFF" />
                 <circle cx="68" cy="42" r="5" fill="#1D3557" class="pet-vector-pupil" data-cx="68" data-cy="42" />
                 <circle cx="70" cy="40" r="2" fill="#FFF" />
-                <!-- 闭眼覆盖层 -->
                 <path d="M58 42 Q 67 47 76 42" stroke="#1D3557" stroke-width="3" fill="none" stroke-linecap="round" class="pet-vector-eyelid" style="opacity:0; transition:opacity 0.08s;" />
             `;
 
-            // 嘴巴 (支持张合同步)
+            // 嘴巴
             let mouthPath = 'M 78 52 Q 81 53 78 55';
             let openPath = 'M 76 50 Q 82 53 76 56 Z';
             if (isThinking) {
@@ -246,7 +271,6 @@ const PetEngine = (function() {
                       data-close-d="${mouthPath}" data-open-d="${openPath}" />
             `;
 
-            // 情绪特效点缀 (如思考的悬浮气泡)
             let emotionExtras = '';
             if (isThinking) {
                 emotionExtras = `<circle cx="82" cy="30" r="3.5" fill="#FFF" opacity="0.8" />
@@ -259,15 +283,20 @@ const PetEngine = (function() {
             return `<g class="pet-body-group">${tail}${body}${extraDecor}${blush}${eyeHtml}${mouthHtml}${emotionExtras}</g>`;
         },
 
-        // --- 1.2 机灵蟹矢量组件 (CRAB: 豆丁小青蟹 -> 铁甲重钳蟹 -> 黄金帝王蟹 -> 机甲泰坦蟹 -> 星河裂空巨鳌) ---
-        buildCrabSvg(stage, emotion) {
+        // --- 1.2 机灵蟹矢量组件 (CRAB) ---
+        buildCrabSvg(stage, emotion, gradId, filterId, baseColor) {
             const isSleeping = emotion === 'sleep';
-            const isThinking = emotion === 'thinking';
             const isCelebrate = emotion === 'celebrate';
 
-            // 蟹腿 (4对底栖足)
+            // 蟹腿 (双层实体底色 + 渐变笔触)
             const legs = `
-                <g class="pet-crab-legs" stroke="url(#crab-body-grad-${stage})" stroke-width="4.5" stroke-linecap="round" fill="none">
+                <g class="pet-crab-legs" stroke="${baseColor}" stroke-width="4.5" stroke-linecap="round" fill="none">
+                    <path d="M30 60 C18 64 12 76 8 82" />
+                    <path d="M34 66 C24 72 20 82 16 88" />
+                    <path d="M70 60 C82 64 88 76 92 82" />
+                    <path d="M66 66 C76 72 80 82 84 88" />
+                </g>
+                <g class="pet-crab-legs" stroke="url(#${gradId})" stroke-width="4.5" stroke-linecap="round" fill="none">
                     <path d="M30 60 C18 64 12 76 8 82" />
                     <path d="M34 66 C24 72 20 82 16 88" />
                     <path d="M70 60 C82 64 88 76 92 82" />
@@ -275,68 +304,71 @@ const PetEngine = (function() {
                 </g>
             `;
 
-            // 双螯剪刀 (Claws)
+            // 双螯剪刀 (双层实体底色 + 渐变)
             let claws = `
                 <g class="pet-crab-claws">
-                    <!-- 左鳌 -->
                     <g transform="translate(14, 25)">
-                        <path d="M12 25 C6 14 4 6 12 2 C16 10 18 16 14 25 Z" fill="url(#crab-body-grad-${stage})" />
-                        <path d="M14 25 C20 16 26 12 26 4 C18 6 14 12 14 25 Z" fill="url(#crab-body-grad-${stage})" />
-                        <circle cx="13" cy="25" r="4" fill="url(#crab-body-grad-${stage})" />
+                        <path d="M12 25 C6 14 4 6 12 2 C16 10 18 16 14 25 Z" fill="${baseColor}" />
+                        <path d="M12 25 C6 14 4 6 12 2 C16 10 18 16 14 25 Z" fill="url(#${gradId})" />
+                        <path d="M14 25 C20 16 26 12 26 4 C18 6 14 12 14 25 Z" fill="${baseColor}" />
+                        <path d="M14 25 C20 16 26 12 26 4 C18 6 14 12 14 25 Z" fill="url(#${gradId})" />
+                        <circle cx="13" cy="25" r="4" fill="${baseColor}" />
+                        <circle cx="13" cy="25" r="4" fill="url(#${gradId})" />
                     </g>
-                    <!-- 右鳌 -->
                     <g transform="translate(62, 25)">
-                        <path d="M12 25 C6 16 2 12 2 4 C10 6 14 12 12 25 Z" fill="url(#crab-body-grad-${stage})" />
-                        <path d="M14 25 C20 14 22 6 14 2 C10 10 8 16 14 25 Z" fill="url(#crab-body-grad-${stage})" />
-                        <circle cx="13" cy="25" r="4" fill="url(#crab-body-grad-${stage})" />
+                        <path d="M12 25 C6 16 2 12 2 4 C10 6 14 12 12 25 Z" fill="${baseColor}" />
+                        <path d="M12 25 C6 16 2 12 2 4 C10 6 14 12 12 25 Z" fill="url(#${gradId})" />
+                        <path d="M14 25 C20 14 22 6 14 2 C10 10 8 16 14 2 Z" fill="${baseColor}" />
+                        <path d="M14 25 C20 14 22 6 14 2 C10 10 8 16 14 2 Z" fill="url(#${gradId})" />
+                        <circle cx="13" cy="25" r="4" fill="${baseColor}" />
+                        <circle cx="13" cy="25" r="4" fill="url(#${gradId})" />
                     </g>
                 </g>
             `;
 
-            // 阶位专属点缀 (皇冠/机甲护目镜/星河)
             let stageDecor = '';
-            if (stage === 2) { // 黄金帝王蟹皇冠
+            if (stage === 2) {
                 stageDecor = `<path d="M38 28 L43 38 L50 30 L57 38 L62 28 L60 42 L40 42 Z" fill="#FFD700" stroke="#B8860B" stroke-width="1.5" />
                               <circle cx="50" cy="30" r="2" fill="#E63946" />`;
-            } else if (stage === 3) { // 机甲电路
-                stageDecor = `<rect x="36" y="44" width="28" height="6" rx="3" fill="#00F5D4" filter="url(#pet-glow-crab)" opacity="0.85" />
+            } else if (stage === 3) {
+                stageDecor = `<rect x="36" y="44" width="28" height="6" rx="3" fill="#00F5D4" filter="url(#${filterId})" opacity="0.85" />
                               <line x1="50" y1="52" x2="50" y2="68" stroke="#00F5D4" stroke-width="2" />`;
-            } else if (stage === 4) { // 星河裂空
+            } else if (stage === 4) {
                 stageDecor = `<circle cx="50" cy="54" r="26" stroke="#E0AAFF" stroke-width="1.5" stroke-dasharray="3 5" fill="none" class="pet-spin" />
                               <text x="46" y="58" font-size="10">🌌</text>`;
             }
 
             // 蟹壳身体
             const body = `
-                <ellipse cx="50" cy="56" rx="27" ry="20" fill="url(#crab-body-grad-${stage})" />
+                <ellipse cx="50" cy="56" rx="27" ry="20" fill="${baseColor}" />
+                <ellipse cx="50" cy="56" rx="27" ry="20" fill="url(#${gradId})" />
                 <path d="M36 50 C44 46 56 46 64 50" stroke="#FFF" stroke-width="2" stroke-linecap="round" fill="none" opacity="0.4" />
             `;
 
-            // 凸出的两只小黑豆/大萌眼 (Crab Stalk Eyes)
+            // 凸出眼柄与眼球
             const eyes = isSleeping ? `
-                <circle cx="41" cy="38" r="7" fill="url(#crab-body-grad-${stage})" />
-                <circle cx="59" cy="38" r="7" fill="url(#crab-body-grad-${stage})" />
+                <circle cx="41" cy="38" r="7" fill="${baseColor}" />
+                <circle cx="41" cy="38" r="7" fill="url(#${gradId})" />
+                <circle cx="59" cy="38" r="7" fill="${baseColor}" />
+                <circle cx="59" cy="38" r="7" fill="url(#${gradId})" />
                 <path d="M37 38 Q 41 42 45 38" stroke="#FFF" stroke-width="2.5" fill="none" />
                 <path d="M55 38 Q 59 42 63 38" stroke="#FFF" stroke-width="2.5" fill="none" />
                 <text x="68" y="28" font-size="11">💤</text>
             ` : `
-                <!-- 眼柄 -->
-                <rect x="38" y="34" width="6" height="8" rx="3" fill="url(#crab-body-grad-${stage})" />
-                <rect x="56" y="34" width="6" height="8" rx="3" fill="url(#crab-body-grad-${stage})" />
-                <!-- 眼球 -->
+                <rect x="38" y="34" width="6" height="8" rx="3" fill="${baseColor}" />
+                <rect x="38" y="34" width="6" height="8" rx="3" fill="url(#${gradId})" />
+                <rect x="56" y="34" width="6" height="8" rx="3" fill="${baseColor}" />
+                <rect x="56" y="34" width="6" height="8" rx="3" fill="url(#${gradId})" />
                 <circle cx="41" cy="34" r="7.5" fill="#FFF" />
                 <circle cx="59" cy="34" r="7.5" fill="#FFF" />
-                <!-- 灵动眼珠 -->
                 <circle cx="41" cy="34" r="4.2" fill="#1D3557" class="pet-vector-pupil" data-cx="41" data-cy="34" />
                 <circle cx="59" cy="34" r="4.2" fill="#1D3557" class="pet-vector-pupil" data-cx="59" data-cy="34" />
                 <circle cx="43" cy="32" r="1.6" fill="#FFF" />
                 <circle cx="61" cy="32" r="1.6" fill="#FFF" />
-                <!-- 眨眼覆盖 -->
                 <path d="M34 34 Q 41 38 48 34" stroke="#1D3557" stroke-width="2.5" fill="none" class="pet-vector-eyelid" style="opacity:0;" />
                 <path d="M52 34 Q 59 38 66 34" stroke="#1D3557" stroke-width="2.5" fill="none" class="pet-vector-eyelid" style="opacity:0;" />
             `;
 
-            // 嘴巴
             const mouthPath = isCelebrate ? 'M 44 60 Q 50 67 56 60 Z' : 'M 45 61 Q 50 65 55 61';
             const openPath = 'M 44 59 Q 50 68 56 59 Z';
             const mouth = `
@@ -348,50 +380,57 @@ const PetEngine = (function() {
             return `<g class="pet-body-group">${legs}${claws}${body}${stageDecor}${eyes}${mouth}</g>`;
         },
 
-        // --- 1.3 跳跳虾矢量组件 (SHRIMP: 软萌晶晶虾 -> 黄金香脆虾 -> 炽热烈焰虾 -> 超光速雷霆虾 -> 不死朱雀灵虾) ---
-        buildShrimpSvg(stage, emotion) {
+        // --- 1.3 跳跳虾矢量组件 (SHRIMP) ---
+        buildShrimpSvg(stage, emotion, gradId, filterId, baseColor) {
             const isSleeping = emotion === 'sleep';
             const isCelebrate = emotion === 'celebrate';
 
-            // 长长触须 (Antennae)
+            // 触须
             const antennae = `
-                <g class="pet-shrimp-antennae" stroke="url(#shrimp-body-grad-${stage})" stroke-width="2" stroke-linecap="round" fill="none">
+                <g class="pet-shrimp-antennae" stroke="${baseColor}" stroke-width="2" stroke-linecap="round" fill="none">
+                    <path d="M56 30 C64 16 76 10 88 8" />
+                    <path d="M54 26 C68 18 82 18 92 20" />
+                </g>
+                <g class="pet-shrimp-antennae" stroke="url(#${gradId})" stroke-width="2" stroke-linecap="round" fill="none">
                     <path d="M56 30 C64 16 76 10 88 8" />
                     <path d="M54 26 C68 18 82 18 92 20" />
                 </g>
             `;
 
-            // 弯曲虾节身段 (Segmented arched body)
+            // 弯曲虾节身段 (双层实体底色 + 渐变)
             const bodySegments = `
                 <g class="pet-shrimp-body">
-                    <!-- 尾部与尾扇 -->
-                    <path d="M22 66 C14 74 12 84 14 88 C20 86 28 80 30 72 Z" fill="url(#shrimp-body-grad-${stage})" />
-                    <path d="M20 74 C10 80 8 90 12 94 C18 90 24 84 26 76 Z" fill="url(#shrimp-body-grad-${stage})" opacity="0.8" />
-                    <!-- 身体节环 -->
-                    <ellipse cx="32" cy="62" rx="14" ry="12" fill="url(#shrimp-body-grad-${stage})" />
-                    <ellipse cx="40" cy="52" rx="15" ry="13" fill="url(#shrimp-body-grad-${stage})" />
-                    <ellipse cx="48" cy="42" rx="16" ry="14" fill="url(#shrimp-body-grad-${stage})" />
-                    <!-- 头部 -->
-                    <circle cx="56" cy="34" r="14" fill="url(#shrimp-body-grad-${stage})" />
+                    <path d="M22 66 C14 74 12 84 14 88 C20 86 28 80 30 72 Z" fill="${baseColor}" />
+                    <path d="M22 66 C14 74 12 84 14 88 C20 86 28 80 30 72 Z" fill="url(#${gradId})" />
+                    <path d="M20 74 C10 80 8 90 12 94 C18 90 24 84 26 76 Z" fill="${baseColor}" opacity="0.8" />
+                    <path d="M20 74 C10 80 8 90 12 94 C18 90 24 84 26 76 Z" fill="url(#${gradId})" opacity="0.8" />
+                    
+                    <ellipse cx="32" cy="62" rx="14" ry="12" fill="${baseColor}" />
+                    <ellipse cx="32" cy="62" rx="14" ry="12" fill="url(#${gradId})" />
+                    <ellipse cx="40" cy="52" rx="15" ry="13" fill="${baseColor}" />
+                    <ellipse cx="40" cy="52" rx="15" ry="13" fill="url(#${gradId})" />
+                    <ellipse cx="48" cy="42" rx="16" ry="14" fill="${baseColor}" />
+                    <ellipse cx="48" cy="42" rx="16" ry="14" fill="url(#${gradId})" />
+                    
+                    <circle cx="56" cy="34" r="14" fill="${baseColor}" />
+                    <circle cx="56" cy="34" r="14" fill="url(#${gradId})" />
                 </g>
             `;
 
-            // 阶位点缀
             let stageDecor = '';
-            if (stage === 1) { // 黄金香脆脆皮头带
+            if (stage === 1) {
                 stageDecor = `<path d="M48 24 L64 24 L60 28 L46 28 Z" fill="#FFF" opacity="0.9" />`;
-            } else if (stage === 2) { // 烈焰喷射器
-                stageDecor = `<path d="M14 82 C6 86 2 96 6 100 C12 98 16 92 18 86 Z" fill="#FF4D6D" filter="url(#pet-glow-shrimp)" />`;
-            } else if (stage === 3) { // 雷霆闪电纹
+            } else if (stage === 2) {
+                stageDecor = `<path d="M14 82 C6 86 2 96 6 100 C12 98 16 92 18 86 Z" fill="#FF4D6D" filter="url(#${filterId})" />`;
+            } else if (stage === 3) {
                 stageDecor = `<polygon points="52,18 46,26 52,26 48,34 58,24 52,24" fill="#FFEA00" />`;
-            } else if (stage === 4) { // 朱雀神羽
+            } else if (stage === 4) {
                 stageDecor = `
                     <path d="M38 38 C28 24 16 20 8 22 C14 30 24 38 34 44 Z" fill="#FF758F" />
                     <path d="M44 48 C34 38 22 36 14 40 C20 46 28 52 38 56 Z" fill="#FFB703" />
                 `;
             }
 
-            // 眼睛
             const eye = isSleeping ? `
                 <path d="M56 32 Q 62 36 66 32" stroke="#FFF" stroke-width="2.5" fill="none" />
                 <text x="70" y="24" font-size="11">💤</text>
@@ -413,15 +452,22 @@ const PetEngine = (function() {
             return `<g class="pet-body-group">${antennae}${bodySegments}${stageDecor}${eye}${mouth}</g>`;
         },
 
-        // --- 1.4 皮皮章矢量组件 (OCTOPUS: 八爪小墨章 -> 深海大乌贼 -> 魔术礼帽章 -> 星象千面学者 -> 深海深渊帝皇) ---
-        buildOctopusSvg(stage, emotion) {
+        // --- 1.4 皮皮章矢量组件 (OCTOPUS) ---
+        buildOctopusSvg(stage, emotion, gradId, filterId, baseColor) {
             const isSleeping = emotion === 'sleep';
-            const isThinking = emotion === 'thinking';
             const isCelebrate = emotion === 'celebrate';
 
-            // 触手 (8只卷曲蠕动的触手)
+            // 触手 (双层实体底色 + 渐变)
             const tentacles = `
-                <g class="pet-octo-tentacles" stroke="url(#octo-body-grad-${stage})" stroke-width="6.5" stroke-linecap="round" fill="none">
+                <g class="pet-octo-tentacles" stroke="${baseColor}" stroke-width="6.5" stroke-linecap="round" fill="none">
+                    <path d="M30 62 C22 72 16 78 12 74 C8 70 14 62 20 62" />
+                    <path d="M38 66 C32 80 26 88 22 84 C18 80 24 72 28 68" />
+                    <path d="M46 68 C42 84 38 94 34 90 C30 86 36 78 40 72" />
+                    <path d="M54 68 C58 84 62 94 66 90 C70 86 64 78 60 72" />
+                    <path d="M62 66 C68 80 74 88 78 84 C82 80 76 72 72 68" />
+                    <path d="M70 62 C78 72 84 78 88 74 C92 70 86 62 80 62" />
+                </g>
+                <g class="pet-octo-tentacles" stroke="url(#${gradId})" stroke-width="6.5" stroke-linecap="round" fill="none">
                     <path d="M30 62 C22 72 16 78 12 74 C8 70 14 62 20 62" />
                     <path d="M38 66 C32 80 26 88 22 84 C18 80 24 72 28 68" />
                     <path d="M46 68 C42 84 38 94 34 90 C30 86 36 78 40 72" />
@@ -431,33 +477,31 @@ const PetEngine = (function() {
                 </g>
             `;
 
-            // 大圆脑袋
+            // 大圆脑袋 (双层实体底色 + 渐变)
             const head = `
-                <ellipse cx="50" cy="46" rx="28" ry="24" fill="url(#octo-body-grad-${stage})" />
+                <ellipse cx="50" cy="46" rx="28" ry="24" fill="${baseColor}" />
+                <ellipse cx="50" cy="46" rx="28" ry="24" fill="url(#${gradId})" />
                 <path d="M36 34 C44 28 56 28 64 34" stroke="#FFF" stroke-width="2.5" stroke-linecap="round" fill="none" opacity="0.4" />
             `;
 
-            // 阶位专属装扮 (礼帽/水晶球/三叉戟与皇冠)
             let stageDecor = '';
-            if (stage === 1) { // 潜水护目镜
+            if (stage === 1) {
                 stageDecor = `<rect x="30" y="38" width="40" height="14" rx="7" fill="none" stroke="#FFD166" stroke-width="3" />
                               <line x1="48" y1="45" x2="52" y2="45" stroke="#FFD166" stroke-width="3" />`;
-            } else if (stage === 2) { // 黑色魔术礼帽
+            } else if (stage === 2) {
                 stageDecor = `
                     <ellipse cx="50" cy="24" rx="22" ry="5" fill="#212529" />
                     <rect x="36" y="8" width="28" height="16" fill="#212529" />
                     <rect x="36" y="20" width="28" height="4" fill="#E63946" />
                 `;
-            } else if (stage === 3) { // 星象水晶球
+            } else if (stage === 3) {
                 stageDecor = `
-                    <circle cx="82" cy="56" r="10" fill="#48CAE4" filter="url(#pet-glow-octo)" opacity="0.85" />
+                    <circle cx="82" cy="56" r="10" fill="#48CAE4" filter="url(#${filterId})" opacity="0.85" />
                     <text x="78" y="60" font-size="9" fill="#FFF">🔮</text>
                 `;
-            } else if (stage === 4) { // 海皇三叉戟与金冠
+            } else if (stage === 4) {
                 stageDecor = `
-                    <!-- 皇冠 -->
                     <polygon points="38,24 43,14 50,20 57,14 62,24" fill="#FFD700" stroke="#B8860B" stroke-width="1.2" />
-                    <!-- 手握三叉戟 -->
                     <g transform="translate(80, 20)">
                         <line x1="0" y1="0" x2="0" y2="50" stroke="#FFD700" stroke-width="2.5" />
                         <path d="M-6 4 L-6 -6 L0 0 L6 -6 L6 4" stroke="#FFD700" stroke-width="2" fill="none" />
@@ -465,7 +509,6 @@ const PetEngine = (function() {
                 `;
             }
 
-            // 眼睛
             const eyes = isSleeping ? `
                 <path d="M38 46 Q 44 51 50 46" stroke="#FFF" stroke-width="2.5" fill="none" />
                 <path d="M52 46 Q 58 51 64 46" stroke="#FFF" stroke-width="2.5" fill="none" />
@@ -481,7 +524,6 @@ const PetEngine = (function() {
                 <path d="M50 46 Q 57 51 64 46" stroke="#1D3557" stroke-width="2.5" fill="none" class="pet-vector-eyelid" style="opacity:0;" />
             `;
 
-            // 嘴巴 (吐小圆泡嘴)
             const mouthPath = isCelebrate ? 'M 46 54 Q 50 60 54 54 Z' : 'M 47 55 Q 50 58 53 55';
             const openPath = 'M 46 53 Q 50 61 54 53 Z';
             const mouth = `
@@ -493,7 +535,6 @@ const PetEngine = (function() {
             return `<g class="pet-body-group">${tentacles}${head}${stageDecor}${eyes}${mouth}</g>`;
         }
     };
-
     // --- 2. 虚拟生命体与深度养成系统 (PET LIFE SYSTEM) ---
     const PetLifeSystem = {
         STORAGE_KEY: 'bingo_child_pet_v2',

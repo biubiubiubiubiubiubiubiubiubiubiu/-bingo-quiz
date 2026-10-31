@@ -2976,3 +2976,23 @@ select:focus {
     0% { box-shadow: 0 0 6px rgba(72, 202, 228, 0.5); }
     100% { box-shadow: 0 0 16px rgba(0, 245, 212, 0.95); }
 }
+
+
+/* 萌宠头像与挂件容器防塌陷与可见性加固 */
+.roaming-pet-avatar {
+    width: 68px;
+    height: 68px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: visible;
+}
+
+.pet-quiz-avatar {
+    width: 26px;
+    height: 26px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: visible;
+}
