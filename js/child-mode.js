@@ -542,19 +542,21 @@ const PetSound = {
     },
 
     // 20. 萌宠开口对话提示音 (按生物属性专属水族搞怪开嗓声学设计)
+    // 20. 萌宠开口对话提示音 (按生物属性专属水族搞怪开嗓声学设计，含物理声学微解谐)
     voiceChime(petType = 'fish') {
         if (!this.isEnabled()) return;
         const ctx = this.getCtx();
         if (!ctx) return;
         try {
             const now = ctx.currentTime;
+            const jitter = (Math.random() - 0.5) * 30; // 物理微谐波随机解谐
             if (petType === 'crab') {
                 // 🦀 机灵蟹：搞怪机械小钢钳合击咔嚓声 (Snappy Claw Snip-Clack)
                 [0, 0.045].forEach((d, idx) => {
                     const osc = ctx.createOscillator();
                     const gain = ctx.createGain();
                     osc.type = 'triangle';
-                    const startF = idx === 0 ? 1200 : 1600;
+                    const startF = (idx === 0 ? 1200 : 1600) + jitter;
                     osc.frequency.setValueAtTime(startF, now + d);
                     osc.frequency.exponentialRampToValueAtTime(320, now + d + 0.04);
                     gain.gain.setValueAtTime(0.20, now + d);
@@ -569,8 +571,8 @@ const PetSound = {
                 const osc = ctx.createOscillator();
                 const gain = ctx.createGain();
                 osc.type = 'sawtooth';
-                osc.frequency.setValueAtTime(420, now);
-                osc.frequency.exponentialRampToValueAtTime(2600, now + 0.08);
+                osc.frequency.setValueAtTime(420 + jitter, now);
+                osc.frequency.exponentialRampToValueAtTime(2600 + jitter * 2, now + 0.08);
                 gain.gain.setValueAtTime(0.16, now);
                 gain.gain.exponentialRampToValueAtTime(0.005, now + 0.09);
                 osc.connect(gain);
@@ -582,7 +584,7 @@ const PetSound = {
                 const osc = ctx.createOscillator();
                 const gain = ctx.createGain();
                 osc.type = 'sine';
-                osc.frequency.setValueAtTime(560, now);
+                osc.frequency.setValueAtTime(560 + jitter, now);
                 osc.frequency.exponentialRampToValueAtTime(140, now + 0.12);
                 gain.gain.setValueAtTime(0.22, now);
                 gain.gain.exponentialRampToValueAtTime(0.005, now + 0.12);
@@ -596,8 +598,8 @@ const PetSound = {
                     const osc = ctx.createOscillator();
                     const gain = ctx.createGain();
                     osc.type = 'sine';
-                    const startF = idx === 0 ? 460 : 720;
-                    const endF = idx === 0 ? 1280 : 1850;
+                    const startF = (idx === 0 ? 460 : 720) + jitter;
+                    const endF = (idx === 0 ? 1280 : 1850) + jitter * 1.5;
                     osc.frequency.setValueAtTime(startF, now + d);
                     osc.frequency.exponentialRampToValueAtTime(endF, now + d + 0.05);
                     gain.gain.setValueAtTime(0.18, now + d);
@@ -657,8 +659,8 @@ const PetVoice = {
         }
     },
 
-    // 获取特定物种匹配的最佳中文童声/亲和女声 (智能互斥与跨浏览器降级兼容)
-    getBestChineseVoice(preferredList, petType = 'fish') {
+    // 获取特定物种匹配的最佳中文童声/亲和女声 (支持学术播音轨独立优选与跨浏览器降级兼容)
+    getBestChineseVoice(preferredList, petType = 'fish', isAcademic = false) {
         if (!('speechSynthesis' in window)) return null;
         const voices = window.speechSynthesis.getVoices();
         if (!voices || voices.length === 0) return null;
@@ -667,7 +669,19 @@ const PetVoice = {
         const zhVoices = voices.filter(v => v.lang.startsWith('zh') || v.lang.includes('CN') || v.lang.includes('cmn'));
         if (zhVoices.length === 0) return voices[0];
 
-        // 1. 若优先列表中有特定名称匹配 (如 Yunxi, Xiaoxiao, Kangkang, Huihui)
+        // 1. 学术播音轨优先策略：寻找最清晰纯正普通话发音人
+        if (isAcademic) {
+            const academicKeywords = ['Xiaoxiao', 'Yunxi', 'Ting-Ting', 'Huihui', 'Google 普通话', 'Natural', 'Online'];
+            for (const kw of academicKeywords) {
+                const found = zhVoices.find(v => v.name.includes(kw));
+                if (found) return found;
+            }
+            const localZh = zhVoices.find(v => v.localService);
+            if (localZh) return localZh;
+            return zhVoices[0];
+        }
+
+        // 2. 若优先列表中有特定名称匹配 (如 Yunxi, Xiaoxiao, Kangkang, Huihui)
         if (preferredList && Array.isArray(preferredList)) {
             for (const name of preferredList) {
                 const found = zhVoices.find(v => v.name.includes(name));
@@ -675,7 +689,7 @@ const PetVoice = {
             }
         }
 
-        // 2. 针对机灵蟹 (crab)：强力优先寻找男声关键字 (Edge/Windows/macOS 男声)
+        // 3. 针对机灵蟹 (crab)：强力优先寻找男声关键字 (Edge/Windows/macOS 男声)
         if (petType === 'crab') {
             const maleVoice = zhVoices.find(v => 
                 v.name.includes('Yunxi') || v.name.includes('Kangkang') || 
@@ -685,7 +699,7 @@ const PetVoice = {
             if (maleVoice) return maleVoice;
         }
 
-        // 3. 针对小泡鱼/跳跳虾：优先寻找清脆童声/女声
+        // 4. 针对小泡鱼/跳跳虾：优先寻找清脆童声/女声
         if (petType === 'fish' || petType === 'shrimp') {
             const sweetVoice = zhVoices.find(v => 
                 v.name.includes('Xiaoxiao') || v.name.includes('Yaoyao') || 
@@ -694,7 +708,7 @@ const PetVoice = {
             if (sweetVoice) return sweetVoice;
         }
 
-        // 4. 在 Chrome 等单/双音色环境中：
+        // 5. 在 Chrome 等单/双音色环境中：
         // 优先使用 localService 为 true 的本地音色 (如 Microsoft Huihui Desktop)，
         // 因为 Chrome 的远程 Google 普通话会完全忽略 pitch 调音属性！
         const localZh = zhVoices.find(v => v.localService);
@@ -762,7 +776,58 @@ const PetVoice = {
         }
     },
 
-    // 核心统一发声入口 (支持完成回调 onEndCallback)
+    // 学术题目/解析朗读纯净播音入口 (独立音轨：无搞怪开嗓声效，标准母语语速语调，专注审题)
+    speakAcademic(text, options = {}, onEndCallback = null) {
+        if (!text) {
+            if (typeof onEndCallback === 'function') onEndCallback();
+            return;
+        }
+        const cleanText = this.cleanTextForSpeech(text);
+        if (!cleanText) {
+            if (typeof onEndCallback === 'function') onEndCallback();
+            return;
+        }
+
+        if ('speechSynthesis' in window) {
+            window.speechSynthesis.cancel();
+            this.speaking = false;
+
+            const utterance = new SpeechSynthesisUtterance(cleanText);
+            utterance.lang = 'zh-CN';
+            utterance.pitch = (options.pitch !== undefined) ? options.pitch : 1.0;
+            utterance.rate = (options.rate !== undefined) ? options.rate : 0.95;
+            utterance.volume = (options.volume !== undefined) ? options.volume : 1.0;
+
+            const bestVoice = this.getBestChineseVoice(null, 'academic', true);
+            if (bestVoice) utterance.voice = bestVoice;
+
+            this.currentUtterance = utterance;
+            this.speaking = true;
+
+            const resetSpeaking = () => {
+                this.speaking = false;
+                this.currentUtterance = null;
+                if (typeof onEndCallback === 'function') {
+                    const cb = onEndCallback;
+                    onEndCallback = null;
+                    cb();
+                }
+            };
+
+            utterance.onend = resetSpeaking;
+            utterance.onerror = () => resetSpeaking();
+
+            setTimeout(() => {
+                if (this.currentUtterance === utterance) resetSpeaking();
+            }, Math.max(6000, cleanText.length * 450));
+
+            window.speechSynthesis.speak(utterance);
+        } else {
+            if (typeof onEndCallback === 'function') onEndCallback();
+        }
+    },
+
+    // 核心统一萌宠发声入口 (物种专属搞怪声学 + 声学微抖动)
     speak(text, petType = 'fish', options = {}, onEndCallback = null) {
         if (!PetSound.isEnabled() || !text) {
             if (typeof onEndCallback === 'function') onEndCallback();
@@ -775,24 +840,32 @@ const PetVoice = {
             return;
         }
 
-        // 1. 播放专属生物开口搞怪水族开嗓音效
-        PetSound.voiceChime(petType);
+        // 1. 播放专属生物开口搞怪水族开嗓音效 (支持 options.skipChime 跳过)
+        if (!options.skipChime) {
+            PetSound.voiceChime(petType);
+        }
 
         const cfg = this.SPECIES_CONFIG[petType] || this.SPECIES_CONFIG.fish;
 
-        // 2. 调校版萌童声发音
+        // 2. 调校版萌童声发音 (注入微抖动，告别机械恒定感)
         if ('speechSynthesis' in window) {
             window.speechSynthesis.cancel();
             this.speaking = false;
 
             const utterance = new SpeechSynthesisUtterance(cleanText);
             utterance.lang = 'zh-CN';
-            // 四大物种专属声线参数应用
-            utterance.pitch = (options.pitch !== undefined) ? options.pitch : cfg.pitch;
-            utterance.rate = (options.rate !== undefined) ? options.rate : cfg.rate;
+
+            // 声学微抖动 (Acoustic Jitter: pitch ±0.04, rate ±0.03)
+            const jitterPitch = (Math.random() - 0.5) * 0.08;
+            const jitterRate = (Math.random() - 0.5) * 0.06;
+            const basePitch = (options.pitch !== undefined) ? options.pitch : cfg.pitch;
+            const baseRate = (options.rate !== undefined) ? options.rate : cfg.rate;
+
+            utterance.pitch = Math.max(0.4, Math.min(2.0, basePitch + jitterPitch));
+            utterance.rate = Math.max(0.5, Math.min(1.8, baseRate + jitterRate));
             utterance.volume = (options.volume !== undefined) ? options.volume : 0.95;
 
-            const bestVoice = this.getBestChineseVoice(cfg.preferredVoices, petType);
+            const bestVoice = this.getBestChineseVoice(cfg.preferredVoices, petType, false);
             if (bestVoice) {
                 utterance.voice = bestVoice;
             }
@@ -827,7 +900,7 @@ const PetVoice = {
             // 留出 100ms 间隔使开口音先清晰入耳
             setTimeout(() => {
                 window.speechSynthesis.speak(utterance);
-            }, 100);
+            }, options.skipChime ? 0 : 100);
         } else {
             this.playAnimalese(cleanText, petType);
             if (typeof onEndCallback === 'function') {
@@ -844,8 +917,13 @@ if ('speechSynthesis' in window) {
     };
 }
 
-// 全局统一定义 speakText，兼容旧调用
-window.speakText = function(text, petType) {
+// 全局统一定义 speakText，支持学术播音轨与萌宠双轨分流
+window.speakText = function(text, petType, isAcademic = false) {
+    // 若明确为学术模式或当前非儿童模式，使用标准母语播音轨
+    if (isAcademic || !isChildMode) {
+        PetVoice.speakAcademic(text);
+        return;
+    }
     if (!petType && typeof getPetData === 'function') {
         const pet = getPetData();
         petType = (pet && pet.type) || 'fish';
@@ -948,7 +1026,216 @@ Object.values(SEAFOOD_PETS).forEach(p => {
     }
 });
 
-// --- 萌宠专属宽泛趣味语料库 (KID-SAFE BROAD TOPIC & HUMOR BANK: 220+ ITEMS) ---
+// --- 抽牌堆管理体系 (FISHER-YATES DRAW-DECK & LRU EXCLUSION ENGINE) ---
+const DrawDeckManager = {
+    decks: {},
+    lastDrawn: {},
+    recentLimit: 50,
+    storageKey: 'bingo_banter_lru_history',
+
+    // 获取最近使用记录 (LRU 队列)
+    getRecentHistory() {
+        try {
+            const raw = localStorage.getItem(this.storageKey);
+            return raw ? JSON.parse(raw) : [];
+        } catch (e) {
+            return [];
+        }
+    },
+
+    // 记录消费项到 LRU 队列 (限制最近 recentLimit 条)
+    recordUsed(text) {
+        if (!text || typeof text !== 'string') return;
+        try {
+            const history = this.getRecentHistory();
+            const clean = text.trim();
+            const idx = history.indexOf(clean);
+            if (idx > -1) history.splice(idx, 1);
+            history.unshift(clean);
+            if (history.length > this.recentLimit) {
+                history.length = this.recentLimit;
+            }
+            localStorage.setItem(this.storageKey, JSON.stringify(history));
+        } catch (e) {}
+    },
+
+    // Fisher-Yates 真正随机洗牌算法
+    shuffle(array) {
+        const arr = [...array];
+        for (let i = arr.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [arr[i], arr[j]] = [arr[j], arr[i]];
+        }
+        return arr;
+    },
+
+    // 从指定分类卡池无放回抽一张 (保证全卡池耗尽前绝对不重复)
+    draw(categoryKey, rawItems, getKeyFn = (it => (it && (it.text || it.q || it)) || '')) {
+        if (!rawItems || rawItems.length === 0) return null;
+        if (rawItems.length === 1) {
+            const item = rawItems[0];
+            this.recordUsed(getKeyFn(item));
+            return item;
+        }
+
+        // 牌堆为空时自动重洗：过滤最近消费过的项目（防相邻重叠与防接龙）
+        if (!this.decks[categoryKey] || this.decks[categoryKey].length === 0) {
+            const history = this.getRecentHistory();
+            let candidates = rawItems.filter(it => !history.includes(getKeyFn(it)));
+            if (candidates.length < Math.min(3, Math.ceil(rawItems.length * 0.4))) {
+                candidates = [...rawItems];
+            }
+            let shuffled = this.shuffle(candidates);
+
+            // 防接龙约束：新牌堆首张绝不等于旧牌堆最后一张
+            if (this.lastDrawn[categoryKey] && shuffled.length > 2) {
+                if (getKeyFn(shuffled[shuffled.length - 1]) === this.lastDrawn[categoryKey]) {
+                    const swapIdx = Math.floor(Math.random() * (shuffled.length - 1));
+                    [shuffled[shuffled.length - 1], shuffled[swapIdx]] = [shuffled[swapIdx], shuffled[shuffled.length - 1]];
+                }
+            }
+            this.decks[categoryKey] = shuffled;
+        }
+
+        const drawn = this.decks[categoryKey].pop();
+        const key = getKeyFn(drawn);
+        this.lastDrawn[categoryKey] = key;
+        this.recordUsed(key);
+        return drawn;
+    }
+};
+
+// --- 插槽式动态微拼接语法生成器 (SLOT-BASED COMBINATORIAL SYNTHESIZER: 组合爆炸式无限台词) ---
+const SlotSyntaxSynthesizer = {
+    // 投喂赞扬插槽
+    feedPraises: {
+        prefixes: [
+            '哇！', '啊呜一大口！', '嘎嘣脆！', '太香啦！', '吧唧吧唧~', 
+            '太好吃了！', '嗷呜~', '一口吞下！', '咕噜咕噜！', '超级美味！',
+            '香喷喷！', '满分口感！', '咔嚓一声！', '能量充盈！', '真顶饱！',
+            '美味大爆发！', '大嚼大嚼！', '神仙味道！'
+        ],
+        speciesCores: {
+            fish: [
+                '吐出了一个闪闪发光的超大经验泡泡！',
+                '海藻小饼干让小鱼游动速度提升200%！',
+                '鱼鳞瞬间镀上一层耀眼的金色微光！',
+                '鱼尾巴欢快地甩出了一道七彩小水浪！',
+                '感觉做题像在清澈珊瑚海里畅游一样爽快！',
+                '吐出的爱心泡泡把整个屏幕都点亮啦！',
+                '小肚子吃得圆滚滚，智慧小天线立起来啦！'
+            ],
+            crab: [
+                '大铁钳咔嚓一声把香脆海苔剪成爱心形状！',
+                '重甲能量矩阵已充能完毕，硬核满分！',
+                '这口脆海苔下肚，横着走也是第一名！',
+                '钳子充满力量，所有难题被我一夹两半！',
+                '机灵蟹保镖大队长向长官敬礼报道！',
+                '铁钳举得高高为你欢呼，太威武啦！',
+                '沙滩防御盾牌全面升温，百毒不侵！'
+            ],
+            shrimp: [
+                '赤炎能量注入，一记超级大弹射直冲浪尖！',
+                '虾须雷达哔哔作响：前方发现连续满分信号！',
+                '这口草莓布丁甜到心坎里，元气瞬间爆棚！',
+                '跳跳虾为你原地来了一个无敌后空翻！',
+                '轻盈如羽毛，弹射爆发力突破天际！',
+                '后背弓起满满劲道，下一题秒速飞升！',
+                '头顶的小触角欢脱摆动，开心得停不下来！'
+            ],
+            octopus: [
+                '八只触手同时竖起大拇指为你点赞！',
+                '三颗心脏一起扑通扑通狂欢心跳！',
+                '深渊奥术魔力+10，学者智慧之光闪烁！',
+                '墨汁在水里绘出了一幅超级可爱的笑脸！',
+                '章鱼秘典翻开新一页，小主人学霸光环拉满！',
+                '八只吸盘紧紧抓住好运，万无一失！',
+                '变色魔法发动，全身泛起祥瑞琉璃紫光！'
+            ]
+        },
+        suffixes: [
+            '小主人冲鸭！', '今天也是无敌学霸拍档！', '下一道题我们一网打尽！',
+            '太厉害啦！', '为你骄傲！', '向星辰大海进发！',
+            '智慧能量继续飙升！', '答题节奏棒极了！', '胜利就在眼前！',
+            '稳准狠，满分非你莫属！', '再接再厉，神级战绩！'
+        ]
+    },
+
+    // 生成不重复插槽投喂赞扬词
+    generateFeedPraise(petType = 'fish') {
+        const p = this.feedPraises;
+        const prefix = DrawDeckManager.draw('slot_feed_prefix', p.prefixes);
+        const cores = p.speciesCores[petType] || p.speciesCores.fish;
+        const core = DrawDeckManager.draw('slot_feed_core_' + petType, cores);
+        const suffix = DrawDeckManager.draw('slot_feed_suffix', p.suffixes);
+        return `+10 EXP！${prefix}${core} ${suffix}`;
+    },
+
+    // 错题治愈安抚插槽
+    wrongComforts: {
+        prefixes: [
+            '深呼吸~', '没关系呀！', '别灰心！', '摸摸头~', '问题不大！',
+            '放轻松！', '慢一点点~', '稳住气！', '胜败兵家常事~'
+        ],
+        cores: [
+            '科学巨匠爱因斯坦做实验也经常做错呢！',
+            '错题是藏着珍珠的贝壳，打开它就能收获新智慧！',
+            '刚才只是稍微调整了一下水流方向，下一发一定正中靶心！',
+            '迷宫里的弯路也是风景，这道题难不倒我们！',
+            '哪怕是神枪手也有校准准星的时候，仔细看题再来一次！',
+            '所有的伟大发现都是从一个小小的失误开始的！',
+            '小海鲜横着走也会踢到小贝壳呢，调整脚步继续前行！'
+        ],
+        suffixes: [
+            '我一直在旁边陪着你呢！', '擦亮眼睛，正确答案就在眼前！', '小海鲜为你加油打气！',
+            '换个角度看，立刻豁然开朗！', '相信自己，你绝对做得到！', '仔细读题，胜利属于细心的小探险家！'
+        ]
+    },
+
+    generateWrongComfort(petType = 'fish') {
+        const w = this.wrongComforts;
+        const prefix = DrawDeckManager.draw('slot_wrong_prefix', w.prefixes);
+        const core = DrawDeckManager.draw('slot_wrong_core', w.cores);
+        const suffix = DrawDeckManager.draw('slot_wrong_suffix', w.suffixes);
+        return `${prefix} ${core} ${suffix}`;
+    },
+
+    // 连胜激励插槽
+    streakPraises: {
+        streak3: [
+            '🔥 3连胜达成！渐入佳境，状态超级火热！',
+            '🔥 3连胜！手感滚烫，答题就像行云流水！',
+            '🔥 连续3题答对！小海鲜为你点亮幸运金光！',
+            '🔥 3连胜破浪前行！小脑瓜飞速运转起来啦！'
+        ],
+        streak5: [
+            '⚡ 5连胜！超能爆发，深海答题大师降临！',
+            '⚡ 5连胜大狂欢！势如破竹，谁也挡不住我们！',
+            '⚡ 连续5题正确！学霸光环全开，太耀眼啦！',
+            '⚡ 5连胜神勇出击！难度题目通通拿下！'
+        ],
+        streakHigh: [
+            '🌟 连胜狂热！无敌超神！海底世界为你起立鼓掌！',
+            '👑 霸气连胜！小主人今天简直是深海答题之神！',
+            '🚀 极速连破！势不可挡，直冲宇宙星河之巅！',
+            '🎆 神级连胜纪录！这道题简直被你拿捏得死死的！'
+        ]
+    },
+
+    generateStreakCheer(streak, petType = 'fish') {
+        if (streak < 3) return null;
+        if (streak < 5) {
+            return DrawDeckManager.draw('streak_3', this.streakPraises.streak3);
+        } else if (streak < 8) {
+            return DrawDeckManager.draw('streak_5', this.streakPraises.streak5);
+        } else {
+            const raw = DrawDeckManager.draw('streak_high', this.streakPraises.streakHigh);
+            return raw.replace('连胜', `${streak}连胜`);
+        }
+    }
+};
+
+// --- 萌宠专属宽泛趣味语料库 (KID-SAFE BROAD TOPIC & HUMOR BANK: 300+ ITEMS) ---
 const PET_HUMOR_BANK = {
     species: {
         fish: [
@@ -981,7 +1268,12 @@ const PET_HUMOR_BANK = {
             '只要有梦想，哪怕是一条小咸鱼，也能逆流而上变成大锦鲤！🎏',
             '咕噜咕噜，我刚才和海龟老爷爷聊了天，他说小主人今天运气爆棚！🐢',
             '海洋世界大得很，等放假了，我带你去珊瑚群岛看七彩水母！🪸',
-            '悄悄告诉你：其实鱼也是会打哈欠的，嗷呜~好舒服呀！🥱'
+            '悄悄告诉你：其实鱼也是会打哈欠的，嗷呜~好舒服呀！🥱',
+            '吐一个小泡泡代表一声谢谢，吐一万个泡泡代表最最喜欢你！🫧',
+            '水底的小贝壳在悄悄咬耳朵，说今天的小主人简直是智慧化身！🐚',
+            '彩虹如果掉进水里，一定会变成一条像我一样绚烂的七彩灵鱼！🌈',
+            '遇到难题先深吸一口水草清香，小泡鱼为你保驾护航！🛡️',
+            '做题累了就眨眨眼睛，看我给你表演一段水下圆舞曲！💃'
         ],
         crab: [
             '知道我为什么横着走吗？因为我有钳，任性呀！🦀',
@@ -1013,7 +1305,12 @@ const PET_HUMOR_BANK = {
             '不管是横着走还是大步走，只要迈开步子，一定能走向星辰大海！🏆',
             '听说煮熟的螃蟹会变红，那我害羞的时候会不会也变成大红蟹呀？😳',
             '我发现了一颗超漂亮的贝壳，偷偷放在你的小书包里啦！🐚',
-            '大铁钳不仅能剪碎困难，还能用来给你剥开甜甜的橘子哦！🍊'
+            '大铁钳不仅能剪碎困难，还能用来给你剥开甜甜的橘子哦！🍊',
+            '两只大螯随时就绪，只要小主人一声令下，错题通通剪成碎纸片！✂️',
+            '沙滩上的寄居蟹想跟我换房子，本蟹的黄金甲才舍不得换呢！🏠',
+            '硬壳底下藏着一颗暖暖的心，机灵蟹随时听候小主人差遣！🫡',
+            '横着走也能冲线拿冠军，有实力就是这么自信！🏅',
+            '咔嚓咔嚓，磨刀霍霍，今天的答题任务我们分分钟拿下！💪'
         ],
         shrimp: [
             '为什么我跳得比珠穆朗玛峰还高？因为珠穆朗玛峰根本不会跳呀！🦐',
@@ -1045,7 +1342,12 @@ const PET_HUMOR_BANK = {
             '深海里有珊瑚花园，做完事情我带你去看彩虹热带鱼！🪼',
             '轻盈如羽毛，爆发如弓弦！这就是赤炎神虾族的真正魅力！🔥',
             '小虾米做梦都在练习水上芭蕾，今天我给你表演一段旋转跳跃！💃',
-            '你知道吗？有些荧光小虾在夜里会发出幽蓝色的光，像海底小星星！✨'
+            '你知道吗？有些荧光小虾在夜里会发出幽蓝色的光，像海底小星星！✨',
+            '谁能比我更会原地起跳？一眨眼我就蹦上了云彩端！☁️',
+            '虾须抖一抖，精神抖擞！小尾巴弹一弹，难题全靠边站！🦐',
+            '我的外号叫深海闪电侠，随时准备陪小主人打破答题纪录！⚡',
+            '吃饱草莓布丁，浑身都是草莓味的元气能量！🍓',
+            '今天也是活力四射的一天，像小虾米一样勇往直前吧！💫'
         ],
         octopus: [
             '我有八只触手，一只拿冰淇淋，一只拿果汁，还能留六只手给你比心心！💖',
@@ -1077,7 +1379,12 @@ const PET_HUMOR_BANK = {
             '深海的夜空也有星星，就是小主人眼里闪烁的那一抹好奇之光！🌌',
             '皮皮章永远是你最忠诚的小军师，今天想去哪里冒险，我都陪着你！🧠',
             '如果我把八只手织成一张网，就能捞起一整片银河系的星星！🌌',
-            '章鱼睡觉的时候也会变颜色做梦哦，我刚才梦见吃了一座布丁山！🍮'
+            '章鱼睡觉的时候也会变颜色做梦哦，我刚才梦见吃了一座布丁山！🍮',
+            '学者礼帽扶一扶，智慧火花在深邃大眼里闪闪烁烁！🎓',
+            '八只触手同时翻书，十行俱下一目了然，学霸本霸就是我！📖',
+            '深海神殿里藏着的每一滴智慧，都将化作小主人通关的法宝！🗝️',
+            '三颗心脏都在说：小主人，你是世界上最聪明最棒的搭档！❤️',
+            '别看我走起路来像跳踢踏舞，深海八阵图我都胸有成竹！🗺️'
         ]
     },
     riddles: [
@@ -1110,7 +1417,12 @@ const PET_HUMOR_BANK = {
         { q: '哪个季节的树叶最喜欢跳舞？🍂', a: '答案是：秋天！因为秋风一来它们就跳起圆舞曲啦！' },
         { q: '为什么太阳每天早上都要从东方升起？☀️', a: '因为太阳从西边升起的话，大家就以为在做梦啦！' },
         { q: '什么样的水喝了不仅不解渴，还会让人哇哇大哭？🧅', a: '答案是：切洋葱流出来的眼水！' },
-        { q: '什么伞无论下多大雨都遮不住水？🪂', a: '答案是：跳伞用的降落伞！' }
+        { q: '什么伞无论下多大雨都遮不住水？🪂', a: '答案是：跳伞用的降落伞！' },
+        { q: '有一头小牛朝南走3步，又朝西走3步，它的尾巴朝向哪边？🐄', a: '答案是：朝向地面呀！' },
+        { q: '什么东西在倒立之后，会比原来多出整整一半？🤸', a: '答案是：数字6！倒过来就变成9啦！' },
+        { q: '哪种树的叶子永远也不会在秋天变黄落下来？🌲', a: '答案是：塑料做的人造圣诞树！' },
+        { q: '什么样的雨下得再大，人们出门也从来不打雨伞？🌧️', a: '答案是：夜空里的流星雨和春风细雨！' },
+        { q: '小明有一只神奇的口袋，怎么装都装不满，为什么？👝', a: '因为口袋底部破了一个大窟窿！嘻嘻！' }
     ],
     cosmos_nature: [
         '你知道吗？在火星上看夕阳西下，太阳周围是一片梦幻的淡蓝色哟！🌅',
@@ -1137,7 +1449,17 @@ const PET_HUMOR_BANK = {
         '长颈鹿的脖子虽然那么长，但它的颈椎骨头数量和我们人类一模一样，都是7块！🦒',
         '闪电的温度比太阳表面还要高出五倍！大自然的力量真是不可思议！⚡',
         '木星是太阳系里最大的行星，它的肚子里能装下一千三百多个地球！🌍',
-        '在太空中没有声音传播，因为太空中是真空的，安安静静像童话里的梦境！🌌'
+        '在太空中没有声音传播，因为太空中是真空的，安安静静像童话里的梦境！🌌',
+        '月亮其实不是完全圆的，它稍微有一点点像鸡蛋的形状呢！🥚',
+        '金星的一天比金星的一年还要长！因为它自己自转一圈实在太慢啦。🚶‍♂️',
+        '如果乘火箭以光速飞行，绕地球一圈只需要眨眼间的0.13秒！🚀',
+        '土星的光环虽然看起来像一块坚硬的玉盘，其实全是由晶莹剔透的冰块组成的！🧊',
+        '太空中有一片巨大的气体云，闻起来的味道居然像甜甜的草莓和覆盆子！🍓',
+        '海豚在睡觉的时候会把一只眼睛闭上，另一只眼睛睁着放哨防鲨鱼！🐬',
+        '蜗牛如果觉得天气太热或者太冷，可以一口气躲在壳里大睡三年呢！🐌',
+        '小牛在牧场里也是有自己的好朋友的，如果分开了它会难过得哞哞叫！🐄',
+        '北极熊的毛看起来是白色的，其实每一根都是中空的透明光纤管管！🐻‍❄️',
+        '蝴蝶是用它细长的小脚丫来品尝花蜜的味道的，是不是很不可思议？🦋'
     ],
     food_fun: [
         '薯片袋里装的才不是空气呢，那是保护香脆薯片不被压碎的‘安全气囊’！🥔',
@@ -1164,7 +1486,17 @@ const PET_HUMOR_BANK = {
         '苹果咬开一会儿为什么会变黄？因为它太害羞，见到空气就悄悄氧化变脸啦！🍎',
         '香蕉弯弯的像小船，剥开皮就是一段甜甜的味觉奇妙漂流记！🍌',
         '蜂蜜是永远不会变坏的食物！三千年前金字塔里的蜂蜜现在还能吃呢！🍯',
-        '小主人，今天想好吃什么好吃的了吗？光是想想口水都要流出来啦！🤤'
+        '小主人，今天想好吃什么好吃的了吗？光是想想口水都要流出来啦！🤤',
+        '成熟的蔓越莓如果从桌上掉下去，会像高弹性小皮球一样砰砰往上蹦！🏀',
+        '菠萝其实长在地里的灌木丛中央，而且一株菠萝树两三年才结出一个菠萝宝宝！🍍',
+        '胡萝卜最早在世界上根本不是橙色的，而是高贵神秘的紫色和黄色！🥕',
+        '为什么吃完辣椒喝冰水不管用？因为辣椒素是脂溶性的，喝一口纯牛奶才解辣哦！🥛',
+        '甜筒冰淇淋底部的巧克力脆尖，是世界上最美妙的压轴惊喜！🍦',
+        '烤面包片如果涂上一层厚厚的草莓果酱，连早晨的空气都变成粉红色的！🍞',
+        '小海苔片虽然薄得像纸，但是入口即化的鲜脆滋味谁也挡不住！🍘',
+        '煮玉米时飘出来的甜香，是夏天田野里最纯真的大自然味道！🌽',
+        '大西瓜切开的第一勺最甜的芯，一定要留给最喜欢的小伙伴吃！🍉',
+        '如果把七彩水果糖泡进汽水里，就会咕嘟咕嘟冒出幸福的彩虹泡泡！🥤'
     ],
     imagination: [
         '如果天上的白云是棉花糖，那阴天下雨会不会稀里哗啦下一地草莓雪糕？🍨',
@@ -1191,23 +1523,61 @@ const PET_HUMOR_BANK = {
         '如果能发明一种不会融化的冰淇淋，我们就能把它装进口袋带去任何地方！🍦',
         '今天的天空蓝得像被清水洗过一样，真想拿一根大吸管吸一口云朵奶盖！🥤',
         '小狗摇尾巴是在给你发送无声的电报：‘我超喜欢你，快来摸摸我！’🐕',
-        '不管世界多大多吵闹，只要和小主人在一起，这里就是最温暖的童话世界！🎠'
+        '不管世界多大多吵闹，只要和小主人在一起，这里就是最温暖的童话世界！🎠',
+        '要是书本里的生字半夜会自己走出来开联欢会，那字典就是最热闹的大礼堂！📖',
+        '要是把阳光装进玻璃罐子里密封起来，冬天停电的时候拿出来会不会照亮整个房间？💡',
+        '我猜海浪每天不知疲倦地拍打沙滩，是在跟岸上的鹅卵石玩‘拍手手’游戏呢！🌊',
+        '如果能有一双像小鸟一样的羽毛翅膀，飞到积雨云上打个滚一定会沾满彩虹光环！🕊️',
+        '时钟的指针每天不停地转圈圈，它是不是也在追逐那个永远追不上的‘明天’呀？⌛',
+        '要是铅笔屑能变成彩色的花瓣，写完作业就能收获一整座秘密小花园！🌸',
+        '雨滴滴答答敲打窗户，是在用音符给小主人弹奏催眠摇篮曲呢！🌧️',
+        '小背包像个神奇的四次元百宝箱，把知识和梦想通通装了进去！🎒',
+        '天上的大雁排成‘人’字飞过，是在给地上认真学习的小朋友比大拇指呢！🦅',
+        '如果所有的梦境都是一场奇幻电影，今晚我们一定会梦见星辰与大海！✨'
+    ],
+    wake_greetings: [
+        '呼啊~ 揉揉眼睛，你来找我玩啦！👀',
+        '伸个大懒腰，小主人你在看我吗？☀️',
+        '被你轻轻碰醒啦，今天也超开心！✨',
+        '打了个小盹，瞬间精神百倍，元气拉满！🚀',
+        '唔~ 刚才做了一个吃满汉全席的美梦，醒来正好见到最棒的你！🍪',
+        '小海鲜准时开机！电量100%，随时准备答题大作战！🔋',
+        '水泡破灭的声音唤醒了我，小主人今天也是闪闪发光呢！🫧',
+        '翻个小身子，抖抖精神，我们今天继续携手闯关！💪',
+        '嘿嘿，我其实一直在半睁着眼偷偷看你认真做题呢！👀',
+        '小憩片刻，大脑飞速升级，随时恭候长官指令！🫡',
+        '海底世界阳光正好，小主人一来水温都变得暖融融的！🌊',
+        '伸出小手碰碰你，愿今天的好运像浪花一样翻滚而来！🎉',
+        '呼噜呼噜~ 刚才梦到小主人拿了满分大奖，果然醒来你就来啦！🏆',
+        '小眼睛亮晶晶，伴学搭档向你报到！今天目标：错题全消灭！🎯',
+        '一觉醒来浑身有劲，让我们开启今天的高能答题旅程！⚡',
+        '轻轻触碰，快乐加倍！有你陪伴的每一分钟都超幸福！💖'
+    ],
+    feedback_titles: [
+        '太棒了！', 'Bingo！', '真聪明！', '答对了！', '小海鲜为你鼓掌！',
+        '火眼金睛！', '太神啦！', '稳稳拿下一题！', '智力大爆发！', '为你比心！',
+        '答题小能手！', '太秀了！', '势如破竹！', '满分表现！', '一语中的！', '智慧光芒闪耀！'
     ]
 };
 
-// --- 拟真闲聊与动态热更新引擎 (PET BANTER ENGINE) ---
-const PetBanterEngine = {
+// --- 拟真语言与智慧去重引擎 (PET LANGUAGE & DRAW-DECK ENGINE) ---
+const PetLanguageEngine = {
     riddleTimer: null,
+    riddleSafetyTimer: null,
     riddleActive: false,
     lastBanterTime: 0,
+    lastTimeGreetingTime: 0,
+    lastWrongComfortTime: 0,
     dynamicCache: [],
+    wheelIndex: 0,
+    // 类别轮转防扎堆轮盘 (保证同类话题绝不连续出现)
+    categoryWheel: ['species', 'riddle', 'cosmos_nature', 'food_fun', 'species', 'imagination', 'dynamic'],
 
     init() {
         this.loadDynamicCache();
         this.syncCloudBanterFeed();
     },
 
-    // 从本地持久化存储加载已同步的动态增量池
     loadDynamicCache() {
         try {
             const raw = localStorage.getItem('bingo_dynamic_banter_cache');
@@ -1222,12 +1592,10 @@ const PetBanterEngine = {
         }
     },
 
-    // 每日静默云端自动热更新 (24小时冷却检测)
     async syncCloudBanterFeed(force = false) {
         try {
             const lastSync = parseInt(localStorage.getItem('bingo_banter_last_sync') || '0', 10);
             const now = Date.now();
-            // 24小时 (86400000ms) 检查一次，避免高频请求
             if (!force && now - lastSync < 86400000 && this.dynamicCache.length > 0) {
                 return;
             }
@@ -1267,18 +1635,15 @@ const PetBanterEngine = {
                 localStorage.setItem('bingo_dynamic_banter_cache', JSON.stringify(this.dynamicCache));
                 localStorage.setItem('bingo_banter_last_sync', String(now));
                 if (addedCount > 0) {
-                    console.log(`[PetBanterEngine] 云端动态语料同步成功，新增 ${addedCount} 条趣味话题！`);
+                    console.log(`[PetLanguageEngine] 云端动态语料同步成功，新增 ${addedCount} 条趣味话题！`);
                 }
             }
-        } catch (e) {
-            // 静默失败，离线或断网无缝降级使用本地大底座
-        }
+        } catch (e) {}
     },
 
-    // 安全内容过滤器 (过滤成人口语、涉暴与不适宜词汇)
     isSafeForChildren(text) {
         if (!text || typeof text !== 'string') return false;
-        if (text.length < 4 || text.length > 65) return false;
+        if (text.length < 4 || text.length > 70) return false;
         const blackList = ['死', '杀', '枪', '劫', '偷', '婚', '恋', '情', '鬼', '穷', '赌', '酒', '烟', '暴'];
         for (const bad of blackList) {
             if (text.includes(bad)) return false;
@@ -1286,48 +1651,141 @@ const PetBanterEngine = {
         return true;
     },
 
-    // 随机获取一条生活化宽泛语料 (融合本地精选底座与云端动态池)
-    getRandomBanter(petType = 'fish') {
-        const petQuotes = (PET_HUMOR_BANK.species[petType] || PET_HUMOR_BANK.species.fish);
+    // 时段关怀与作息感知 (早晨/午餐/午后防困/傍晚/晚安)
+    checkTimeAwareGreeting(petType = 'fish') {
+        const now = Date.now();
+        // 至少间隔 45 分钟触发一次时段关怀，避免打扰
+        if (now - this.lastTimeGreetingTime < 2700000) return null;
 
-        // 如果有云端动态池且随机触发 (20% 几率优先从动态新库抽取)
-        if (this.dynamicCache.length > 0 && Math.random() < 0.20) {
-            const dynItem = this.dynamicCache[Math.floor(Math.random() * this.dynamicCache.length)];
-            return dynItem;
+        const hour = new Date().getHours();
+        let greeting = null;
+        if (hour >= 6 && hour < 9) {
+            greeting = '清晨好呀！金色的朝阳洒在海面上，一日之计在于晨，今天也要元气满满！☀️';
+        } else if (hour >= 11 && hour <= 13) {
+            greeting = '咕噜噜~ 肚子在提醒该吃美味午饭啦！好好吃饭补充能量，大脑才会飞速运转哦！🍲';
+        } else if (hour >= 14 && hour < 17) {
+            greeting = '午后有点小困意？跟我一起伸个大懒腰，喝口温水，立刻精神百倍！🛋️';
+        } else if (hour >= 18 && hour < 21) {
+            greeting = '晚上好！夕阳西下，今天的小主人又掌握了好多好多新知识，为你点赞！🌆';
+        } else if (hour >= 21 || hour < 6) {
+            greeting = '夜深啦，小海鲜也要准备入眠做美梦了，注意保护眼睛，早早休息身体棒！🌙';
         }
 
-        // 随机权重分配：
-        // 40% 专属物种生活趣事，25% 趣味脑筋急转弯，15% 奇趣宇宙自然，10% 吃货天地，10% 天马行空幻想
-        const rand = Math.random();
-        if (rand < 0.40) {
-            const item = petQuotes[Math.floor(Math.random() * petQuotes.length)];
+        if (greeting) {
+            this.lastTimeGreetingTime = now;
+            DrawDeckManager.recordUsed(greeting);
+            return { type: 'time_greeting', text: greeting };
+        }
+        return null;
+    },
+
+    // 随机获取一条生活化宽泛语料 (无放回抽牌堆 + 类别轮转防扎堆 + LRU 排除)
+    getRandomBanter(petType = 'fish') {
+        // 1. 优先检查时段共情 (15% 几率尝试触发早/中/晚问候)
+        if (Math.random() < 0.15) {
+            const timeItem = this.checkTimeAwareGreeting(petType);
+            if (timeItem) return timeItem;
+        }
+
+        // 2. 轮盘轮转类别选择，避免连续相同类型
+        const targetCategory = this.categoryWheel[this.wheelIndex % this.categoryWheel.length];
+        this.wheelIndex++;
+
+        // 3. 动态云端池抽取
+        if (targetCategory === 'dynamic' && this.dynamicCache.length > 0) {
+            const dynItem = DrawDeckManager.draw('dynamic_cloud', this.dynamicCache);
+            if (dynItem) return dynItem;
+        }
+
+        // 4. 物种专属生活趣事抽牌
+        if (targetCategory === 'species') {
+            const petQuotes = (PET_HUMOR_BANK.species[petType] || PET_HUMOR_BANK.species.fish);
+            const item = DrawDeckManager.draw('species_' + petType, petQuotes);
             return { type: 'joke', text: item };
-        } else if (rand < 0.65) {
-            const riddle = PET_HUMOR_BANK.riddles[Math.floor(Math.random() * PET_HUMOR_BANK.riddles.length)];
+        }
+
+        // 5. 趣味脑筋急转弯
+        if (targetCategory === 'riddle') {
+            const riddle = DrawDeckManager.draw('riddles', PET_HUMOR_BANK.riddles);
             return { type: 'riddle', q: riddle.q, a: riddle.a };
-        } else if (rand < 0.80) {
-            const nature = PET_HUMOR_BANK.cosmos_nature[Math.floor(Math.random() * PET_HUMOR_BANK.cosmos_nature.length)];
+        }
+
+        // 6. 奇趣宇宙自然科普
+        if (targetCategory === 'cosmos_nature') {
+            const nature = DrawDeckManager.draw('cosmos_nature', PET_HUMOR_BANK.cosmos_nature);
             return { type: 'cosmos_nature', text: nature };
-        } else if (rand < 0.90) {
-            const food = PET_HUMOR_BANK.food_fun[Math.floor(Math.random() * PET_HUMOR_BANK.food_fun.length)];
+        }
+
+        // 7. 吃货天地搞笑生活
+        if (targetCategory === 'food_fun') {
+            const food = DrawDeckManager.draw('food_fun', PET_HUMOR_BANK.food_fun);
             return { type: 'food_fun', text: food };
-        } else {
-            const imag = PET_HUMOR_BANK.imagination[Math.floor(Math.random() * PET_HUMOR_BANK.imagination.length)];
-            return { type: 'imagination', text: imag };
+        }
+
+        // 8. 天马行空幻想
+        const imag = DrawDeckManager.draw('imagination', PET_HUMOR_BANK.imagination);
+        return { type: 'imagination', text: imag };
+    },
+
+    // 动态投喂赞扬获取 (插槽式无限组合，告别单调硬编码)
+    getFeedPraise(petType = 'fish') {
+        return SlotSyntaxSynthesizer.generateFeedPraise(petType);
+    },
+
+    // 连胜激励获取
+    getStreakCheer(streak, petType = 'fish') {
+        return SlotSyntaxSynthesizer.generateStreakCheer(streak, petType);
+    },
+
+    // 唤醒问候获取 (无放回洗牌抽牌堆)
+    getWakeUpGreeting(petType = 'fish') {
+        return DrawDeckManager.draw('wake_greetings', PET_HUMOR_BANK.wake_greetings);
+    },
+
+    // 答对反馈大标题获取
+    getFeedbackTitle() {
+        return DrawDeckManager.draw('feedback_titles', PET_HUMOR_BANK.feedback_titles);
+    },
+
+    // 错题暖心治愈安抚触发 (含防抖与温馨发声)
+    triggerWrongComfort(petType = 'fish') {
+        const now = Date.now();
+        // 6秒冷却防抖，避免连点错误选项时频繁触发语音
+        if (now - this.lastWrongComfortTime < 6000) return;
+        this.lastWrongComfortTime = now;
+
+        if (!window.roamingPet) return;
+        const comfort = SlotSyntaxSynthesizer.generateWrongComfort(petType);
+        window.roamingPet.say(comfort, 4200);
+        if (typeof PetVoice !== 'undefined') {
+            PetVoice.speak(comfort, petType, { pitch: 1.05, rate: 0.95 });
         }
     },
 
-    // 触发幽默互动发声与气泡
+    // 点击宠物互动获取
+    getPetInteractionQuote(petType, activeForm, petDef) {
+        const customDeckKey = `pet_click_${petType}_${activeForm ? activeForm.stage : 1}`;
+        const quotesPool = [
+            (activeForm && activeForm.quote) ? activeForm.quote : null,
+            ...(petDef && petDef.quotes ? petDef.quotes : []),
+            ...(PET_HUMOR_BANK.species[petType] ? PET_HUMOR_BANK.species[petType].slice(0, 10) : [])
+        ].filter(Boolean);
+
+        return DrawDeckManager.draw(customDeckKey, quotesPool);
+    },
+
+    // 触发幽默伴学发声与气泡
     triggerBanter(petType = 'fish', isIdle = false) {
         if (!window.roamingPet) return;
         if (this.riddleActive) return;
 
         const banter = this.getRandomBanter(petType);
+        if (!banter) return;
         this.lastBanterTime = Date.now();
         const cfg = (typeof PetVoice !== 'undefined' && PetVoice.SPECIES_CONFIG[petType]) || { personaPrefix: '' };
 
         if (banter.type === 'riddle' && banter.q && banter.a) {
-            // 二段式脑筋急转弯：完整念完谜面 -> 悬念思考停顿 1.8~2.2s -> 揭晓爆笑答案
+            // 二段式脑筋急转弯：念完谜面 -> 悬念思考停顿 1.8s -> 揭晓答案
             this.riddleActive = true;
             if (this.riddleTimer) clearTimeout(this.riddleTimer);
             if (this.riddleSafetyTimer) clearTimeout(this.riddleSafetyTimer);
@@ -1335,14 +1793,11 @@ const PetBanterEngine = {
             const questionText = (cfg.personaPrefix && !banter.q.startsWith('【')) ? `${cfg.personaPrefix} ${banter.q}` : banter.q;
             const answerText = banter.a;
 
-            // 预估问题发音时长 (每字约 280ms + 600ms 缓冲)
             const questionAudioDuration = Math.max(3800, questionText.length * 280 + 600);
-            const questionBubbleDuration = questionAudioDuration + 2400; // 气泡一直保留至答案揭晓
+            const questionBubbleDuration = questionAudioDuration + 2400;
 
-            // 1. 弹出谜面气泡
             window.roamingPet.say(questionText, questionBubbleDuration);
 
-            // 伴随思考微动作
             if (window.roamingPet.body) {
                 window.roamingPet.body.classList.add('pet-bounce');
                 setTimeout(() => {
@@ -1366,9 +1821,8 @@ const PetBanterEngine = {
 
                 const answerDuration = Math.max(4200, answerText.length * 260);
                 window.roamingPet.say(answerText, answerDuration);
-                PetVoice.speak(answerText, petType);
+                PetVoice.speak(answerText, petType, { pitch: 1.05 });
 
-                // 解答后欢呼小动作
                 this.triggerSpeciesReaction(petType);
 
                 setTimeout(() => {
@@ -1376,20 +1830,17 @@ const PetBanterEngine = {
                 }, answerDuration + 400);
             };
 
-            // 2. 朗读谜面：只有当谜面完整念完之后，再留出 1.8 秒思考停顿，才揭晓答案！
-            PetVoice.speak(questionText, petType, {}, () => {
+            PetVoice.speak(questionText, petType, { rate: 0.95 }, () => {
                 this.riddleTimer = setTimeout(() => {
                     revealAnswer();
                 }, 1800);
             });
 
-            // 3. 兜底看门狗安全定时器：若静音或浏览器未触发 onend，在问题预估时长 + 2秒后自动揭晓
             this.riddleSafetyTimer = setTimeout(() => {
                 revealAnswer();
             }, questionAudioDuration + 2200);
 
         } else {
-            // 常规搞笑生活台词 / 宇宙科普 / 美食趣事 / 幻想
             const rawText = banter.text || banter.q || '';
             const taggedText = (cfg.personaPrefix && !rawText.startsWith('【')) 
                 ? `${cfg.personaPrefix} ${rawText}` 
@@ -1401,7 +1852,6 @@ const PetBanterEngine = {
         }
     },
 
-    // 生物学特色调皮发声与动作配合
     triggerSpeciesReaction(petType) {
         if (!window.roamingPet || !window.roamingPet.body) return;
         const body = window.roamingPet.body;
@@ -1424,6 +1874,9 @@ const PetBanterEngine = {
         }
     }
 };
+
+// 兼容别名保持旧调用兼容
+const PetBanterEngine = PetLanguageEngine;
 
 // --- 宠物状态与存储 ---
 function getPetData() {
@@ -1591,11 +2044,15 @@ function feedPetOnCorrectAnswer() {
     return lastFeedingInfo;
 }
 
-// 答错打断连胜
+// 答错打断连胜，并触发治愈系暖心安抚
 function recordQuizWrong() {
     childStreak = 0;
     if (window.roamingPet) {
         window.roamingPet.updateStreak(0);
+        if (typeof PetLanguageEngine !== 'undefined') {
+            const pet = getPetData();
+            PetLanguageEngine.triggerWrongComfort(pet.type);
+        }
     }
 }
 
@@ -2378,13 +2835,14 @@ class RoamingPetEngine {
             }, 800);
         }
 
-        // 随机专属台词与语音朗读 (65% 概率触发幽默金句/脑筋急转弯，35% 触发形态称号台词)
-        if (typeof PetBanterEngine !== 'undefined' && Math.random() < 0.65) {
-            PetBanterEngine.triggerBanter(pet.type, false);
+        // 随机专属台词与语音朗读 (65% 概率触发幽默金句/脑筋急转弯，35% 触发形态称号与深度互动台词)
+        if (typeof PetLanguageEngine !== 'undefined' && Math.random() < 0.65) {
+            PetLanguageEngine.triggerBanter(pet.type, false);
         } else {
             const cfg = (typeof PetVoice !== 'undefined' && PetVoice.SPECIES_CONFIG[pet.type]) || { personaPrefix: '' };
-            const quotesPool = [activeForm.quote, ...(petDef.quotes || [])];
-            const rawQuote = quotesPool[Math.floor(Math.random() * quotesPool.length)];
+            const rawQuote = (typeof PetLanguageEngine !== 'undefined')
+                ? PetLanguageEngine.getPetInteractionQuote(pet.type, activeForm, petDef)
+                : activeForm.quote;
             const quote = (cfg.personaPrefix && !rawQuote.startsWith('【')) ? `${cfg.personaPrefix} ${rawQuote}` : rawQuote;
             this.say(quote);
             PetVoice.speak(quote, pet.type);
@@ -2445,8 +2903,11 @@ class RoamingPetEngine {
             }, 650);
         }
 
-        this.say(`+10 EXP！真香呀！😋`);
-        PetVoice.speak('+10 EXP！真香呀！', pet.type);
+        const praise = (typeof PetLanguageEngine !== 'undefined')
+            ? PetLanguageEngine.getFeedPraise(pet.type)
+            : `+10 EXP！真香呀！😋`;
+        this.say(praise);
+        PetVoice.speak(praise, pet.type);
     }
 
     // 怠速打盹检测 (45秒未操作入眠)
@@ -2496,15 +2957,11 @@ class RoamingPetEngine {
 
             const pet = getPetData();
             if (byHover) {
-                // 鼠标悬停唤醒台词互动
+                // 鼠标悬停唤醒台词互动 (无放回洗牌抽牌堆)
                 const cfg = (typeof PetVoice !== 'undefined' && PetVoice.SPECIES_CONFIG[pet.type]) || { personaPrefix: '' };
-                const hoverGreetings = [
-                    '呼啊~ 揉揉眼睛，你来找我玩啦！👀',
-                    '伸个大懒腰，小主人你在看我吗？☀️',
-                    '被你轻轻碰醒啦，今天也超开心！✨',
-                    '打了个小盹，瞬间精神百倍！🚀'
-                ];
-                const rawGreet = hoverGreetings[Math.floor(Math.random() * hoverGreetings.length)];
+                const rawGreet = (typeof PetLanguageEngine !== 'undefined')
+                    ? PetLanguageEngine.getWakeUpGreeting(pet.type)
+                    : '呼啊~ 揉揉眼睛，你来找我玩啦！👀';
                 const greet = (cfg.personaPrefix && !rawGreet.startsWith('【')) ? `${cfg.personaPrefix} ${rawGreet}` : rawGreet;
                 this.say(greet, 3800);
                 PetVoice.speak(greet, pet.type);
@@ -2543,7 +3000,14 @@ class RoamingPetEngine {
         if (!this.body) return;
         if (streak >= 3) {
             this.body.classList.add('streak-active');
-            this.say(`🔥 ${streak}连胜！狂热变身形态！冲呀！`);
+            const cheer = (typeof PetLanguageEngine !== 'undefined')
+                ? PetLanguageEngine.getStreakCheer(streak)
+                : `🔥 ${streak}连胜！狂热变身形态！冲呀！`;
+            this.say(cheer);
+            if (streak === 3 || streak === 5 || streak === 8 || streak === 10) {
+                const pet = getPetData();
+                PetVoice.speak(cheer, pet.type);
+            }
         } else {
             this.body.classList.remove('streak-active');
         }
@@ -3137,10 +3601,11 @@ function showChildFeedback() {
         `;
     }
 
-    const titles = ['太棒了！', 'Bingo！', '真聪明！', '答对了！', '小海鲜为你鼓掌！'];
     const feedbackTitle = document.getElementById('feedback-title');
     if (feedbackTitle) {
-        feedbackTitle.innerText = titles[Math.floor(Math.random() * titles.length)];
+        feedbackTitle.innerText = (typeof PetLanguageEngine !== 'undefined')
+            ? PetLanguageEngine.getFeedbackTitle()
+            : '太棒了！';
     }
 
     feedback.style.display = 'flex';

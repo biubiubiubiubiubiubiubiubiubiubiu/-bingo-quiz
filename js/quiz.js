@@ -466,7 +466,7 @@
 
                 function speakText(text) {
                     if (typeof window.speakText === 'function') {
-                        window.speakText(text);
+                        window.speakText(text, null, true); // true: 题目/解析学术清晰播音轨，不混淆萌宠搞怪音
                         return;
                     }
 
