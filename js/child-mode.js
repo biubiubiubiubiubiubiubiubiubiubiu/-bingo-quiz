@@ -803,10 +803,16 @@ const PetVoice = {
 
             this.currentUtterance = utterance;
             this.speaking = true;
+            if (window.PetEngine && PetEngine.Vector) {
+                PetEngine.Vector.setSpeaking(true);
+            }
 
             const resetSpeaking = () => {
                 this.speaking = false;
                 this.currentUtterance = null;
+                if (window.PetEngine && PetEngine.Vector) {
+                    PetEngine.Vector.setSpeaking(false);
+                }
                 if (typeof onEndCallback === 'function') {
                     const cb = onEndCallback;
                     onEndCallback = null;
@@ -1880,6 +1886,9 @@ const PetBanterEngine = PetLanguageEngine;
 
 // --- 宠物状态与存储 ---
 function getPetData() {
+    if (window.PetEngine && PetEngine.Life) {
+        return PetEngine.Life.getData();
+    }
     try {
         const saved = localStorage.getItem('bingo_child_pet');
         if (saved) {
@@ -1898,11 +1907,15 @@ function getPetData() {
         exp: 0,
         feedCount: 0,
         level: 1,
-        equippedStage: null // null 表示跟随当前最高解锁形态
+        equippedStage: null
     };
 }
 
 function savePetData(pet) {
+    if (window.PetEngine && PetEngine.Life) {
+        PetEngine.Life.saveData(pet);
+        return;
+    }
     try {
         localStorage.setItem('bingo_child_pet', JSON.stringify(pet));
     } catch (e) {
@@ -1990,9 +2003,31 @@ function feedPetOnCorrectAnswer() {
     const pet = getPetData();
     const oldLvlInfo = getPetLevelInfo(pet.exp || 0);
     
-    pet.exp = (pet.exp || 0) + 10;
+    // 检查疾风弹射倍率与饱腹度加成
+    let expGain = 10;
+    if (window.PetEngine && PetEngine.Skills && PetEngine.Skills.activeEffects.hyperBoostRemaining > 0) {
+        expGain *= 2;
+        PetEngine.Skills.activeEffects.hyperBoostRemaining -= 1;
+    }
+    if ((pet.satiety ?? 85) >= 60) {
+        expGain = Math.round(expGain * 1.2);
+    }
+
+    pet.exp = (pet.exp || 0) + expGain;
     pet.feedCount = (pet.feedCount || 0) + 1;
     childStreak += 1; // 累积连胜
+
+    if (window.PetEngine && PetEngine.Life) {
+        PetEngine.Life.feed(15);
+    }
+    if (window.PetEngine && PetEngine.Emotion) {
+        PetEngine.Emotion.setEmotion(childStreak >= 3 ? 'celebrate' : 'happy');
+        setTimeout(() => {
+            if (PetEngine.Emotion.currentEmotion === 'celebrate' || PetEngine.Emotion.currentEmotion === 'happy') {
+                PetEngine.Emotion.setEmotion('normal');
+            }
+        }, 3200);
+    }
     
     const newLvlInfo = getPetLevelInfo(pet.exp);
     pet.level = newLvlInfo.level;
@@ -2047,6 +2082,14 @@ function feedPetOnCorrectAnswer() {
 // 答错打断连胜，并触发治愈系暖心安抚
 function recordQuizWrong() {
     childStreak = 0;
+    if (window.PetEngine && PetEngine.Emotion) {
+        PetEngine.Emotion.setEmotion('comfort');
+        setTimeout(() => {
+            if (PetEngine.Emotion.currentEmotion === 'comfort') {
+                PetEngine.Emotion.setEmotion('normal');
+            }
+        }, 3800);
+    }
     if (window.roamingPet) {
         window.roamingPet.updateStreak(0);
         if (typeof PetLanguageEngine !== 'undefined') {
@@ -2923,6 +2966,9 @@ class RoamingPetEngine {
 
     goToSleep() {
         this.isSleeping = true;
+        if (window.PetEngine && PetEngine.Emotion) {
+            PetEngine.Emotion.setEmotion('sleep');
+        }
         if (this.autonomousBanterTimer) {
             clearTimeout(this.autonomousBanterTimer);
             this.autonomousBanterTimer = null;
@@ -2945,6 +2991,9 @@ class RoamingPetEngine {
         if (this.autoWakeTimer) clearTimeout(this.autoWakeTimer);
         if (this.isSleeping) {
             this.isSleeping = false;
+            if (window.PetEngine && PetEngine.Emotion) {
+                PetEngine.Emotion.setEmotion('normal');
+            }
             if (this.sleepEl) this.sleepEl.style.display = 'none';
             if (this.body) {
                 this.body.style.filter = 'none';
@@ -3020,7 +3069,17 @@ class RoamingPetEngine {
         const activeForm = getPetActiveForm(pet);
         const lvlInfo = getPetLevelInfo(pet.exp || 0);
 
-        if (this.avatarEl) this.avatarEl.innerText = activeForm.avatar;
+        if (this.avatarEl) {
+            if (window.PetEngine && PetEngine.Vector) {
+                this.avatarEl.innerHTML = PetEngine.Vector.renderSvg(pet.type, lvlInfo.stageIndex, {
+                    emotion: (window.PetEngine && PetEngine.Emotion) ? PetEngine.Emotion.currentEmotion : 'normal',
+                    width: 68,
+                    height: 68
+                });
+            } else {
+                this.avatarEl.innerText = activeForm.avatar;
+            }
+        }
         if (this.tagEl) this.tagEl.innerText = `Lv.${lvlInfo.level}`;
 
         // 清理旧光环类名并应用新光环
@@ -3192,17 +3251,23 @@ function updatePetWidgets() {
     // 1. 首页宠物状态卡片
     const homeBadge = document.getElementById('child-pet-home-badge');
     if (homeBadge) {
+        const vectorAvatar = (window.PetEngine && PetEngine.Vector)
+            ? PetEngine.Vector.renderSvg(pet.type, lvlInfo.stageIndex, { width: 44, height: 44 })
+            : `<span style="font-size:32px;">${activeForm.avatar}</span>`;
+
         homeBadge.innerHTML = `
             <div class="pet-avatar-circle" onclick="speakPetQuote()" title="点击与我互动！">
-                <span style="font-size:32px;">${activeForm.avatar}</span>
+                ${vectorAvatar}
             </div>
             <div class="pet-badge-info" onclick="openPetModal()">
                 <div style="font-weight:bold; font-size:15px; color:var(--text-main); display:flex; align-items:center; gap:6px;">
                     <span>${pet.customName || petDef.name}</span>
                     <span class="pet-level-tag">Lv.${lvlInfo.level} · ${activeForm.title}</span>
                 </div>
-                <div style="font-size:12px; color:var(--text-sub); margin-top:2px;">
-                    已投喂 ${pet.feedCount || 0} 次 · EXP: ${pet.exp}/${lvlInfo.nextExp}
+                <div style="font-size:12px; color:var(--text-sub); margin-top:2px; display:flex; align-items:center; gap:6px; flex-wrap:wrap;">
+                    <span>EXP: ${pet.exp}/${lvlInfo.nextExp}</span>
+                    <span class="pet-satiety-pill" title="饱腹度 (做题投喂保持饱满)">🍗 ${pet.satiety ?? 85}%</span>
+                    <span class="pet-shells-pill" title="深海贝壳币">🐚 ${pet.shells ?? 20}</span>
                 </div>
                 <div class="pet-exp-bar"><div class="pet-exp-fill" style="width:${Math.min(100, Math.round(((pet.exp - lvlInfo.minExp) / (lvlInfo.nextExp - lvlInfo.minExp)) * 100))}%;"></div></div>
             </div>
@@ -3219,9 +3284,24 @@ function updatePetWidgets() {
     // 2. 答题界面伴学胶囊挂件 (内置于标题栏居中)
     const quizWidget = document.getElementById('child-pet-quiz-widget');
     if (quizWidget) {
+        const compactSvg = (window.PetEngine && PetEngine.Vector)
+            ? PetEngine.Vector.renderSvg(pet.type, lvlInfo.stageIndex, { width: 24, height: 24 })
+            : activeForm.avatar;
+        const skillDef = (window.PetEngine && PetEngine.Skills) ? PetEngine.Skills.getSkillDef(pet.type) : null;
+        const skillHtml = skillDef ? `
+            <button type="button" class="btn-pet-skill-trigger ${PetEngine.Skills.canUseSkill(pet.type) ? 'skill-ready' : 'skill-exhausted'}" 
+                    id="pet-quiz-skill-btn"
+                    onclick="triggerCompanionSkill(event)" 
+                    title="${skillDef.name}: ${skillDef.desc}">
+                <span>${skillDef.icon}</span>
+                <span class="skill-name-text">${skillDef.name}</span>
+            </button>
+        ` : '';
+
         quizWidget.innerHTML = `
-            <div class="pet-quiz-avatar" onclick="speakPetQuote()" title="轻触听我说说话！">${activeForm.avatar}</div>
-            <div class="pet-quiz-name" title="${activeForm.title} (Lv.${lvlInfo.level})">${activeForm.title} · Lv.${lvlInfo.level}</div>
+            <div class="pet-quiz-avatar" onclick="speakPetQuote()" title="轻触听我说说话！">${compactSvg}</div>
+            <div class="pet-quiz-name" title="${activeForm.title} (Lv.${lvlInfo.level})">${activeForm.title}</div>
+            ${skillHtml}
             <button class="btn btn-ghost pet-quiz-sound-btn" onclick="togglePetSound(event)" title="声音开关">${PetSound.isEnabled() ? '🔊' : '🔇'}</button>
         `;
         quizWidget.style.display = 'inline-flex';
@@ -3258,7 +3338,11 @@ function triggerEvolutionModal(pet, newForm) {
     const preForm = petDef.forms[oldStage] || petDef.forms[0];
 
     if (preAvatarEl) {
-        preAvatarEl.innerText = preForm.avatar;
+        if (window.PetEngine && PetEngine.Vector) {
+            preAvatarEl.innerHTML = PetEngine.Vector.renderSvg(pet.type, oldStage, { width: 100, height: 100 });
+        } else {
+            preAvatarEl.innerText = preForm.avatar;
+        }
         preAvatarEl.style.opacity = '1';
         preAvatarEl.style.transform = 'scale(1)';
     }
@@ -3267,7 +3351,13 @@ function triggerEvolutionModal(pet, newForm) {
         newAvatarContainer.classList.remove('active');
     }
 
-    if (newAvatarEl) newAvatarEl.innerText = newForm.avatar;
+    if (newAvatarEl) {
+        if (window.PetEngine && PetEngine.Vector) {
+            newAvatarEl.innerHTML = PetEngine.Vector.renderSvg(pet.type, newForm.stage - 1, { width: 120, height: 120, emotion: 'celebrate' });
+        } else {
+            newAvatarEl.innerText = newForm.avatar;
+        }
+    }
     if (titleBanner) titleBanner.innerText = `🎉 恭喜！觉醒五阶变身！ 🎉`;
     if (formTitle) formTitle.innerText = `【${newForm.title}】`;
     if (descEl) descEl.innerText = newForm.desc;
@@ -3359,8 +3449,11 @@ function renderAquariumModal() {
             const card = document.createElement('div');
             card.className = `pet-selector-card ${isActive ? 'active' : ''}`;
             card.onclick = () => switchCompanionPet(p.id);
+            const cardSvg = (window.PetEngine && PetEngine.Vector)
+                ? PetEngine.Vector.renderSvg(p.id, 0, { width: 34, height: 34 })
+                : p.avatar;
             card.innerHTML = `
-                <div class="pet-card-icon">${p.avatar}</div>
+                <div class="pet-card-icon" style="display:flex; align-items:center; justify-content:center; width:34px; height:34px;">${cardSvg}</div>
                 <div class="pet-card-name">${p.name}</div>
                 <div class="pet-card-status">${isActive ? '伴学中 ⭐' : '选我 🐾'}</div>
             `;
@@ -3377,14 +3470,21 @@ function renderAquariumModal() {
     // 2. 渲染头部物种简介卡
     const headerEl = document.getElementById('aquarium-header-card');
     if (headerEl) {
+        const headerSvg = (window.PetEngine && PetEngine.Vector)
+            ? PetEngine.Vector.renderSvg(activeType, lvlInfo.stageIndex, { width: 54, height: 54 })
+            : `<div style="font-size:38px;">${petDef.avatar}</div>`;
         headerEl.innerHTML = `
-            <div style="font-size:38px;">${petDef.avatar}</div>
+            <div style="width:54px; height:54px; flex-shrink:0;">${headerSvg}</div>
             <div style="flex-grow:1; text-align:left;">
-                <div style="font-weight:bold; font-size:15px; color:var(--text-main);">
-                    ${petDef.name} <span style="font-size:12px; color:var(--text-sub); font-weight:normal;">(${petDef.speciesName})</span>
+                <div style="font-weight:bold; font-size:15px; color:var(--text-main); display:flex; align-items:center; gap:6px;">
+                    <span>${petDef.name}</span>
+                    <span style="font-size:12px; color:var(--text-sub); font-weight:normal;">(${petDef.speciesName})</span>
                 </div>
-                <div style="font-size:12px; color:var(--text-sub); margin-top:2px;">
-                    喜好：${petDef.foodIcon} ${petDef.favoriteFood} · 当前成长：Lv.${lvlInfo.level} (${lvlInfo.stageName})
+                <div style="font-size:12px; color:var(--text-sub); margin-top:3px; display:flex; align-items:center; gap:6px; flex-wrap:wrap;">
+                    <span>喜好：${petDef.foodIcon} ${petDef.favoriteFood}</span>
+                    <span class="pet-satiety-pill">🍗 ${currentPet.satiety ?? 85}%</span>
+                    <span class="pet-shells-pill">🐚 ${currentPet.shells ?? 20}</span>
+                    <span style="color:#FF70A6; font-weight:bold;">💖 羁绊 Lv.${currentPet.bondLevel ?? 1}</span>
                 </div>
             </div>
         `;
@@ -3420,9 +3520,12 @@ function renderAquariumModal() {
                 actionHtml = `<span style="font-size:11px; color:var(--text-sub);">🔒 Lv.${form.unlockLevel} 解锁</span>`;
             }
 
+            const stageSvg = (window.PetEngine && PetEngine.Vector)
+                ? PetEngine.Vector.renderSvg(activeType, idx, { width: 44, height: 44 })
+                : `<span>${form.avatar}</span>`;
             card.innerHTML = `
-                <div class="evo-stage-avatar-box">
-                    <span>${form.avatar}</span>
+                <div class="evo-stage-avatar-box" style="display:flex; align-items:center; justify-content:center;">
+                    ${stageSvg}
                 </div>
                 <div class="evo-stage-info">
                     <div class="evo-stage-title">
@@ -3585,10 +3688,14 @@ function showChildFeedback() {
             levelUpBanner = `<div class="pet-levelup-banner">🎉 哇！升级啦！变成【${lastFeedingInfo.levelTitle}】！</div>`;
         }
 
+        const feedbackSvg = (window.PetEngine && PetEngine.Vector)
+            ? PetEngine.Vector.renderSvg(pet.type, lvlInfo.stageIndex, { width: 52, height: 52, emotion: 'celebrate' })
+            : activeForm.avatar;
+
         feedbackPetEl.innerHTML = `
-            <div class="feedback-pet-animation">
-                <span class="eating-food">${petDef.foodIcon}</span>
-                <span class="eating-pet">${activeForm.avatar}</span>
+            <div class="feedback-pet-animation" style="display:flex; align-items:center; justify-content:center; gap:8px;">
+                <span class="eating-food" style="font-size:32px;">${petDef.foodIcon}</span>
+                <div class="eating-pet" style="width:52px; height:52px;">${feedbackSvg}</div>
             </div>
             <div style="font-weight:bold; font-size:18px; color:var(--text-main); margin-top:10px;">
                 ${pet.customName || petDef.name} 饱餐了一顿！

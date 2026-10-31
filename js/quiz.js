@@ -46,6 +46,7 @@
             masteredInSession = 0;
             currentQuiz = wrongQuestions.sort(() => 0.5 - Math.random());
             lastVisibleQuestionIndex = 0;
+            if (window.PetEngine && PetEngine.Skills) { PetEngine.Skills.resetQuizSkills(); }
 
             history.pushState({ view: 'quiz', dbId: currentDb.id }, '', '#quiz');
             updateView({ view: 'quiz' });
@@ -641,6 +642,21 @@
 
                 } else {
                     // 点击了错误选项
+                    // 检查小泡鱼锦鲤结界 (Koi Blessing Shield)
+                    if (window.PetEngine && PetEngine.Skills && PetEngine.Skills.activeEffects.koiShieldActive) {
+                        PetEngine.Skills.activeEffects.koiShieldActive = false;
+                        const parentCard = row.closest('.ios-card');
+                        if (parentCard) parentCard.classList.remove('pet-bubble-shield-active');
+                        if (typeof PetSound !== 'undefined') PetSound.cheer();
+                        if (window.roamingPet) {
+                            window.roamingPet.say('🫧 锦鲤结界抵挡了本次错误！保住连胜，小主人再试一次！✨', 4000);
+                            if (typeof PetVoice !== 'undefined') PetVoice.speak('锦鲤结界生效啦，再试一次！', 'fish');
+                        }
+                        row.classList.add('shake-it');
+                        setTimeout(() => row.classList.remove('shake-it'), 400);
+                        return;
+                    }
+
                     row.classList.add('shake-it');
                     if (navigator.vibrate) navigator.vibrate([100, 50, 100]);
                     if (typeof recordQuizWrong === 'function') { recordQuizWrong(); }
