@@ -946,7 +946,14 @@
                 const flagBtn = document.getElementById('btn-nav-flag');
                 const paletteBadge = document.getElementById('nav-palette-badge');
 
-                if (prevBtn) prevBtn.disabled = (idx === 0);
+                if (prevBtn) {
+                    prevBtn.disabled = (idx === 0);
+                    if (idx === 0) {
+                        prevBtn.setAttribute('aria-disabled', 'true');
+                    } else {
+                        prevBtn.removeAttribute('aria-disabled');
+                    }
+                }
                 if (flagBtn) {
                     flagBtn.classList.toggle('is-flagged', isFlagged);
                     const flagChar = isChildMode ? (isFlagged ? '🚩' : '📍') : (isFlagged ? '📌' : '📍');
@@ -963,16 +970,16 @@
                 if (nextBtn) {
                     if (idx === currentQuiz.length - 1) {
                         if (isChildMode) {
-                            nextBtn.innerHTML = (quizFeedbackMode === 'exam') ? `<span>🎉 完成大挑战！</span>` : `<span>🎉 探险通关！</span>`;
-                            nextBtn.className = 'btn btn-primary m3-btn--filled nav-next-btn';
+                            nextBtn.innerHTML = (quizFeedbackMode === 'exam') ? `<span>🎉 完成挑战</span>` : `<span>🎉 探险通关</span>`;
+                            nextBtn.className = 'btn btn-primary m3-btn--filled m3-ripple nav-next-btn';
                             nextBtn.onclick = () => (typeof showChildVictoryModal === 'function' ? showChildVictoryModal() : alert('通关啦！'));
                         } else {
                             nextBtn.innerHTML = isReviewMode ? `<span>回狗窝</span>` : `<span>汪！交卷！</span>`;
-                            nextBtn.className = isReviewMode ? 'btn btn-ghost m3-btn--tonal nav-next-btn' : 'btn btn-success m3-btn--success nav-next-btn';
+                            nextBtn.className = isReviewMode ? 'btn btn-ghost m3-btn--tonal m3-ripple nav-next-btn' : 'btn btn-success m3-btn--success m3-ripple nav-next-btn';
                             nextBtn.onclick = isReviewMode ? finishExamAndExit : () => submitPaper();
                         }
                     } else {
-                        nextBtn.innerHTML = `<span>下一题</span><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg>`;
+                        nextBtn.innerHTML = `<span>下一题</span><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0"><polyline points="9 18 15 12 9 6"></polyline></svg>`;
                         nextBtn.className = 'btn btn-primary m3-btn--filled m3-ripple nav-next-btn';
                         nextBtn.onclick = nextSingleQuestion;
                     }

@@ -604,6 +604,22 @@ body {
     transform: scale(0.98);
 }
 
+/* M3 Disabled Button State */
+.btn:disabled,
+.btn[disabled],
+.m3-btn:disabled,
+.m3-btn--filled:disabled,
+.m3-btn--tonal:disabled,
+.m3-btn--success:disabled,
+.m3-btn--error:disabled {
+    opacity: 0.38 !important;
+    cursor: not-allowed !important;
+    pointer-events: none !important;
+    box-shadow: none !important;
+    filter: grayscale(0.6) !important;
+    transform: none !important;
+}
+
 /* M3 Filled Button */
 .btn-primary,
 .m3-btn--filled {
@@ -3800,12 +3816,20 @@ select:focus {
 .nav-prev-btn, .nav-next-btn {
     display: inline-flex;
     align-items: center;
+    justify-content: center;
     gap: 6px;
     font-size: 14px;
     font-weight: 600;
     border-radius: var(--md-sys-shape-corner-full);
     height: 44px;
     padding: 0 16px;
+    white-space: nowrap;
+    user-select: none;
+    text-decoration: none;
+}
+
+.nav-prev-btn svg, .nav-next-btn svg {
+    flex-shrink: 0;
 }
 
 .nav-flag-btn {
@@ -4252,4 +4276,193 @@ select:focus {
     display: flex;
     gap: 12px;
     margin-top: 20px;
+}
+
+/* ==========================================================================
+   Mobile UX & Responsive Ergonomics Polish (移动端全面体验与单题导航重构优化)
+   ========================================================================== */
+
+@media (max-width: 480px) {
+    /* 1. 单题沉浸模式底栏：弹性对称伸展与防换行 */
+    #quiz-single-nav {
+        padding: 8px 10px calc(8px + env(safe-area-inset-bottom)) 10px;
+        gap: 6px;
+    }
+
+    .nav-prev-btn,
+    .nav-next-btn {
+        flex: 1 1 0;
+        min-width: 0;
+        height: 42px;
+        padding: 0 8px;
+        font-size: 13.5px;
+        letter-spacing: -0.2px;
+        gap: 4px;
+        box-sizing: border-box;
+    }
+
+    .nav-prev-btn span,
+    .nav-next-btn span {
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
+    .nav-flag-btn {
+        width: 40px;
+        height: 42px;
+        flex-shrink: 0;
+        padding: 0;
+    }
+
+    .nav-palette-btn {
+        height: 42px;
+        padding: 0 10px;
+        font-size: 13px;
+        flex-shrink: 0;
+        white-space: nowrap;
+    }
+
+    /* 儿童模式单题底栏在移动端的童趣化适配 */
+    [data-mode="child"] #quiz-single-nav {
+        padding: 8px 10px calc(8px + env(safe-area-inset-bottom)) 10px;
+        gap: 6px;
+    }
+
+    [data-mode="child"] .nav-prev-btn,
+    [data-mode="child"] .nav-next-btn {
+        height: 46px;
+        font-size: 13.5px;
+        padding: 0 8px;
+        gap: 4px;
+        border-radius: 9999px;
+    }
+
+    [data-mode="child"] .nav-flag-btn {
+        width: 44px;
+        height: 46px;
+        font-size: 18px;
+        flex-shrink: 0;
+        border-radius: 9999px;
+    }
+
+    [data-mode="child"] .nav-palette-btn {
+        height: 46px;
+        padding: 0 8px;
+        font-size: 13px;
+        flex-shrink: 0;
+        border-radius: 9999px;
+    }
+
+    /* 2. 做题卡片与选项排版优化 */
+    .single-card {
+        margin: 10px auto 16px auto;
+        padding: 16px 14px;
+        border-radius: 18px;
+    }
+
+    .m3-card,
+    .ios-card {
+        padding: 16px 14px;
+        margin-bottom: 12px;
+        border-radius: 18px;
+    }
+
+    .option-row {
+        padding: 12px 14px;
+        margin-bottom: 8px;
+        font-size: 14.5px;
+        border-radius: 12px;
+    }
+
+    .option-circle {
+        width: 24px;
+        height: 24px;
+        font-size: 12px;
+        margin-right: 10px;
+    }
+
+    /* 排除干扰项按钮扩大热区，彻底杜绝误触选项 */
+    .btn-eliminate {
+        min-width: 36px;
+        min-height: 36px;
+        padding: 0;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 15px;
+        margin-left: 6px;
+        touch-action: manipulation;
+        border-radius: 8px;
+    }
+
+    /* 3. 顶栏防溢出优化 */
+    #view-quiz .nav-bar {
+        padding-left: 10px;
+        padding-right: 10px;
+        gap: 6px;
+    }
+
+    #view-quiz .nav-bar > div:last-child {
+        gap: 2px !important;
+    }
+
+    #view-quiz .m3-icon-btn {
+        width: 38px;
+        height: 38px;
+        padding: 6px;
+    }
+
+    #quiz-progress-text {
+        font-size: 12px;
+        padding: 2px 7px;
+    }
+
+    #quiz-timer {
+        font-size: 13.5px !important;
+    }
+
+    /* 仪表盘顶栏标题弹性截断，杜绝把右侧功能按钮挤出屏幕 */
+    #dash-title {
+        flex: 1 1 auto !important;
+        min-width: 0 !important;
+        max-width: none !important;
+    }
+
+    /* 4. 答题卡抽屉与安全区适配 */
+    .palette-sheet {
+        padding: 16px 14px calc(16px + env(safe-area-inset-bottom)) 14px;
+        border-radius: 24px 24px 0 0;
+    }
+
+    .palette-grid {
+        grid-template-columns: repeat(auto-fill, minmax(42px, 1fr));
+        gap: 8px;
+    }
+
+    .palette-item {
+        height: 42px;
+        font-size: 14px;
+        border-radius: 10px;
+    }
+
+    /* 5. 导入弹窗分段 Tab 按钮优化 */
+    .import-tab-group .m3-segmented-button__btn {
+        font-size: 11.5px;
+        padding: 6px 4px;
+        gap: 2px;
+        white-space: nowrap;
+    }
+
+    /* 6. 弹窗与对话框在移动端边距收敛 */
+    .modal-box,
+    .m3-dialog {
+        padding: 20px 16px;
+        border-radius: 22px;
+    }
+
+    /* 7. 首页底部留白，避让右下角浮动新建 FAB */
+    #view-home {
+        padding-bottom: calc(96px + env(safe-area-inset-bottom));
+    }
 }
