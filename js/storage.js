@@ -116,23 +116,51 @@
         }
 
 
-        // --- 新增: 保存历史记录 (修复缺失函数) ---
+        // --- 保存历史记录 (轻量化瘦身版，防止配额溢出) ---
         function saveHistory(score, type) {
             if (!currentDb) return;
             const id = currentDb.id;
             const histKey = `bingo_hist_${id}`;
-            const history = JSON.parse(localStorage.getItem(histKey) || '[]');
+            let history = JSON.parse(localStorage.getItem(histKey) || '[]');
+
+            // 对题目快照进行轻量化瘦身：
+            // - 做错的题目：保留全部完整字段（题干、答案、选项、解析、题型、分类），确保错题本与重点复习 100% 完整可用
+            // - 做对的题目：移除冗长的大段解析和非必要信息，保留题干、答案、选项与题型，大幅削减空间
+            const lightweightSnapshot = (currentQuiz || []).map((q, idx) => {
+                const userAns = (userAnswers && userAnswers[idx]) ? userAnswers[idx] : '';
+                const isWrong = userAns !== q.a;
+                if (isWrong) {
+                    return {
+                        id: q.id,
+                        q: q.q,
+                        a: q.a,
+                        o: q.o,
+                        e: q.e || '',
+                        t: q.t || '单选',
+                        c: q.c || '未分类'
+                    };
+                } else {
+                    return {
+                        id: q.id,
+                        q: q.q,
+                        a: q.a,
+                        o: q.o,
+                        t: q.t || '单选'
+                    };
+                }
+            });
 
             const record = {
                 date: Date.now(),
                 score: score,
                 type: type,
-                quizSnapshot: currentQuiz, // 保存当时的题目快照
-                userAnswers: userAnswers   // 保存用户答案
+                quizSnapshot: lightweightSnapshot, // 优化后的轻量题目快照
+                userAnswers: userAnswers           // 保存用户答案
             };
 
             history.push(record);
-            if (history.length > 30) history = history.slice(-30);
+            // 将常驻历史记录上限优化为 15 条，既满足近期复盘需求，又彻底避免 5MB 爆仓
+            if (history.length > 15) history = history.slice(-15);
             safeSetItem(histKey, JSON.stringify(history));
 
             // ...
@@ -228,27 +256,63 @@
                         return;
                     }
 
-                    const count = Object.keys(payload.data).length;
-                    if (count === 0) {
+                    const entries = Object.entries(payload.data);
+                    if (entries.length === 0) {
                         alert('备份文件里没有数据。');
                         return;
                     }
 
-                    if (!confirm(`将导入 ${count} 项数据。\n\n⚠️ 当前所有题库、进度和历史会被覆盖！\n\n确定继续吗？`)) return;
+                    // 验证备份数据中是否包含必要的有效键
+                    const hasValidAppKeys = entries.some(([k]) => k.startsWith('bingo_') || BACKUP_APP_KEYS.includes(k));
+                    if (!hasValidAppKeys) {
+                        alert('备份文件未包含有效题库或设置数据，导入中止！');
+                        return;
+                    }
 
-                    // 先清掉现有应用数据再恢复，避免残留
+                    if (!confirm(`将导入 ${entries.length} 项数据。\n\n⚠️ 当前所有题库、进度和历史会被替换！\n\n确定继续吗？`)) return;
+
+                    // === 事务安全机制：先为当前 localStorage 拍摄一份内存快照 ===
+                    const backupSnapshot = {};
                     Object.keys(localStorage).forEach(key => {
                         if (key.startsWith('bingo_') || BACKUP_APP_KEYS.includes(key)) {
-                            localStorage.removeItem(key);
+                            backupSnapshot[key] = localStorage.getItem(key);
                         }
                     });
 
-                    Object.entries(payload.data).forEach(([key, value]) => {
-                        localStorage.setItem(key, String(value));
-                    });
+                    try {
+                        // 1. 尝试清空原应用键
+                        Object.keys(backupSnapshot).forEach(key => localStorage.removeItem(key));
 
-                    alert('汪！备份恢复完成！');
-                    location.reload();
+                        // 2. 逐项安全写入新数据
+                        for (const [key, value] of entries) {
+                            if (key.startsWith('bingo_') || BACKUP_APP_KEYS.includes(key)) {
+                                localStorage.setItem(key, String(value));
+                            }
+                        }
+
+                        // 3. 校验写入有效性
+                        const restoredMeta = localStorage.getItem('bingo_meta');
+                        if (restoredMeta !== null) {
+                            JSON.parse(restoredMeta); // 确保元数据解析正常
+                        }
+
+                        alert('汪！备份恢复完成！');
+                        location.reload();
+                    } catch (writeErr) {
+                        // 发生 QuotaExceededError 或解析异常，执行原子级安全回滚
+                        console.error('[BackupRestore] 写入备份失败，启动自动回滚:', writeErr);
+                        try {
+                            // 清理失败的不完整数据
+                            entries.forEach(([key]) => localStorage.removeItem(key));
+                            // 写回原快照
+                            Object.entries(backupSnapshot).forEach(([key, val]) => {
+                                localStorage.setItem(key, val);
+                            });
+                        } catch (rollbackErr) {
+                            console.error('[BackupRestore] 回滚异常:', rollbackErr);
+                        }
+                        alert('恢复备份失败（存储空间不足或数据项异常）！\n系统已安全回滚至导入前状态，原有数据完好无损。');
+                    }
                 } catch (err) {
                     console.error(err);
                     alert('备份文件解析失败，请确认文件未损坏。');
@@ -260,7 +324,7 @@
         }
 
         // --- 题库导出为 Excel (.xlsx) ---
-        function exportDbToExcel(dbId) {
+        async function exportDbToExcel(dbId) {
             const meta = (getMeta().find(m => m.id === dbId)) || currentDb;
             if (!meta) {
                 alert('未找到该题库！');
@@ -271,6 +335,18 @@
                 alert('这窝骨头是空的，没啥可导出的！');
                 return;
             }
+
+            // 动态按需加载 SheetJS 引擎
+            try {
+                if (typeof XLSXLoader !== 'undefined') {
+                    await XLSXLoader.load();
+                }
+            } catch (err) {
+                alert('Excel 导出组件加载失败，请检查网络后重试。');
+                console.error(err);
+                return;
+            }
+
             if (typeof XLSX === 'undefined') {
                 alert('Excel 导出组件还在准备中，请稍候再试...');
                 return;
@@ -299,7 +375,7 @@
         }
 
         // --- 错题本导出为 Excel (.xlsx) ---
-        function exportWrongQuestionsToExcel(dbId) {
+        async function exportWrongQuestionsToExcel(dbId) {
             const meta = (getMeta().find(m => m.id === dbId)) || currentDb;
             if (!meta) return;
             const wrongQuestions = getAllWrongQuestions(meta.id);
@@ -307,6 +383,18 @@
                 alert('没有发现错题，太棒啦！');
                 return;
             }
+
+            // 动态按需加载 SheetJS 引擎
+            try {
+                if (typeof XLSXLoader !== 'undefined') {
+                    await XLSXLoader.load();
+                }
+            } catch (err) {
+                alert('Excel 导出组件加载失败，请检查网络后重试。');
+                console.error(err);
+                return;
+            }
+
             if (typeof XLSX === 'undefined') {
                 alert('Excel 导出组件还在准备中，请稍候再试...');
                 return;

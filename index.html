@@ -32,8 +32,8 @@
     </script>
 
 
-    <!-- 引入 SheetJS (defer 避免首屏主线程阻塞) -->
-    <script src="vendor/xlsx.full.min.js" defer></script>
+    <!-- SheetJS 动态按需加载器 (首屏不加载 881KB 巨包，导入/导出时按需异步拉取) -->
+    <script src="js/xlsx-loader.js"></script>
 </head>
 
 <body>

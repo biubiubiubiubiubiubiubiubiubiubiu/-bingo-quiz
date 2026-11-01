@@ -36,7 +36,7 @@
         // 1. 原有 Excel 导入逻辑 (100% 完整保留与兼容)
         // ==========================================
 
-        function handleFileSelect(input) {
+        async function handleFileSelect(input) {
             const file = input.files[0];
             if (!file) return;
 
@@ -47,11 +47,24 @@
 
             feedbackContainer.style.display = 'block';
             loader.style.display = 'block';
-            status.innerText = '';
+            status.innerText = '正在准备 Excel 引擎...';
             preview.style.display = 'none';
             document.getElementById('btn-confirm-import').style.display = 'none';
             document.getElementById('btn-select-file').style.display = 'none';
 
+            try {
+                if (typeof XLSXLoader !== 'undefined') {
+                    await XLSXLoader.load();
+                }
+            } catch (loadErr) {
+                loader.style.display = 'none';
+                status.innerText = 'Excel 解析组件加载失败，请检查网络后重试。';
+                document.getElementById('btn-select-file').style.display = 'inline-flex';
+                console.error('XLSXLoader error:', loadErr);
+                return;
+            }
+
+            status.innerText = '正在挖掘骨头...';
             const reader = new FileReader();
             reader.onload = function (e) {
                 loader.style.display = 'none';
